@@ -1,5 +1,9 @@
 <?php
 
+// Arquivo criado com o comando:
+//   php artisan make:controller ProdutoController --resource
+// (--resource já cria os métodos index, create, store, show, edit, update e destroy)
+
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;

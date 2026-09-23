@@ -1,5 +1,8 @@
 <?php
 
+// Arquivo criado com o comando:
+//   php artisan make:model Cliente
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;

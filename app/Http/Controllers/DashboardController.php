@@ -1,5 +1,8 @@
 <?php
 
+// Arquivo criado com o comando:
+//   php artisan make:controller DashboardController
+
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;

@@ -1,5 +1,9 @@
 <?php
 
+// Arquivo criado com o comando:
+//   php artisan make:test MiniErpTest
+// Para rodar os testes:  php artisan test
+
 namespace Tests\Feature;
 
 use App\Models\Categoria;
