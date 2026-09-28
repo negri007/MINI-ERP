@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Mini ERP') - Mini ERP</title>
 
-    {{-- Bootstrap 5 (CSS) via CDN --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    {{-- Bootstrap 5 (CSS) salvo dentro do projeto: funciona sem internet --}}
+    <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
 
     {{-- Estilos da sidebar --}}
     <style>
@@ -21,6 +21,12 @@
             background-color: #0d6efd;
             color: #fff;
         }
+        .sidebar .titulo-menu {
+            font-size: .75rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin: 1rem 0 .25rem .75rem;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -29,6 +35,15 @@
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">Mini ERP</a>
+
+            {{-- Usuário logado e botão de sair --}}
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white-50 small">{{ auth()->user()->name }}</span>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-light">Sair</button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -40,6 +55,9 @@
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a>
                 </li>
+
+                {{-- Cadastros --}}
+                <li class="titulo-menu">Cadastros</li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}" href="{{ route('categorias.index') }}">Categorias</a>
                 </li>
@@ -51,6 +69,21 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('produtos.*') ? 'active' : '' }}" href="{{ route('produtos.index') }}">Produtos</a>
+                </li>
+
+                {{-- Operações do dia a dia --}}
+                <li class="titulo-menu">Operações</li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('vendas.*') ? 'active' : '' }}" href="{{ route('vendas.index') }}">Vendas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('estoque.*') ? 'active' : '' }}" href="{{ route('estoque.index') }}">Estoque</a>
+                </li>
+
+                {{-- Relatórios --}}
+                <li class="titulo-menu">Relatórios</li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('relatorios.vendas*') ? 'active' : '' }}" href="{{ route('relatorios.vendas') }}">Vendas por período</a>
                 </li>
             </ul>
         </aside>
@@ -81,7 +114,28 @@
 
     </div>
 
-    {{-- Bootstrap 5 (JS) via CDN --}}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- Modal de confirmação usado pelos botões "Excluir" e "Cancelar venda" --}}
+    <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body" id="modalConfirmarTexto">Deseja realmente continuar?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+                    <button type="button" class="btn btn-danger" id="modalConfirmarBotao">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Bootstrap 5 (JS) e scripts do sistema (máscaras e confirmação) --}}
+    <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('js/mini-erp.js') }}"></script>
+
+    {{-- Scripts específicos de cada página (ex.: gráficos, itens da venda) --}}
+    @stack('scripts')
 </body>
 </html>

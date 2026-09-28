@@ -6,15 +6,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FornecedorRequest;
 use App\Models\Fornecedor;
 use Illuminate\Http\Request;
 
 class FornecedorController extends Controller
 {
-    // Lista todos os fornecedores
-    public function index()
+    // Lista os fornecedores (com busca e paginação)
+    public function index(Request $request)
     {
-        $fornecedores = Fornecedor::orderBy('nome')->get();
+        $fornecedores = Fornecedor::withCount('produtos')
+            ->busca($request->input('busca'))
+            ->orderBy('nome')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('fornecedores.index', compact('fornecedores'));
     }
@@ -22,13 +27,13 @@ class FornecedorController extends Controller
     // Exibe o formulário de cadastro
     public function create()
     {
-        return view('fornecedores.create');
+        return view('fornecedores.create', ['fornecedor' => new Fornecedor]);
     }
 
-    // Salva um novo fornecedor
-    public function store(Request $request)
+    // Salva um novo fornecedor (a validação acontece no FornecedorRequest)
+    public function store(FornecedorRequest $request)
     {
-        Fornecedor::create($this->validar($request));
+        Fornecedor::create($request->validated());
 
         return redirect()->route('fornecedores.index')->with('success', 'Fornecedor cadastrado com sucesso!');
     }
@@ -40,9 +45,9 @@ class FornecedorController extends Controller
     }
 
     // Atualiza um fornecedor existente
-    public function update(Request $request, Fornecedor $fornecedor)
+    public function update(FornecedorRequest $request, Fornecedor $fornecedor)
     {
-        $fornecedor->update($this->validar($request));
+        $fornecedor->update($request->validated());
 
         return redirect()->route('fornecedores.index')->with('success', 'Fornecedor atualizado com sucesso!');
     }
@@ -53,16 +58,5 @@ class FornecedorController extends Controller
         $fornecedor->delete();
 
         return redirect()->route('fornecedores.index')->with('success', 'Fornecedor excluído com sucesso!');
-    }
-
-    // Regras de validação: apenas o nome é obrigatório
-    private function validar(Request $request): array
-    {
-        return $request->validate([
-            'nome' => 'required|string|max:255',
-            'cnpj' => 'nullable|string|max:18',
-            'telefone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-        ]);
     }
 }

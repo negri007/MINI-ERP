@@ -6,15 +6,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoriaRequest;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    // Lista todas as categorias
-    public function index()
+    // Lista as categorias (com busca e paginação)
+    public function index(Request $request)
     {
-        $categorias = Categoria::withCount('produtos')->orderBy('nome')->get();
+        $categorias = Categoria::withCount('produtos')
+            ->busca($request->input('busca'))
+            ->orderBy('nome')
+            ->paginate(10)
+            ->withQueryString(); // mantém a busca ao trocar de página
 
         return view('categorias.index', compact('categorias'));
     }
@@ -22,13 +27,13 @@ class CategoriaController extends Controller
     // Exibe o formulário de cadastro
     public function create()
     {
-        return view('categorias.create');
+        return view('categorias.create', ['categoria' => new Categoria]);
     }
 
-    // Salva uma nova categoria
-    public function store(Request $request)
+    // Salva uma nova categoria (a validação acontece no CategoriaRequest)
+    public function store(CategoriaRequest $request)
     {
-        Categoria::create($this->validar($request));
+        Categoria::create($request->validated());
 
         return redirect()->route('categorias.index')->with('success', 'Categoria cadastrada com sucesso!');
     }
@@ -40,9 +45,9 @@ class CategoriaController extends Controller
     }
 
     // Atualiza uma categoria existente
-    public function update(Request $request, Categoria $categoria)
+    public function update(CategoriaRequest $request, Categoria $categoria)
     {
-        $categoria->update($this->validar($request));
+        $categoria->update($request->validated());
 
         return redirect()->route('categorias.index')->with('success', 'Categoria atualizada com sucesso!');
     }
@@ -57,14 +62,5 @@ class CategoriaController extends Controller
         $categoria->delete();
 
         return redirect()->route('categorias.index')->with('success', 'Categoria excluída com sucesso!');
-    }
-
-    // Regras de validação compartilhadas entre store e update
-    private function validar(Request $request): array
-    {
-        return $request->validate([
-            'nome' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-        ]);
     }
 }

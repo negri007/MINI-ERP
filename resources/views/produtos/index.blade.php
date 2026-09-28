@@ -9,6 +9,33 @@
         <a href="{{ route('produtos.create') }}" class="btn btn-primary">Novo Produto</a>
     </div>
 
+    {{-- Filtros: nome, categoria e estoque baixo --}}
+    <form method="GET" class="row g-2 mb-3 align-items-center">
+        <div class="col-sm-6 col-lg-4">
+            <input type="search" name="busca" value="{{ request('busca') }}" class="form-control" placeholder="Buscar por nome...">
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <select name="categoria_id" class="form-select">
+                <option value="">Todas as categorias</option>
+                @foreach ($categorias as $categoria)
+                    <option value="{{ $categoria->id }}" @selected(request('categoria_id') == $categoria->id)>{{ $categoria->nome }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="estoque_baixo" value="1" id="estoque_baixo" @checked(request('estoque_baixo'))>
+                <label class="form-check-label" for="estoque_baixo">Só estoque baixo</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+            @if (request()->hasAny(['busca', 'categoria_id', 'estoque_baixo']))
+                <a href="{{ route('produtos.index') }}" class="btn btn-outline-secondary">Limpar</a>
+            @endif
+        </div>
+    </form>
+
     {{-- Tabela de registros --}}
     <div class="card">
         <div class="card-body p-0">
@@ -29,27 +56,29 @@
                             <td>{{ $produto->nome }}</td>
                             <td>{{ $produto->categoria->nome ?? '-' }}</td>
                             <td>{{ $produto->fornecedor->nome ?? '-' }}</td>
-                            <td class="text-end">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
-                            <td class="text-end">{{ $produto->estoque }}</td>
+                            <td class="text-end text-nowrap">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
+                            <td class="text-end">
+                                {{-- Vermelho quando está no estoque mínimo ou abaixo --}}
+                                <span class="badge {{ $produto->estaComEstoqueBaixo() ? 'bg-danger' : 'bg-success' }}" title="Mínimo: {{ $produto->estoque_minimo }}">
+                                    {{ $produto->estoque }}
+                                </span>
+                            </td>
                             <td class="text-end text-nowrap">
-                                {{-- Botão editar --}}
+                                <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="btn btn-sm btn-outline-secondary">Estoque</a>
                                 <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-warning">Editar</a>
-
-                                {{-- Botão excluir (formulário com DELETE) --}}
-                                <form action="{{ route('produtos.destroy', $produto) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja realmente excluir?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-                                </form>
+                                @include('partials.excluir', ['rota' => route('produtos.destroy', $produto), 'nome' => $produto->nome])
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted">Nenhum produto cadastrado.</td>
+                            <td colspan="6" class="text-center text-muted">Nenhum produto encontrado.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
+    {{-- Links de paginação --}}
+    <div class="mt-3">{{ $produtos->links() }}</div>
 @endsection

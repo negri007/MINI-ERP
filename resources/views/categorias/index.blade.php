@@ -9,6 +9,9 @@
         <a href="{{ route('categorias.create') }}" class="btn btn-primary">Nova Categoria</a>
     </div>
 
+    {{-- Campo de busca --}}
+    @include('partials.busca', ['placeholder' => 'Buscar por nome...'])
+
     {{-- Tabela de registros --}}
     <div class="card">
         <div class="card-body p-0">
@@ -28,24 +31,20 @@
                             <td>{{ $categoria->descricao ?? '-' }}</td>
                             <td class="text-center">{{ $categoria->produtos_count }}</td>
                             <td class="text-end text-nowrap">
-                                {{-- Botão editar --}}
                                 <a href="{{ route('categorias.edit', $categoria) }}" class="btn btn-sm btn-warning">Editar</a>
-
-                                {{-- Botão excluir (formulário com DELETE) --}}
-                                <form action="{{ route('categorias.destroy', $categoria) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja realmente excluir?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-                                </form>
+                                @include('partials.excluir', ['rota' => route('categorias.destroy', $categoria), 'nome' => $categoria->nome])
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-muted">Nenhuma categoria cadastrada.</td>
+                            <td colspan="4" class="text-center text-muted">Nenhuma categoria encontrada.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
+    {{-- Links de paginação --}}
+    <div class="mt-3">{{ $categorias->links() }}</div>
 @endsection

@@ -6,15 +6,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ClienteRequest;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
 
 class ClienteController extends Controller
 {
-    // Lista todos os clientes
-    public function index()
+    // Lista os clientes (com busca e paginação)
+    public function index(Request $request)
     {
-        $clientes = Cliente::orderBy('nome')->get();
+        $clientes = Cliente::withCount('vendas')
+            ->busca($request->input('busca'))
+            ->orderBy('nome')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('clientes.index', compact('clientes'));
     }
@@ -22,13 +27,13 @@ class ClienteController extends Controller
     // Exibe o formulário de cadastro
     public function create()
     {
-        return view('clientes.create');
+        return view('clientes.create', ['cliente' => new Cliente]);
     }
 
-    // Salva um novo cliente
-    public function store(Request $request)
+    // Salva um novo cliente (a validação acontece no ClienteRequest)
+    public function store(ClienteRequest $request)
     {
-        Cliente::create($this->validar($request));
+        Cliente::create($request->validated());
 
         return redirect()->route('clientes.index')->with('success', 'Cliente cadastrado com sucesso!');
     }
@@ -40,29 +45,22 @@ class ClienteController extends Controller
     }
 
     // Atualiza um cliente existente
-    public function update(Request $request, Cliente $cliente)
+    public function update(ClienteRequest $request, Cliente $cliente)
     {
-        $cliente->update($this->validar($request));
+        $cliente->update($request->validated());
 
         return redirect()->route('clientes.index')->with('success', 'Cliente atualizado com sucesso!');
     }
 
-    // Exclui um cliente
+    // Exclui um cliente (bloqueia se ele já tiver vendas)
     public function destroy(Cliente $cliente)
     {
+        if ($cliente->vendas()->exists()) {
+            return redirect()->route('clientes.index')->with('error', 'Não é possível excluir: este cliente possui vendas registradas.');
+        }
+
         $cliente->delete();
 
         return redirect()->route('clientes.index')->with('success', 'Cliente excluído com sucesso!');
-    }
-
-    // Regras de validação: apenas o nome é obrigatório
-    private function validar(Request $request): array
-    {
-        return $request->validate([
-            'nome' => 'required|string|max:255',
-            'cpf_cnpj' => 'nullable|string|max:18',
-            'telefone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-        ]);
     }
 }

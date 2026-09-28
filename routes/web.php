@@ -33,12 +33,26 @@
 | 5) Criar as tabelas no banco:
 |      php artisan migrate
 |
+| 5.1) Popular o banco com dados de exemplo (usuário admin, produtos, vendas...):
+|      php artisan db:seed
+|    Ou apagar tudo, recriar as tabelas e popular de uma vez:
+|      php artisan migrate:fresh --seed
+|    Login criado pelo seeder:  admin@minierp.com  /  senha: admin123
+|
 | 6) Criar os controllers:
 |      php artisan make:controller DashboardController
 |      php artisan make:controller CategoriaController --resource
 |      php artisan make:controller FornecedorController --resource
 |      php artisan make:controller ClienteController --resource
 |      php artisan make:controller ProdutoController --resource
+|      php artisan make:controller VendaController
+|      php artisan make:controller MovimentacaoEstoqueController
+|      php artisan make:controller RelatorioController
+|      php artisan make:controller Auth/LoginController
+|
+| 6.1) Criar as validações (Form Requests) e a regra de CPF/CNPJ:
+|      php artisan make:request ProdutoRequest   (e os demais *Request)
+|      php artisan make:rule CpfCnpj
 |
 | 7) Registrar as rotas (este arquivo) e conferir:
 |      php artisan route:list
@@ -56,28 +70,57 @@
 |      composer install
 |      copy .env.example .env
 |      php artisan key:generate
-|      php artisan migrate
+|      php artisan migrate --seed
 |      php artisan serve
 |
 */
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FornecedorController;
+use App\Http\Controllers\MovimentacaoEstoqueController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\RelatorioController;
+use App\Http\Controllers\VendaController;
 use Illuminate\Support\Facades\Route;
 
-// Página inicial (Dashboard)
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+// Rotas para quem NÃO está logado (tela de login)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    // throttle:5,1 = no máximo 5 tentativas por minuto (protege contra "chute" de senha)
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
+});
 
-// CRUDs do sistema (sem a rota "show", que não é usada)
-Route::resource('categorias', CategoriaController::class)->except('show');
+// Rotas que exigem login (middleware "auth" manda para /login quem não entrou)
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-Route::resource('fornecedores', FornecedorController::class)
-    ->except('show')
-    ->parameters(['fornecedores' => 'fornecedor']);
+    // Página inicial (Dashboard)
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::resource('clientes', ClienteController::class)->except('show');
+    // CRUDs de cadastro (sem a rota "show", que não é usada)
+    Route::resource('categorias', CategoriaController::class)->except('show');
 
-Route::resource('produtos', ProdutoController::class)->except('show');
+    Route::resource('fornecedores', FornecedorController::class)
+        ->except('show')
+        ->parameters(['fornecedores' => 'fornecedor']);
+
+    Route::resource('clientes', ClienteController::class)->except('show');
+
+    Route::resource('produtos', ProdutoController::class)->except('show');
+
+    // Vendas: registrar e consultar (não se edita nem se apaga venda, só se cancela)
+    Route::resource('vendas', VendaController::class)->only(['index', 'create', 'store', 'show']);
+    Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
+
+    // Estoque: histórico e entradas/saídas manuais
+    Route::get('/estoque', [MovimentacaoEstoqueController::class, 'index'])->name('estoque.index');
+    Route::get('/estoque/movimentar', [MovimentacaoEstoqueController::class, 'create'])->name('estoque.create');
+    Route::post('/estoque', [MovimentacaoEstoqueController::class, 'store'])->name('estoque.store');
+
+    // Relatórios
+    Route::get('/relatorios/vendas', [RelatorioController::class, 'vendas'])->name('relatorios.vendas');
+    Route::get('/relatorios/vendas/exportar', [RelatorioController::class, 'exportarVendas'])->name('relatorios.vendas.exportar');
+});

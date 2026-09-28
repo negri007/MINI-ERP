@@ -27,7 +27,10 @@ Homestead.yaml
 Thumbs.db
 
 # Arquivos do skeleton upstream do Laravel (não fazem parte do projeto)
-/.github
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/tests.yml
 /CHANGELOG.md
 /AGENTS.md
 /CLAUDE.md

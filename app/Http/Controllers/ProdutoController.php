@@ -6,34 +6,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProdutoRequest;
 use App\Models\Categoria;
 use App\Models\Fornecedor;
 use App\Models\Produto;
+use App\Services\EstoqueService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProdutoController extends Controller
 {
-    // Lista todos os produtos com categoria e fornecedor
-    public function index()
+    // Lista os produtos com filtros de nome, categoria e estoque baixo
+    public function index(Request $request)
     {
-        $produtos = Produto::with(['categoria', 'fornecedor'])->orderBy('nome')->get();
+        $produtos = Produto::with(['categoria', 'fornecedor'])
+            ->busca($request->input('busca'))
+            ->when($request->filled('categoria_id'), fn ($q) => $q->where('categoria_id', $request->input('categoria_id')))
+            ->when($request->boolean('estoque_baixo'), fn ($q) => $q->estoqueBaixo())
+            ->orderBy('nome')
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('produtos.index', compact('produtos'));
+        $categorias = Categoria::orderBy('nome')->get();
+
+        return view('produtos.index', compact('produtos', 'categorias'));
     }
 
     // Exibe o formulário de cadastro
     public function create()
     {
-        $categorias = Categoria::orderBy('nome')->get();
-        $fornecedores = Fornecedor::orderBy('nome')->get();
-
-        return view('produtos.create', compact('categorias', 'fornecedores'));
+        return view('produtos.create', [
+            'produto' => new Produto(['estoque_minimo' => 5]),
+            'categorias' => Categoria::orderBy('nome')->get(),
+            'fornecedores' => Fornecedor::orderBy('nome')->get(),
+        ]);
     }
 
-    // Salva um novo produto
-    public function store(Request $request)
+    // Salva um novo produto e registra o estoque inicial no histórico
+    public function store(ProdutoRequest $request, EstoqueService $estoque)
     {
-        Produto::create($this->validar($request));
+        DB::transaction(function () use ($request, $estoque) {
+            $dados = $request->validated();
+            $estoqueInicial = (int) $dados['estoque'];
+
+            // O produto nasce com estoque 0 e o saldo entra como movimentação
+            $produto = Produto::create(array_merge($dados, ['estoque' => 0]));
+
+            if ($estoqueInicial > 0) {
+                $estoque->entrada($produto, $estoqueInicial, 'Estoque inicial');
+            }
+        });
 
         return redirect()->route('produtos.index')->with('success', 'Produto cadastrado com sucesso!');
     }
@@ -41,38 +63,30 @@ class ProdutoController extends Controller
     // Exibe o formulário de edição
     public function edit(Produto $produto)
     {
-        $categorias = Categoria::orderBy('nome')->get();
-        $fornecedores = Fornecedor::orderBy('nome')->get();
-
-        return view('produtos.edit', compact('produto', 'categorias', 'fornecedores'));
+        return view('produtos.edit', [
+            'produto' => $produto,
+            'categorias' => Categoria::orderBy('nome')->get(),
+            'fornecedores' => Fornecedor::orderBy('nome')->get(),
+        ]);
     }
 
-    // Atualiza um produto existente
-    public function update(Request $request, Produto $produto)
+    // Atualiza um produto (o estoque não é alterado aqui)
+    public function update(ProdutoRequest $request, Produto $produto)
     {
-        $produto->update($this->validar($request));
+        $produto->update($request->validated());
 
         return redirect()->route('produtos.index')->with('success', 'Produto atualizado com sucesso!');
     }
 
-    // Exclui um produto
+    // Exclui um produto (bloqueia se ele já apareceu em alguma venda)
     public function destroy(Produto $produto)
     {
+        if ($produto->itensVenda()->exists()) {
+            return redirect()->route('produtos.index')->with('error', 'Não é possível excluir: este produto já foi vendido.');
+        }
+
         $produto->delete();
 
         return redirect()->route('produtos.index')->with('success', 'Produto excluído com sucesso!');
-    }
-
-    // Regras de validação compartilhadas entre store e update
-    private function validar(Request $request): array
-    {
-        return $request->validate([
-            'nome' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'preco' => 'required|numeric|min:0',
-            'estoque' => 'required|integer|min:0',
-            'categoria_id' => 'required|exists:categorias,id',
-            'fornecedor_id' => 'nullable|exists:fornecedores,id',
-        ]);
     }
 }

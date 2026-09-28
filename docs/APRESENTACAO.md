@@ -17,7 +17,8 @@ O que Produtos tem a mais que os outros cadastros:
 - **Campos de tipos diferentes**: texto, decimal (preço), inteiro (estoque) e listas de seleção (select).
 - **Validação mais rica**: números mínimos e checagem de que a categoria e o fornecedor existem no banco.
 - **Formatação**: o preço aparece como moeda brasileira (R$ 7,50).
-- **Integração com o Dashboard**: produtos com estoque até 5 aparecem na página inicial.
+- **Integração com o Dashboard**: produtos no estoque mínimo ou abaixo aparecem na página inicial.
+- **Ligação com o estoque**: o estoque inicial vira uma movimentação, e depois só muda por vendas ou pela tela de Estoque.
 
 ## 2. Fluxo MVC
 
@@ -62,18 +63,25 @@ Schema::create('produtos', function (Blueprint $table) {
 ## 4. Model Produto
 
 ```php
-protected $fillable = ['nome', 'descricao', 'preco', 'estoque', 'categoria_id', 'fornecedor_id'];
+protected $fillable = ['nome', 'descricao', 'preco', 'estoque', 'estoque_minimo', 'categoria_id', 'fornecedor_id'];
 
 public function categoria(): BelongsTo
 {
     return $this->belongsTo(Categoria::class);
+}
+
+// Filtro reutilizável: Produto::estoqueBaixo()->get()
+public function scopeEstoqueBaixo(Builder $query): Builder
+{
+    return $query->whereColumn('estoque', '<=', 'estoque_minimo');
 }
 ```
 
 - **`$fillable`**: campos liberados para `Produto::create($dados)`. Um campo fora da lista é ignorado (proteção).
 - **`$casts`**: preço sempre com 2 casas, estoque sempre inteiro.
 - **`belongsTo`**: permite escrever `$produto->categoria->nome` na view.
-- **O outro lado**: `Categoria` e `Fornecedor` têm `hasMany(Produto::class)`.
+- **`hasMany`**: `$produto->movimentacoes` traz o histórico de estoque do produto.
+- **Scopes** (`scopeEstoqueBaixo`, `scopeBusca`): filtros com nome, usados como `Produto::estoqueBaixo()`.
 
 ## 5. Rotas
 
@@ -94,27 +102,53 @@ Para mostrar na aula: `php artisan route:list`
 
 ## 6. Controller
 
-- **index**: `Produto::with(['categoria', 'fornecedor'])->get()`. O `with` carrega tudo numa consulta só.
+- **index**: `Produto::with([...])->busca(...)->paginate(10)`. O `with` carrega categoria e fornecedor numa consulta só; `paginate` divide em páginas de 10.
 - **create**: busca categorias e fornecedores para montar os selects.
-- **store**: valida, grava (`Produto::create`) e redireciona com `->with('success', ...)`.
-- **edit / update**: `Produto $produto` é o *route model binding*: o Laravel busca o produto pelo id da URL (404 se não existir).
-- **destroy**: `$produto->delete()`.
+- **store**: salva o produto e registra o estoque inicial como movimentação, tudo numa transação.
+- **edit / update**: `Produto $produto` é o *route model binding*: o Laravel busca o produto pelo id da URL (404 se não existir). O estoque **não** é alterado na edição.
+- **destroy**: bloqueia se o produto já apareceu em alguma venda.
 
 ```php
-private function validar(Request $request): array
+public function store(ProdutoRequest $request, EstoqueService $estoque)
 {
-    return $request->validate([
-        'nome' => 'required|string|max:255',
-        'descricao' => 'nullable|string',
-        'preco' => 'required|numeric|min:0',
-        'estoque' => 'required|integer|min:0',
-        'categoria_id' => 'required|exists:categorias,id',
-        'fornecedor_id' => 'nullable|exists:fornecedores,id',
-    ]);
+    DB::transaction(function () use ($request, $estoque) {
+        $dados = $request->validated();
+        $produto = Produto::create(array_merge($dados, ['estoque' => 0]));
+
+        if ($dados['estoque'] > 0) {
+            $estoque->entrada($produto, $dados['estoque'], 'Estoque inicial');
+        }
+    });
+
+    return redirect()->route('produtos.index')->with('success', 'Produto cadastrado com sucesso!');
 }
 ```
 
-Se alguma regra falhar, o Laravel **volta sozinho para o formulário** com os erros e o que foi digitado. Nada é salvo.
+### Validação: Form Request
+
+A validação fica numa classe própria, `app/Http/Requests/ProdutoRequest.php` (criada com `php artisan make:request ProdutoRequest`). Basta colocar `ProdutoRequest $request` no método: o Laravel valida **antes** de o método rodar.
+
+```php
+public function rules(): array
+{
+    $regras = [
+        'nome' => 'required|string|max:255',
+        'preco' => 'required|numeric|min:0',
+        'estoque_minimo' => 'required|integer|min:0',
+        'categoria_id' => 'required|exists:categorias,id',
+        'fornecedor_id' => 'nullable|exists:fornecedores,id',
+    ];
+
+    // Estoque só no cadastro; depois muda por vendas e movimentações
+    if ($this->isMethod('post')) {
+        $regras['estoque'] = 'required|integer|min:0';
+    }
+
+    return $regras;
+}
+```
+
+Se alguma regra falhar, o Laravel **volta sozinho para o formulário** com os erros (em português, vindos de `lang/pt_BR/validation.php`) e o que foi digitado. Nada é salvo.
 
 ## 7. Views Blade
 
@@ -129,24 +163,29 @@ Se alguma regra falhar, o Laravel **volta sozinho para o formulário** com os er
 | `old('campo', $produto->campo)` | Mantém o que foi digitado; senão, usa o valor do banco |
 | `@selected(...)` | Deixa marcada a opção certa no select |
 
-A única diferença entre `create` e `edit` é o `action` (store ou update), o `@method('PUT')` e o valor padrão do `old()`.
+Os campos ficam em **`produtos/_form.blade.php`**, incluído no `create` e no `edit` com `@include('produtos._form')`. Assim o formulário é escrito uma vez só. A diferença entre as duas telas é o `action` (store ou update) e o `@method('PUT')`.
+
+Na listagem, `{{ $produtos->links() }}` mostra os botões de paginação.
 
 ## 8. Roteiro da apresentação (~10 min)
 
-**Antes da aula:** Laragon ligado, `php artisan serve` rodando, 2 categorias e 1 fornecedor cadastrados.
+**Antes da aula:** Laragon ligado, `php artisan migrate:fresh --seed` (dados de exemplo) e `php artisan serve` rodando. Login: admin@minierp.com / admin123.
 
 1. **Mostrar funcionando (3 min)**
-    - Abra http://127.0.0.1:8000 e mostre o Dashboard e a sidebar.
+    - Abra http://127.0.0.1:8000, faça login e mostre o Dashboard (gráficos e estoque baixo).
     - Clique "Novo Produto" e salve vazio: aparecem os erros de validação.
-    - Cadastre um produto com estoque 3: alerta verde e preço em R$ na tabela.
+    - Cadastre um produto com estoque 3 e mínimo 5: alerta verde e preço em R$ na tabela.
     - Volte ao Dashboard: o produto aparece em "estoque baixo".
-    - Edite (troque o fornecedor para "Nenhum") e depois exclua.
+    - Mostre a busca e o filtro "Só estoque baixo" na lista de produtos.
+    - Edite (troque o fornecedor para "Nenhum"): o estoque não é editável ali.
+    - Faça uma venda desse produto e mostre que o estoque baixou.
+    - Exclua um produto que nunca foi vendido.
     - Tente excluir uma categoria com produto: aparece a mensagem de erro.
 2. **Banco (1 min)**: migration e chaves estrangeiras; se der, a tabela no HeidiSQL.
 3. **Model (1 min)**: `$fillable` e os `belongsTo`.
 4. **Rotas (1 min)**: `Route::resource` e `php artisan route:list`.
-5. **Controller (3 min)**: siga um cadastro: `create` → formulário → `store` → `validar` → `redirect`.
-6. **Views (1 min)**: `@forelse`, `@csrf`, `@method('PUT')`, `@error`, `old()`.
+5. **Controller (3 min)**: siga um cadastro: `create` → formulário → `ProdutoRequest` (validação) → `store` → `redirect`.
+6. **Views (1 min)**: `_form` com `@include`, `@forelse`, `@csrf`, `@method('PUT')`, `@error`, `old()`.
 
 Para fechar: *"Os outros três cadastros seguem exatamente essa estrutura. Produtos só acrescenta os relacionamentos."*
 
@@ -163,4 +202,8 @@ Para fechar: *"Os outros três cadastros seguem exatamente essa estrutura. Produ
 | E se excluir uma categoria com produtos? | O controller bloqueia com mensagem; o banco também bloquearia. |
 | E se excluir um fornecedor? | Os produtos ficam sem fornecedor (`nullOnDelete`). |
 | O que é migration? | Arquivo que cria as tabelas; `php artisan migrate` recria o banco. |
-| Como foi testado? | `php artisan test` roda os testes de todos os CRUDs. |
+| O que é Form Request? | Uma classe só para validação. O controller fica limpo e a regra é reaproveitada no store e no update. |
+| O que é transação (`DB::transaction`)? | Um bloco "tudo ou nada": se algo falhar no meio (ex.: estoque insuficiente), o banco desfaz tudo. |
+| Por que o estoque não é editável? | Para ter histórico: toda mudança vira uma movimentação (entrada/saída) com motivo e usuário. |
+| Por que venda não se apaga? | Venda é documento. Se deu errado, ela é cancelada e o estoque volta, mas o registro fica. |
+| Como foi testado? | `php artisan test` roda os testes de todos os módulos; no GitHub rodam sozinhos a cada push. |

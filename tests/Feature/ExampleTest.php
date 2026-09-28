@@ -9,13 +9,10 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
+    // Quem não está logado é mandado para a tela de login
+    public function test_visitante_e_redirecionado_para_o_login(): void
     {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
+        $this->get('/')->assertRedirect('/login');
+        $this->get('/login')->assertOk()->assertSee('Entrar');
     }
 }
