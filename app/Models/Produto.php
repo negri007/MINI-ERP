@@ -69,4 +69,16 @@ class Produto extends Model
     {
         return $this->estoque <= $this->estoque_minimo;
     }
+
+    // Posições (em %) para desenhar a régua de estoque:
+    // a escala vai até 3x o mínimo, e o traço marca onde fica o mínimo
+    public function reguaEstoque(): array
+    {
+        $maximo = max($this->estoque_minimo * 3, $this->estoque, 1);
+
+        return [
+            'nivel' => round($this->estoque / $maximo * 100),
+            'minimo' => round($this->estoque_minimo / $maximo * 100),
+        ];
+    }
 }

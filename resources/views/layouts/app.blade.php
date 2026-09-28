@@ -8,92 +8,103 @@
     {{-- Bootstrap 5 (CSS) salvo dentro do projeto: funciona sem internet --}}
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
 
-    {{-- Estilos da sidebar --}}
-    <style>
-        .sidebar {
-            width: 220px;
-            min-height: calc(100vh - 56px);
-        }
-        .sidebar .nav-link {
-            color: #333;
-        }
-        .sidebar .nav-link.active {
-            background-color: #0d6efd;
-            color: #fff;
-        }
-        .sidebar .titulo-menu {
-            font-size: .75rem;
-            text-transform: uppercase;
-            color: #6c757d;
-            margin: 1rem 0 .25rem .75rem;
-        }
-    </style>
+    {{-- Tema "Balcão": muda só a aparência, por cima do Bootstrap --}}
+    <link href="{{ asset('css/balcao.css') }}" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
+    @php
+        // Itens do menu (fichário): [grupo, cor da etiqueta, [título, rota, padrão da rota ativa]]
+        $menu = [
+            ['Início', 'var(--tinta)', [
+                ['Dashboard', 'dashboard', 'dashboard'],
+            ]],
+            ['Cadastros', 'var(--carbono)', [
+                ['Categorias', 'categorias.index', 'categorias.*'],
+                ['Fornecedores', 'fornecedores.index', 'fornecedores.*'],
+                ['Clientes', 'clientes.index', 'clientes.*'],
+                ['Produtos', 'produtos.index', 'produtos.*'],
+            ]],
+            ['Operações', 'var(--caixa)', [
+                ['Vendas', 'vendas.index', 'vendas.*'],
+                ['Estoque', 'estoque.index', 'estoque.*'],
+            ]],
+            ['Relatórios', 'var(--carimbo)', [
+                ['Vendas por período', 'relatorios.vendas', 'relatorios.vendas*'],
+            ]],
+        ];
 
-    {{-- Navbar superior --}}
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">Mini ERP</a>
+        // Comandos do "Balcão rápido" (Ctrl + K): [grupo, título, endereço, ícone]
+        $comandos = [
+            ['Criar', 'Nova venda', route('vendas.create'), '+'],
+            ['Criar', 'Novo produto', route('produtos.create'), '+'],
+            ['Criar', 'Novo cliente', route('clientes.create'), '+'],
+            ['Criar', 'Nova categoria', route('categorias.create'), '+'],
+            ['Criar', 'Novo fornecedor', route('fornecedores.create'), '+'],
+            ['Criar', 'Entrada ou saída de estoque', route('estoque.create'), '±'],
+            ['Consultar', 'Produtos com estoque baixo', route('produtos.index', ['estoque_baixo' => 1]), '!'],
+            ['Consultar', 'Vendas canceladas', route('vendas.index', ['status' => 'cancelada']), '×'],
+            ['Consultar', 'Relatório do mês', route('relatorios.vendas'), '%'],
+            ['Consultar', 'Exportar vendas do mês (Excel)', route('relatorios.vendas.exportar'), '↓'],
+        ];
+        // Telas onde o Balcão rápido oferece "buscar o texto digitado"
+        $rotasBusca = [
+            'Produtos' => route('produtos.index'),
+            'Clientes' => route('clientes.index'),
+            'Vendas' => route('vendas.index'),
+        ];
 
-            {{-- Usuário logado e botão de sair --}}
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-white-50 small">{{ auth()->user()->name }}</span>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-light">Sair</button>
-                </form>
-            </div>
+        foreach ($menu as [, , $itens]) {
+            foreach ($itens as [$titulo, $rota]) {
+                $comandos[] = ['Ir para', $titulo, route($rota), '→'];
+            }
+        }
+    @endphp
+
+    {{-- Topo: marca, Balcão rápido e usuário --}}
+    <header class="topo">
+        <a class="marca" href="{{ route('dashboard') }}">
+            <span class="selo">ME</span>
+            <span>Mini <em>ERP</em></span>
+        </a>
+
+        {{-- Abre a busca de comandos (também abre com Ctrl + K ou /) --}}
+        <button type="button" class="abrir-rapido" data-abrir-rapido>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <span>Ir para… ou fazer…</span>
+            <kbd>Ctrl</kbd><kbd>K</kbd>
+        </button>
+
+        <div class="usuario">
+            <span class="hoje">{{ now()->locale('pt_BR')->translatedFormat('D, d \\d\\e M') }}</span>
+            <span>{{ auth()->user()->name }}</span>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-secondary">Sair</button>
+            </form>
         </div>
-    </nav>
+    </header>
 
-    <div class="d-flex">
+    <div class="mesa">
 
-        {{-- Sidebar lateral com os links do sistema --}}
-        <aside class="sidebar bg-white border-end p-3 flex-shrink-0">
-            <ul class="nav nav-pills flex-column gap-1">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a>
-                </li>
+        {{-- Fichário: cada item do menu é uma aba de pasta --}}
+        <nav class="fichario" aria-label="Menu principal">
+            @foreach ($menu as [$grupo, $cor, $itens])
+                <div class="grupo" style="--cor-grupo: {{ $cor }}">{{ $grupo }}</div>
+                @foreach ($itens as [$titulo, $rota, $padrao])
+                    <a href="{{ route($rota) }}" style="--cor-grupo: {{ $cor }}"
+                       class="aba {{ request()->routeIs($padrao) ? 'ativa' : '' }}">
+                        {{ $titulo }} <span class="atalho">→</span>
+                    </a>
+                @endforeach
+            @endforeach
+        </nav>
 
-                {{-- Cadastros --}}
-                <li class="titulo-menu">Cadastros</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}" href="{{ route('categorias.index') }}">Categorias</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('fornecedores.*') ? 'active' : '' }}" href="{{ route('fornecedores.index') }}">Fornecedores</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('clientes.*') ? 'active' : '' }}" href="{{ route('clientes.index') }}">Clientes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('produtos.*') ? 'active' : '' }}" href="{{ route('produtos.index') }}">Produtos</a>
-                </li>
-
-                {{-- Operações do dia a dia --}}
-                <li class="titulo-menu">Operações</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('vendas.*') ? 'active' : '' }}" href="{{ route('vendas.index') }}">Vendas</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('estoque.*') ? 'active' : '' }}" href="{{ route('estoque.index') }}">Estoque</a>
-                </li>
-
-                {{-- Relatórios --}}
-                <li class="titulo-menu">Relatórios</li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('relatorios.vendas*') ? 'active' : '' }}" href="{{ route('relatorios.vendas') }}">Vendas por período</a>
-                </li>
-            </ul>
-        </aside>
-
-        {{-- Área principal de conteúdo --}}
-        <main class="flex-grow-1 p-4">
+        {{-- Folha de trabalho: o conteúdo de cada página --}}
+        <main class="folha">
 
             {{-- Mensagem de sucesso --}}
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="alert alert-success alert-dismissible fade show no-print" role="alert">
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
@@ -101,7 +112,7 @@
 
             {{-- Mensagem de erro --}}
             @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show no-print" role="alert">
                     {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
@@ -111,7 +122,6 @@
             @yield('content')
 
         </main>
-
     </div>
 
     {{-- Modal de confirmação usado pelos botões "Excluir" e "Cancelar venda" --}}
@@ -119,7 +129,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirmar</h5>
+                    <h5 class="modal-title">Tem certeza?</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body" id="modalConfirmarTexto">Deseja realmente continuar?</div>
@@ -131,7 +141,25 @@
         </div>
     </div>
 
-    {{-- Bootstrap 5 (JS) e scripts do sistema (máscaras e confirmação) --}}
+    {{-- Balcão rápido: busca de telas e ações (Ctrl + K) --}}
+    <div class="balcao-rapido" id="balcaoRapido" hidden>
+        <div class="br-caixa" role="dialog" aria-label="Balcão rápido">
+            <input type="text" id="brBusca" placeholder="Ir para… ou fazer…" autocomplete="off">
+            <ul class="br-lista" id="brLista"></ul>
+            <div class="br-rodape">
+                <span><kbd>↑</kbd> <kbd>↓</kbd> escolher</span>
+                <span><kbd>Enter</kbd> abrir</span>
+                <span><kbd>Esc</kbd> fechar</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Lista de comandos montada no PHP acima, usada pelo mini-erp.js
+        window.COMANDOS = @json($comandos);
+        window.ROTAS_BUSCA = @json($rotasBusca);
+    </script>
+
+    {{-- Bootstrap 5 (JS) e scripts do sistema (máscaras, confirmação, Balcão rápido) --}}
     <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('js/mini-erp.js') }}"></script>
 

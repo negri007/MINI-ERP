@@ -33,6 +33,9 @@ class DashboardController extends Controller
             'faturamento' => (clone $vendasMes)->sum('total'),
         ];
 
+        // Últimas vendas para a "fita de caixa"
+        $ultimasVendas = Venda::with('cliente')->latest('id')->limit(6)->get();
+
         // Produtos no estoque mínimo ou abaixo dele
         $estoqueBaixo = Produto::with('categoria')->estoqueBaixo()->orderBy('estoque')->limit(10)->get();
 
@@ -57,6 +60,6 @@ class DashboardController extends Controller
             'valores' => $categorias->pluck('produtos_count'),
         ];
 
-        return view('dashboard', compact('totais', 'mes', 'estoqueBaixo', 'graficoVendas', 'graficoCategorias'));
+        return view('dashboard', compact('totais', 'mes', 'ultimasVendas', 'estoqueBaixo', 'graficoVendas', 'graficoCategorias'));
     }
 }

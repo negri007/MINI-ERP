@@ -3,47 +3,58 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Dashboard</h1>
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <div class="rotulo">{{ now()->locale('pt_BR')->translatedFormat('l, d \\d\\e F \\d\\e Y') }}</div>
+            <h1 class="h3 mb-0">Fechamento parcial do caixa</h1>
+        </div>
         <a href="{{ route('vendas.create') }}" class="btn btn-primary">Nova Venda</a>
     </div>
 
-    {{-- Vendas do mês --}}
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <div class="card text-bg-primary h-100">
-                <div class="card-body">
-                    <div class="small">Faturamento do mês</div>
-                    <div class="display-6">R$ {{ number_format($mes['faturamento'], 2, ',', '.') }}</div>
-                </div>
+    {{-- Caixa do mês (painel escuro) + fita com as últimas vendas --}}
+    <section class="caixa-do-dia">
+        <div class="painel-caixa">
+            <div class="rotulo">Faturamento de {{ now()->locale('pt_BR')->translatedFormat('F') }}</div>
+            <div class="valor"><small>R$</small>{{ number_format($mes['faturamento'], 2, ',', '.') }}</div>
+            <div class="resumo">
+                <div><strong>{{ $mes['quantidade'] }}</strong> vendas no mês</div>
+                <div><strong>R$ {{ number_format($mes['quantidade'] ? $mes['faturamento'] / $mes['quantidade'] : 0, 2, ',', '.') }}</strong> ticket médio</div>
+                <div><strong>{{ $estoqueBaixo->count() }}</strong> produtos para repor</div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card text-bg-success h-100">
-                <div class="card-body">
-                    <div class="small">Vendas no mês</div>
-                    <div class="display-6">{{ $mes['quantidade'] }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Cartões com os totais de cada cadastro --}}
+        <div class="fita">
+            <div class="rotulo mb-2">Fita de caixa · últimas vendas</div>
+            @forelse ($ultimasVendas as $venda)
+                <div class="linha">
+                    <a href="{{ route('vendas.show', $venda) }}">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }} {{ \Illuminate\Support\Str::limit($venda->cliente->nome, 16) }}</a>
+                    <span class="pontilhado"></span>
+                    @if ($venda->estaCancelada())
+                        <s class="text-danger">{{ number_format($venda->total, 2, ',', '.') }}</s>
+                    @else
+                        <span>{{ number_format($venda->total, 2, ',', '.') }}</span>
+                    @endif
+                </div>
+            @empty
+                <div class="text-muted">Nenhuma venda ainda.</div>
+            @endforelse
+        </div>
+    </section>
+
+    {{-- Gavetas: totais de cada cadastro --}}
     <div class="row g-3 mb-4">
         @foreach ([
-            ['Categorias', $totais['categorias'], 'categorias.index', 'primary'],
-            ['Fornecedores', $totais['fornecedores'], 'fornecedores.index', 'success'],
-            ['Clientes', $totais['clientes'], 'clientes.index', 'warning'],
-            ['Produtos', $totais['produtos'], 'produtos.index', 'info'],
-        ] as [$titulo, $total, $rota, $cor])
+            ['Categorias', $totais['categorias'], 'categorias.index'],
+            ['Fornecedores', $totais['fornecedores'], 'fornecedores.index'],
+            ['Clientes', $totais['clientes'], 'clientes.index'],
+            ['Produtos', $totais['produtos'], 'produtos.index'],
+        ] as [$titulo, $total, $rota])
             <div class="col-sm-6 col-lg-3">
-                <div class="card border-{{ $cor }} h-100">
-                    <div class="card-body">
-                        <h2 class="h6 text-muted">{{ $titulo }}</h2>
-                        <p class="display-6 mb-2">{{ $total }}</p>
-                        <a href="{{ route($rota) }}" class="btn btn-sm btn-outline-{{ $cor }}">Ver todos</a>
-                    </div>
-                </div>
+                <a href="{{ route($rota) }}" class="gaveta" style="--cor-grupo: var(--carbono)">
+                    <div class="rotulo">{{ $titulo }}</div>
+                    <div class="qtd">{{ $total }}</div>
+                    <div class="abrir">abrir gaveta →</div>
+                </a>
             </div>
         @endforeach
     </div>
@@ -67,15 +78,16 @@
     {{-- Produtos com estoque baixo --}}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span>Produtos com estoque baixo (no mínimo ou abaixo)</span>
-            <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}" class="small">Ver todos</a>
+            <span>Para repor: no estoque mínimo ou abaixo</span>
+            <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">Ver todos</a>
         </div>
         <div class="card-body p-0">
-            <table class="table table-striped mb-0 align-middle">
+            <table class="table mb-0 align-middle">
                 <thead>
                     <tr>
                         <th>Produto</th>
                         <th>Categoria</th>
+                        <th>Nível</th>
                         <th class="text-end">Estoque</th>
                         <th class="text-end">Mínimo</th>
                         <th></th>
@@ -86,9 +98,8 @@
                         <tr>
                             <td>{{ $produto->nome }}</td>
                             <td>{{ $produto->categoria->nome ?? '-' }}</td>
-                            <td class="text-end">
-                                <span class="badge {{ $produto->estoque == 0 ? 'bg-danger' : 'bg-warning text-dark' }}">{{ $produto->estoque }}</span>
-                            </td>
+                            <td>@include('partials.regua', ['produto' => $produto])</td>
+                            <td class="text-end">{{ $produto->estoque }}</td>
                             <td class="text-end">{{ $produto->estoque_minimo }}</td>
                             <td class="text-end">
                                 <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="btn btn-sm btn-outline-primary">Repor</a>
@@ -96,7 +107,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted">Nenhum produto com estoque baixo.</td>
+                            <td colspan="6" class="text-center text-muted">Nenhum produto com estoque baixo.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -113,15 +124,30 @@
     const vendas = @json($graficoVendas);
     const categorias = @json($graficoCategorias);
 
+    // Visual dos gráficos combinando com o tema: tinta preta, carimbo vermelho, fonte de máquina
+    Chart.defaults.font.family = "'Plex Mono', monospace";
+    Chart.defaults.color = '#6d6558';
+    Chart.defaults.borderColor = '#e2d7c3';
+
     new Chart(document.getElementById('graficoVendas'), {
         type: 'bar',
         data: {
             labels: vendas.labels,
-            datasets: [{ label: 'Faturamento (R$)', data: vendas.valores, backgroundColor: '#0d6efd' }],
+            datasets: [{
+                label: 'Faturamento (R$)',
+                data: vendas.valores,
+                // Barras em tinta; a de hoje em vermelho
+                backgroundColor: vendas.valores.map((_, i) => i === vendas.valores.length - 1 ? '#c2362b' : '#1e1b16'),
+                borderRadius: 2,
+                barPercentage: .6,
+            }],
         },
         options: {
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => c.parsed.y.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) } },
+            },
+            scales: { y: { beginAtZero: true, grid: { borderDash: [3, 3] } }, x: { grid: { display: false } } },
         },
     });
 
@@ -129,9 +155,14 @@
         type: 'doughnut',
         data: {
             labels: categorias.labels,
-            datasets: [{ data: categorias.valores }],
+            datasets: [{
+                data: categorias.valores,
+                backgroundColor: ['#1e1b16', '#2c4a94', '#2e6b4c', '#d49a2a', '#c2362b', '#8a7f6d'],
+                borderColor: '#fffcf5',
+                borderWidth: 3,
+            }],
         },
-        options: { plugins: { legend: { position: 'bottom' } } },
+        options: { cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } },
     });
 </script>
 @endpush

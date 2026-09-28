@@ -64,9 +64,9 @@
                             <td class="text-end text-nowrap">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
                             <td class="text-center">
                                 @if ($venda->estaCancelada())
-                                    <span class="badge bg-secondary">Cancelada</span>
+                                    <span class="badge bg-secondary selo-status">Cancelada</span>
                                 @else
-                                    <span class="badge bg-success">Concluída</span>
+                                    <span class="badge bg-success selo-status">Concluída</span>
                                 @endif
                             </td>
                             <td class="text-end">

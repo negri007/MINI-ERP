@@ -49,7 +49,10 @@ class VendaController extends Controller
 
         $venda = $service->registrar($dados['cliente_id'], $dados['data'], $dados['itens'], $dados['observacao'] ?? null);
 
-        return redirect()->route('vendas.show', $venda)->with('success', "Venda #{$venda->id} registrada com sucesso!");
+        // "imprimir" faz o cupom aparecer saindo da impressora (animação na tela)
+        return redirect()->route('vendas.show', $venda)
+            ->with('success', "Venda #{$venda->id} registrada com sucesso!")
+            ->with('imprimir', true);
     }
 
     // Detalhes de uma venda
@@ -65,6 +68,9 @@ class VendaController extends Controller
     {
         $service->cancelar($venda);
 
-        return redirect()->route('vendas.show', $venda)->with('success', "Venda #{$venda->id} cancelada. O estoque foi devolvido.");
+        // "carimbar" faz o carimbo de CANCELADA bater no cupom (animação na tela)
+        return redirect()->route('vendas.show', $venda)
+            ->with('success', "Venda #{$venda->id} cancelada. O estoque foi devolvido.")
+            ->with('carimbar', true);
     }
 }
