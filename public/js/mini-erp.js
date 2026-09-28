@@ -58,6 +58,12 @@ if (balcao) {
     const lista = document.getElementById('brLista');
     let itens = [];
     let posicao = 0;
+    let focoAnterior = null; // quem tinha o foco antes de abrir, para devolver ao fechar
+
+    // No Mac o atalho é Cmd (⌘), não Ctrl
+    if (/Mac|iPhone|iPad/.test(navigator.platform)) {
+        document.querySelectorAll('[data-tecla-ctrl]').forEach((k) => { k.textContent = '⌘'; });
+    }
 
     // Tira acentos e deixa minúsculo: "Relatório" -> "relatorio"
     const normalizar = (texto) => texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -83,11 +89,12 @@ if (balcao) {
         desenhar();
     }
 
-    // Desenha os itens agrupados, destacando o escolhido
+    // Desenha os itens agrupados
     function desenhar() {
         lista.innerHTML = '';
         if (!itens.length) {
-            lista.innerHTML = '<li class="br-vazio">Nada encontrado.</li>';
+            lista.innerHTML = '<li class="br-vazio" role="presentation">Nada encontrado.</li>';
+            busca.removeAttribute('aria-activedescendant');
             return;
         }
         let grupoAtual = null;
@@ -96,26 +103,46 @@ if (balcao) {
                 grupoAtual = item.grupo;
                 const titulo = document.createElement('li');
                 titulo.className = 'br-grupo';
+                titulo.setAttribute('role', 'presentation');
                 titulo.textContent = grupoAtual;
                 lista.appendChild(titulo);
             }
             const li = document.createElement('li');
+            li.setAttribute('role', 'presentation');
             const link = document.createElement('a');
             link.href = item.url;
-            link.className = i === posicao ? 'foco' : '';
-            link.innerHTML = '<span class="icone"></span><span class="texto"></span><span class="dica">Enter</span>';
+            link.id = `br-item-${i}`;
+            link.tabIndex = -1; // o foco fica na caixa de busca; as setas escolhem
+            link.setAttribute('role', 'option');
+            link.innerHTML = '<span class="icone" aria-hidden="true"></span><span class="texto"></span><span class="dica" aria-hidden="true">Enter</span>';
             link.querySelector('.icone').textContent = item.icone;
             link.querySelector('.texto').textContent = item.titulo;
-            link.querySelector('.dica').style.visibility = i === posicao ? 'visible' : 'hidden';
-            link.addEventListener('mousemove', () => { if (posicao !== i) { posicao = i; desenhar(); } });
+            link.addEventListener('mousemove', () => { if (posicao !== i) escolher(i); });
             li.appendChild(link);
             lista.appendChild(li);
         });
-        lista.querySelector('a.foco')?.scrollIntoView({ block: 'nearest' });
+        escolher(posicao);
+    }
+
+    // Destaca o item escolhido (sem redesenhar a lista)
+    function escolher(i) {
+        if (!itens.length) return;
+        posicao = (i + itens.length) % itens.length; // passa do fim volta ao começo
+        lista.querySelectorAll('[role="option"]').forEach((link, n) => {
+            const ativo = n === posicao;
+            link.classList.toggle('foco', ativo);
+            link.setAttribute('aria-selected', ativo);
+            link.querySelector('.dica').style.visibility = ativo ? 'visible' : 'hidden';
+        });
+        const atual = document.getElementById(`br-item-${posicao}`);
+        busca.setAttribute('aria-activedescendant', atual.id);
+        atual.scrollIntoView({ block: 'nearest' });
     }
 
     function abrir() {
+        focoAnterior = document.activeElement;
         balcao.hidden = false;
+        document.body.style.overflow = 'hidden'; // a página de trás não rola
         busca.value = '';
         montar();
         busca.focus();
@@ -123,24 +150,29 @@ if (balcao) {
 
     function fechar() {
         balcao.hidden = true;
+        document.body.style.overflow = '';
+        focoAnterior?.focus?.();
     }
 
     document.querySelectorAll('[data-abrir-rapido]').forEach((b) => b.addEventListener('click', abrir));
     balcao.addEventListener('click', (e) => { if (e.target === balcao) fechar(); });
     busca.addEventListener('input', montar);
 
-    // Setas escolhem, Enter abre, Esc fecha
+    // Setas (ou Tab) escolhem, Enter abre, Esc fecha
     busca.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown') { posicao = Math.min(posicao + 1, itens.length - 1); desenhar(); e.preventDefault(); }
-        if (e.key === 'ArrowUp') { posicao = Math.max(posicao - 1, 0); desenhar(); e.preventDefault(); }
-        if (e.key === 'Enter' && itens[posicao]) { window.location = itens[posicao].url; }
-        if (e.key === 'Escape') fechar();
+        const descer = e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey);
+        const subir = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey);
+        if (descer || subir) { e.preventDefault(); escolher(posicao + (descer ? 1 : -1)); }
+        if (e.key === 'Enter' && itens[posicao]) { e.preventDefault(); window.location = itens[posicao].url; }
+        if (e.key === 'Escape') { e.preventDefault(); fechar(); }
     });
 
     // Atalhos globais: Ctrl + K (ou Cmd + K no Mac) e "/" fora de campos de texto
     document.addEventListener('keydown', (e) => {
-        const digitando = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+        const ativo = document.activeElement;
+        const digitando = ['INPUT', 'TEXTAREA', 'SELECT'].includes(ativo.tagName) || ativo.isContentEditable;
+        const modalAberto = document.querySelector('.modal.show');
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); balcao.hidden ? abrir() : fechar(); }
-        if (e.key === '/' && !digitando && balcao.hidden) { e.preventDefault(); abrir(); }
+        if (e.key === '/' && !digitando && !modalAberto && balcao.hidden) { e.preventDefault(); abrir(); }
     });
 }

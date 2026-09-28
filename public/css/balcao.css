@@ -27,7 +27,7 @@
     --folha: #fffcf5;         /* folha de trabalho */
     --folha-2: #f7f1e4;       /* papel um pouco mais escuro (abas, cabeçalhos) */
     --tinta: #1e1b16;         /* texto principal */
-    --tinta-2: #6d6558;       /* texto secundário */
+    --tinta-2: #645c50;       /* texto secundário (contraste AA também sobre o kraft) */
     --linha: #e2d7c3;         /* bordas finas */
     --carimbo: #c2362b;       /* vermelho de carimbo */
     --carbono: #2c4a94;       /* azul de papel carbono */
@@ -61,6 +61,13 @@ body {
     font-feature-settings: 'ss01';
     -webkit-font-smoothing: antialiased;
 }
+
+/* Texto selecionado vira "marca-texto" amarelo */
+::selection { background: rgba(212, 154, 42, .35); color: var(--tinta); }
+
+/* Foco de teclado: contorno de caneta azul, só quando se navega pelo teclado */
+:focus-visible { outline: 2px solid var(--carbono); outline-offset: 2px; }
+.btn:focus-visible { box-shadow: none; outline: 2px solid var(--carbono); outline-offset: 2px; }
 
 h1, h2, .h1, .h2, .h3, .titulo {
     font-family: var(--fonte-titulo);
@@ -139,6 +146,8 @@ h1, h2, .h1, .h2, .h3, .titulo {
 }
 .abrir-rapido:hover { background: var(--folha); border-color: var(--tinta-2); }
 .abrir-rapido span { flex: 1; }
+/* Em telas de toque não existe teclado físico: esconde o atalho */
+@media (hover: none) { .abrir-rapido kbd { display: none; } }
 
 kbd {
     font-family: var(--fonte-numero);
@@ -201,9 +210,9 @@ kbd {
     box-shadow: inset -6px 0 8px -6px rgba(60, 40, 10, .25);
     transition: transform .18s ease, background .18s ease;
 }
-.aba:hover { transform: translateX(-5px); background: #fbf6ea; color: var(--tinta); }
+.aba:hover, .aba:focus-visible { transform: translateX(-5px); background: #fbf6ea; color: var(--tinta); }
 .aba .atalho { font-family: var(--fonte-numero); font-size: .68rem; color: var(--tinta-2); opacity: 0; transition: opacity .15s; }
-.aba:hover .atalho { opacity: 1; }
+.aba:hover .atalho, .aba:focus-visible .atalho { opacity: 1; }
 
 /* Aba aberta: tem a cor da folha e "se encaixa" nela, sem sombra */
 .aba.ativa {
@@ -328,7 +337,11 @@ kbd {
     --bs-btn-active-bg: #000; --bs-btn-active-border-color: #000;
     box-shadow: 3px 3px 0 var(--mostarda);
 }
+.btn-primary { transition: transform .12s, box-shadow .12s; }
 .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--mostarda); }
+/* Ao clicar, o botão "afunda" na sombra, como uma tecla de caixa registradora */
+.btn-primary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--mostarda); }
+.btn-primary:disabled, .btn-primary.disabled { transform: none; box-shadow: none; }
 .btn-success {
     --bs-btn-bg: var(--caixa); --bs-btn-border-color: var(--caixa);
     --bs-btn-hover-bg: #245a3f; --bs-btn-hover-border-color: #245a3f;
@@ -533,7 +546,7 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
     text-decoration: none;
     transition: transform .18s, box-shadow .18s;
 }
-.gaveta:hover { transform: translateY(-3px); box-shadow: 0 14px 22px -18px rgba(60, 40, 10, .8); color: var(--tinta); }
+.gaveta:hover, .gaveta:focus-visible { transform: translateY(-3px); box-shadow: 0 14px 22px -18px rgba(60, 40, 10, .8); color: var(--tinta); }
 .gaveta .qtd { font-family: var(--fonte-titulo); font-size: 2.6rem; font-weight: 600; line-height: 1; margin: .35rem 0 .5rem; }
 .gaveta .abrir { font-family: var(--fonte-numero); font-size: .72rem; color: var(--tinta-2); }
 
@@ -607,7 +620,7 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
 .cupom .item-conta .pontilhado { flex: 1; border-bottom: 1px dotted #b8ad99; margin-bottom: .35rem; }
 .cupom .total { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.05rem; font-weight: 700; }
 .cupom .total .valor-total { font-size: 1.6rem; }
-.cupom .aviso { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: #6d6558; }
+.cupom .aviso { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-2); }
 
 /* Código de barras desenhado com barras de CSS */
 .codigo-barras { display: flex; justify-content: center; align-items: stretch; height: 46px; gap: 0; margin: 1rem 0 .3rem; }
@@ -693,8 +706,8 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
     outline: none;
     color: var(--tinta);
 }
-.br-caixa input::placeholder { color: #b3a996; font-style: italic; }
-.br-lista { list-style: none; margin: 0; padding: .4rem; max-height: 50vh; overflow: auto; }
+.br-caixa input::placeholder { color: var(--tinta-2); opacity: .75; font-style: italic; }
+.br-lista { list-style: none; margin: 0; padding: .4rem; max-height: 50vh; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--linha) transparent; }
 .br-lista .br-grupo {
     padding: .7rem .8rem .3rem;
     font-family: var(--fonte-numero);
@@ -741,10 +754,20 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
 /* ---------- Telas pequenas ---------- */
 @media (max-width: 900px) {
     .mesa { flex-direction: column; align-items: stretch; padding: 0 .75rem 1.5rem; }
-    .fichario { position: static; width: 100%; display: flex; flex-wrap: wrap; gap: .3rem; padding-top: 0; margin-bottom: .75rem; }
+    /* Fichário vira uma fileira de abas no topo da folha, rolando para o lado */
+    .fichario {
+        position: static; width: auto; display: flex; gap: .3rem;
+        margin: 0 -.75rem -1px; padding: 0 .75rem; overflow-x: auto;
+        scroll-snap-type: x proximity; scrollbar-width: none;
+    }
+    .fichario::-webkit-scrollbar { display: none; }
     .fichario .grupo { display: none; }
-    .aba, .aba.ativa { margin: 0; border-radius: 8px 8px 0 0; border: 1px solid var(--linha); transform: none; }
-    .folha { padding: 1.4rem 1.2rem; }
+    .aba, .aba.ativa { margin: 0; flex-shrink: 0; scroll-snap-align: start; white-space: nowrap; border-radius: 8px 8px 0 0; border: 1px solid var(--linha); transform: none; box-shadow: none; }
+    .aba:hover, .aba:focus-visible { transform: none; }
+    .aba.ativa { border-bottom-color: var(--folha); padding-left: 1rem; }
+    .aba.ativa::before { left: 50%; top: auto; bottom: 4px; width: 40%; height: 3px; transform: translateX(-50%); }
+    .aba .atalho { display: none; }
+    .folha { padding: 1.4rem 1.2rem; border-radius: 0 0 6px 6px; }
     .folha::before { display: none; }
     .caixa-do-dia, .balcao-cupom { grid-template-columns: minmax(0, 1fr); }
     .folha > .d-flex { flex-wrap: wrap; gap: .75rem; }
@@ -754,6 +777,16 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
     .painel-caixa { padding: 1.4rem; }
     .folha h1.h3 { font-size: 1.6rem; }
     .card-body.p-0 { overflow-x: auto; } /* tabelas largas rolam dentro do cartão */
+}
+
+/* ---------- Menos movimento: respeita a configuração do sistema ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* ---------- Impressão: só o cupom sai no papel ---------- */

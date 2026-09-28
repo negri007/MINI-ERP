@@ -126,7 +126,7 @@
 
     // Visual dos gráficos combinando com o tema: tinta preta, carimbo vermelho, fonte de máquina
     Chart.defaults.font.family = "'Plex Mono', monospace";
-    Chart.defaults.color = '#6d6558';
+    Chart.defaults.color = '#645c50';
     Chart.defaults.borderColor = '#e2d7c3';
 
     new Chart(document.getElementById('graficoVendas'), {

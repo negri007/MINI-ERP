@@ -68,10 +68,10 @@
         </a>
 
         {{-- Abre a busca de comandos (também abre com Ctrl + K ou /) --}}
-        <button type="button" class="abrir-rapido" data-abrir-rapido>
+        <button type="button" class="abrir-rapido" data-abrir-rapido aria-haspopup="dialog" aria-keyshortcuts="Control+K /">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <span>Ir para… ou fazer…</span>
-            <kbd>Ctrl</kbd><kbd>K</kbd>
+            <kbd data-tecla-ctrl>Ctrl</kbd><kbd>K</kbd>
         </button>
 
         <div class="usuario">
@@ -91,9 +91,10 @@
             @foreach ($menu as [$grupo, $cor, $itens])
                 <div class="grupo" style="--cor-grupo: {{ $cor }}">{{ $grupo }}</div>
                 @foreach ($itens as [$titulo, $rota, $padrao])
+                    @php($ativa = request()->routeIs($padrao))
                     <a href="{{ route($rota) }}" style="--cor-grupo: {{ $cor }}"
-                       class="aba {{ request()->routeIs($padrao) ? 'ativa' : '' }}">
-                        {{ $titulo }} <span class="atalho">→</span>
+                       class="aba {{ $ativa ? 'ativa' : '' }}" @if ($ativa) aria-current="page" @endif>
+                        {{ $titulo }} <span class="atalho" aria-hidden="true">→</span>
                     </a>
                 @endforeach
             @endforeach
@@ -143,9 +144,10 @@
 
     {{-- Balcão rápido: busca de telas e ações (Ctrl + K) --}}
     <div class="balcao-rapido" id="balcaoRapido" hidden>
-        <div class="br-caixa" role="dialog" aria-label="Balcão rápido">
-            <input type="text" id="brBusca" placeholder="Ir para… ou fazer…" autocomplete="off">
-            <ul class="br-lista" id="brLista"></ul>
+        <div class="br-caixa" role="dialog" aria-modal="true" aria-label="Balcão rápido">
+            <input type="text" id="brBusca" placeholder="Ir para… ou fazer…" autocomplete="off"
+                   role="combobox" aria-expanded="true" aria-controls="brLista" aria-autocomplete="list" aria-label="Ir para uma tela ou fazer uma ação">
+            <ul class="br-lista" id="brLista" role="listbox" aria-label="Resultados"></ul>
             <div class="br-rodape">
                 <span><kbd>↑</kbd> <kbd>↓</kbd> escolher</span>
                 <span><kbd>Enter</kbd> abrir</span>
