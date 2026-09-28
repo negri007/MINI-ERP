@@ -1,0 +1,35 @@
+# Roda os testes automáticos a cada push ou pull request no GitHub
+name: Testes
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Instalar dependências
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Preparar o .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Rodar os testes
+        run: php artisan test
