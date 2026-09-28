@@ -620,6 +620,7 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
 .cupom .item-conta .pontilhado { flex: 1; border-bottom: 1px dotted #b8ad99; margin-bottom: .35rem; }
 .cupom .total { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.05rem; font-weight: 700; }
 .cupom .total .valor-total { font-size: 1.6rem; }
+.cupom .d-flex { flex-wrap: wrap; column-gap: .75rem; }
 .cupom .aviso { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-2); }
 
 /* Código de barras desenhado com barras de CSS */
@@ -777,6 +778,7 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
     .painel-caixa { padding: 1.4rem; }
     .folha h1.h3 { font-size: 1.6rem; }
     .card-body.p-0 { overflow-x: auto; } /* tabelas largas rolam dentro do cartão */
+    .card-body.p-0 .table th, .card-body.p-0 .table td { white-space: nowrap; } /* rolam para o lado em vez de virar colunas estreitas */
 }
 
 /* ---------- Menos movimento: respeita a configuração do sistema ---------- */

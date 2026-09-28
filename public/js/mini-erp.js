@@ -50,6 +50,14 @@ if (modalEl) {
     });
 }
 
+// ---------- Fichário no celular ----------
+// As abas viram uma fileira que rola para o lado: mostra a aba da tela atual
+const fichario = document.querySelector('.fichario');
+const abaAtiva = fichario?.querySelector('.aba.ativa');
+if (abaAtiva && fichario.scrollWidth > fichario.clientWidth) {
+    fichario.scrollLeft = abaAtiva.offsetLeft - (fichario.clientWidth - abaAtiva.offsetWidth) / 2;
+}
+
 // ---------- Balcão rápido (Ctrl + K) ----------
 // Uma caixa de busca que leva a qualquer tela ou ação digitando.
 const balcao = document.getElementById('balcaoRapido');
