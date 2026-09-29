@@ -50,7 +50,9 @@
         <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}" class="card kpi kpi-link text-decoration-none text-reset">
             <div class="rotulo">Para repor <span class="icone perigo">@include('partials.icone', ['nome' => 'alerta'])</span></div>
             <div class="valor">{{ $qtdParaRepor }}</div>
-            <div class="rodape d-flex justify-content-between">produtos no estoque mínimo <span class="ir" aria-hidden="true">ver lista →</span></div>
+            <div class="rodape">produtos no estoque mínimo</div>
+            {{-- Linha própria: ao lado do texto, "ver lista" quebrava em duas linhas --}}
+            <div class="rodape ir mt-1">ver lista <span aria-hidden="true">→</span></div>
         </a>
     </section>
 

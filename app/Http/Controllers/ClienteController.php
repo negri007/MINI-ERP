@@ -61,10 +61,21 @@ class ClienteController extends Controller
         return response()->json($clientes->map(fn (Cliente $c) => $this->paraLista($c)));
     }
 
-    // Cadastro rápido feito pelo modal da Nova venda (mesma validação do cadastro normal)
+    // Cadastro rápido feito pelo modal da Nova venda (mesma validação do cadastro normal).
+    // Se já existe cliente com nome parecido, responde 409 com a lista, para a tela perguntar
+    // "É ele?". A pessoa pode confirmar e mandar de novo com confirmar_novo=1.
     public function rapido(ClienteRequest $request)
     {
-        $cliente = Cliente::create($request->validated());
+        $dados = $request->validated();
+
+        if (! $request->boolean('confirmar_novo')) {
+            $parecidos = Cliente::comNomeParecido($dados['nome']);
+            if ($parecidos->isNotEmpty()) {
+                return response()->json(['parecidos' => $parecidos->map(fn (Cliente $c) => $this->paraLista($c))], 409);
+            }
+        }
+
+        $cliente = Cliente::create($dados);
 
         return response()->json($this->paraLista($cliente), 201);
     }

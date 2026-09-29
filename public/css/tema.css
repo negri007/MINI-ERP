@@ -971,7 +971,7 @@ a:hover { text-decoration: underline; }
 
 /* Cartão que é link: mostra que dá para clicar (o anel de foco é o amarelo geral de :focus-visible) */
 .kpi-link { transition: border-color .15s ease, background-color .15s ease; }
-.kpi-link .ir { color: var(--ceu); font-weight: 500; }
+.kpi-link .ir { color: var(--ceu); font-weight: 500; white-space: nowrap; }
 .kpi-link:hover, .kpi-link:focus-visible { border-color: rgba(67, 148, 232, .45); background-color: var(--cartao-2); }
 
 /* Celular: botão "Repor" com área de toque de 44px */
@@ -1076,3 +1076,8 @@ a:hover { text-decoration: underline; }
 /* "Sobre o Mini ERP" no fim do menu: empurrado para baixo, logo acima do usuário */
 .menu-rodape { position: relative; z-index: 1; margin-top: auto; padding-top: .5rem; }
 .menu-rodape + .usuario { margin-top: .5rem; }
+
+/* Pergunta "Já existe X. É ele?" no cadastro rápido */
+.parecidos { margin-bottom: 1rem; padding: .75rem .9rem; border: 1px solid rgba(194, 128, 59, .45); border-radius: 10px; background: rgba(194, 128, 59, .1); }
+.parecidos p { margin: 0 0 .6rem; font-weight: 600; }
+.parecidos-botoes { display: flex; flex-wrap: wrap; gap: .5rem; }

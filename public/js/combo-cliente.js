@@ -192,13 +192,11 @@
         }, 120);
     });
 
-    // "Cadastrar "fulano"": abre o modal (o nome digitado já vai preenchido)
+    // "Cadastrar "fulano"": só este botão preenche o nome com o que foi buscado.
+    // O "+ Novo cliente" abre o modal vazio (o modal é limpo sempre que fecha).
     vazio.querySelector('button').addEventListener('click', () => {
+        formRapido.elements.nome.value = campo.value.trim();
         bootstrap.Modal.getOrCreateInstance(modalEl).show(document.getElementById('btnNovoCliente'));
-    });
-    modalEl.addEventListener('show.bs.modal', () => {
-        const nome = formRapido.elements.nome;
-        if (!nome.value && !select.value) nome.value = campo.value.trim();
     });
 
     // Ao fechar o modal, se o foco ficou perdido, volta para o campo Cliente
@@ -212,6 +210,8 @@
     // Cliente cadastrado no modal: já fica escolhido na venda
     formRapido.addEventListener('cadastro-rapido:salvo', (e) => {
         escolher(e.detail);
-        aviso.textContent = `Cliente ${e.detail.nome} cadastrado e escolhido.`;
+        aviso.textContent = e.detail.existente
+            ? `Cliente ${e.detail.nome} escolhido.`
+            : `Cliente ${e.detail.nome} cadastrado e escolhido.`;
     });
 })();

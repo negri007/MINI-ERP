@@ -77,4 +77,30 @@ class ClienteRapidoTest extends TestCase
         $this->postJson('/clientes/rapido', ['nome' => 'Sem login'])->assertUnauthorized();
         $this->assertDatabaseMissing('clientes', ['nome' => 'Sem login']);
     }
+
+    public function test_nome_parecido_pergunta_antes_de_cadastrar(): void
+    {
+        $antonio = Cliente::factory()->create(['nome' => 'Antônio Zambrano', 'cpf_cnpj' => null]);
+
+        // "Antô" (texto que sobrou da busca) não cria cliente: o servidor devolve quem já existe
+        $this->postJson('/clientes/rapido', ['nome' => 'Antô'])
+            ->assertStatus(409)
+            ->assertJsonPath('parecidos.0.id', $antonio->id)
+            ->assertJsonPath('parecidos.0.nome', 'Antônio Zambrano');
+        $this->assertDatabaseMissing('clientes', ['nome' => 'Antô']);
+
+        // Sem diferenciar acentos e com mais de uma palavra
+        $this->postJson('/clientes/rapido', ['nome' => 'antonio zam'])->assertStatus(409);
+
+        // "Cadastrar novo mesmo assim"
+        $this->postJson('/clientes/rapido', ['nome' => 'Antô', 'confirmar_novo' => 1])->assertCreated();
+        $this->assertDatabaseHas('clientes', ['nome' => 'Antô']);
+    }
+
+    public function test_nome_que_so_divide_o_primeiro_nome_nao_e_parecido(): void
+    {
+        Cliente::factory()->create(['nome' => 'Maria Souza']);
+
+        $this->postJson('/clientes/rapido', ['nome' => 'Maria Oliveira'])->assertCreated();
+    }
 }

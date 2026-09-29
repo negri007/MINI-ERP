@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class Cliente extends Model
 {
@@ -81,5 +83,39 @@ class Cliente extends Model
         return $temVendas
             ? "O cliente \"{$this->nome}\" tem vendas registradas e precisa ficar no histórico, por isso não pode ser excluído."
             : null;
+    }
+
+    // Clientes com nome parecido com o digitado (para evitar cadastro repetido sem querer).
+    // Parecido = cada palavra digitada é o começo de alguma palavra do nome existente,
+    // sem diferenciar maiúsculas nem acentos. Ex.: "Antô" e "antonio z" batem com "Antônio Zambrano";
+    // "Maria Oliveira" não bate com "Maria Souza".
+    public static function comNomeParecido(string $nome, int $limite = 3): Collection
+    {
+        $normalizar = fn (string $texto) => Str::of($texto)->ascii()->lower()->squish()->explode(' ')->filter()->values();
+        $digitadas = $normalizar($nome);
+        if ($digitadas->isEmpty() || mb_strlen($digitadas[0]) < 2) {
+            return collect();
+        }
+
+        // Primeiro filtro no banco: até 3 letras do começo da primeira palavra, paradas antes do
+        // primeiro acento (nem todo banco ignora acento no LIKE: "antonio" precisa achar "Antônio").
+        // A comparação completa, sem acentos, é feita logo abaixo.
+        preg_match('/^[A-Za-z0-9]{0,3}/', (string) Str::of($nome)->squish()->before(' '), $inicio);
+        $prefixo = $inicio[0];
+
+        return static::comuns()
+            ->when($prefixo !== '', fn (Builder $q) => $q->where(fn (Builder $q) => $q
+                ->where('nome', 'like', "{$prefixo}%")
+                ->orWhere('nome', 'like', "% {$prefixo}%")))
+            ->orderBy('nome')
+            ->limit(200)
+            ->get(['id', 'nome', 'cpf_cnpj', 'consumidor_final'])
+            ->filter(function (Cliente $cliente) use ($normalizar, $digitadas) {
+                $palavras = $normalizar($cliente->nome);
+
+                return $digitadas->every(fn ($d) => $palavras->contains(fn ($p) => str_starts_with($p, $d)));
+            })
+            ->take($limite)
+            ->values();
     }
 }
