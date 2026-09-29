@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Editar Fornecedor')
+@section('title', 'Editar fornecedor')
 
 @section('content')
-    <h1 class="h3 mb-3">Editar Fornecedor</h1>
+    @include('partials.cabeca-form', ['lista' => 'Fornecedores', 'rota' => 'fornecedores.index', 'titulo' => 'Editar fornecedor'])
 
     {{-- Formulário --}}
-    <div class="card">
+    <div class="card cartao-form">
         <div class="card-body">
             <form action="{{ route('fornecedores.update', $fornecedor) }}" method="POST">
                 @csrf
@@ -14,9 +14,11 @@
 
                 @include('fornecedores._form')
 
-                {{-- Botões --}}
-                <button type="submit" class="btn btn-success">Atualizar</button>
-                <a href="{{ route('fornecedores.index') }}" class="btn btn-secondary">Cancelar</a>
+                {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
+                <div class="pe-form">
+                    <a href="{{ route('fornecedores.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Atualizar</button>
+                </div>
             </form>
         </div>
     </div>

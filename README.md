@@ -21,6 +21,10 @@ O visual (`public/css/tema.css`) é escuro, com as cores do Brasil: verde-mata, 
 - **Medidor de estoque**: barra de nível com a marca do mínimo e a situação escrita (OK, Baixo, Esgotado).
 - **Busca rápida**: aperte **Ctrl + K** (ou **/**) e digite para ir a qualquer tela, criar algo ou buscar produtos, clientes e vendas.
 - Cores dos gráficos e medidores validadas para contraste e daltonismo (skill dataviz).
+- **Um amarelo por tela**: o amarelo-sol cheio fica só na ação principal; filtros, Tabela/Vitrine e a coluna ordenada escolhidos aparecem em verde-mata.
+- **Formulários** com trilha (ex.: Produtos › Novo produto), largura de leitura e rodapé com Cancelar e a ação principal.
+- **Acessibilidade**: anel amarelo no foco do teclado (Tab), contrastes de texto no padrão WCAG AA (mínimo 4,5:1)
+  e animações desligadas para quem ativou "reduzir movimento" no sistema.
 
 Fontes: Outfit e Inter (licença SIL Open Font, em `public/vendor/fonts`).
 

@@ -40,7 +40,7 @@
 
         <div class="card kpi">
             <div class="rotulo">Ticket médio <span class="icone sol">@include('partials.icone', ['nome' => 'dinheiro'])</span></div>
-            <div class="valor">R$ {{ number_format($mes['ticket_medio'], 2, ',', '.') }}</div>
+            <div class="valor"><small>R$</small>{{ number_format($mes['ticket_medio'], 2, ',', '.') }}</div>
             <div class="rodape">por venda</div>
         </div>
 
@@ -77,10 +77,7 @@
             <div class="card-body p-0">
                 @forelse ($estoqueBaixo as $produto)
                     <div class="estoque-item">
-                        <div class="text-truncate">
-                            <div class="nome text-truncate">{{ $produto->nome }}</div>
-                            <small>{{ $produto->categoria->nome ?? '-' }}</small>
-                        </div>
+                        <div class="nome text-truncate">{{ $produto->nome }} <small>{{ $produto->categoria->nome ?? '-' }}</small></div>
                         @include('partials.medidor', ['produto' => $produto])
                         <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="btn btn-sm btn-outline-primary">Repor</a>
                     </div>

@@ -36,6 +36,11 @@
     --ceu: #4394e8;          /* azul-céu: links e informação */
     --atencao: #c2803b;
     --perigo: #e56060;
+    --perigo-forte: #b83b43; /* fundo vermelho com texto branco (contraste 5,6:1) */
+    --selecionado: rgba(45, 171, 106, .2);        /* filtro/visão/coluna escolhidos: verde-mata */
+    --selecionado-borda: rgba(79, 208, 140, .45);
+    --selecionado-texto: #c3f1d8;
+    --placeholder: #869a90;  /* texto de exemplo nos campos (5:1 sobre o campo) */
     --contexto: #6b7076;     /* barras de contexto nos gráficos */
 
     --fonte-titulo: 'Outfit', system-ui, sans-serif;
@@ -155,7 +160,7 @@ h1, h2, h3, .h1, .h2, .h3, .h4, .h5 { font-family: var(--fonte-titulo); font-wei
     min-width: 20px;
     padding: 1px 7px;
     border-radius: 99px;
-    background: var(--perigo);
+    background: var(--perigo-forte);
     color: #fff;
     font-size: .7rem;
     font-weight: 600;
@@ -420,7 +425,7 @@ kbd {
     box-shadow: 0 0 0 3px rgba(245, 197, 24, .18);
     color: var(--texto);
 }
-.form-control::placeholder { color: #6f8279; }
+.form-control::placeholder { color: var(--placeholder); }
 .form-control:disabled { background-color: rgba(255, 255, 255, .03); color: var(--texto-2); }
 .form-check-input { background-color: var(--cartao-2); border-color: rgba(255, 255, 255, .2); }
 .form-check-input:checked { background-color: var(--sol); border-color: var(--sol); }
@@ -440,8 +445,9 @@ kbd {
     box-shadow: 0 8px 18px -10px rgba(245, 197, 24, .8);
 }
 .btn-success {
-    --bs-btn-bg: var(--verde); --bs-btn-border-color: var(--verde); --bs-btn-color: #fff;
-    --bs-btn-hover-bg: #259058; --bs-btn-hover-border-color: #259058; --bs-btn-hover-color: #fff;
+    /* Texto escuro: branco sobre este verde tinha só 2,9:1 de contraste */
+    --bs-btn-bg: var(--verde); --bs-btn-border-color: var(--verde); --bs-btn-color: var(--fundo);
+    --bs-btn-hover-bg: #3cc47c; --bs-btn-hover-border-color: #3cc47c; --bs-btn-hover-color: var(--fundo);
 }
 .btn-danger {
     --bs-btn-bg: #c94b4b; --bs-btn-border-color: #c94b4b;
@@ -502,7 +508,7 @@ kbd {
     --bs-pagination-active-color: var(--sol-texto);
     --bs-pagination-active-border-color: var(--sol);
     --bs-pagination-disabled-bg: var(--cartao);
-    --bs-pagination-disabled-color: #5f7168;
+    --bs-pagination-disabled-color: #7f9188;
     --bs-pagination-disabled-border-color: var(--borda);
 }
 
@@ -560,7 +566,12 @@ kbd {
 .ver-tabela table { margin-top: .5rem; }
 
 /* Lista de produtos com medidor de estoque */
-.estoque-item { display: flex; align-items: center; gap: .9rem; padding: .7rem 1.25rem; border-bottom: 1px solid var(--borda); }
+/* Grade: nome em cima, medidor embaixo (largura toda), botão Repor à direita das duas linhas.
+   Assim o nome do produto não é cortado. */
+.estoque-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: .9rem; row-gap: .45rem; align-items: center; padding: .8rem 1.25rem; border-bottom: 1px solid var(--borda); }
+.estoque-item .medidor { grid-column: 1; width: 100%; margin-left: 0; }
+.estoque-item > .btn { grid-column: 2; grid-row: 1 / span 2; }
+.estoque-item .nome small { margin-left: .4rem; font-weight: 400; font-size: .78rem; }
 .estoque-item:last-child { border-bottom: 0; }
 .estoque-item .nome { font-weight: 600; }
 .estoque-item small { color: var(--texto-2); }
@@ -637,7 +648,7 @@ kbd {
     font-family: var(--fonte-titulo);
     font-size: 1.25rem;
 }
-.br-caixa input::placeholder { color: #6f8279; }
+.br-caixa input::placeholder { color: var(--placeholder); }
 .br-lista { list-style: none; margin: 0; padding: .4rem; max-height: 50vh; overflow: auto; }
 .br-lista .br-grupo { padding: .7rem .8rem .3rem; color: var(--texto-2); font-size: .68rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; }
 .br-lista a { display: flex; align-items: center; gap: .75rem; padding: .6rem .8rem; border-radius: 10px; color: var(--texto); text-decoration: none; }
@@ -721,8 +732,9 @@ a:hover { text-decoration: underline; }
 .chip:hover { border-color: rgba(255, 255, 255, .2); color: var(--texto); text-decoration: none; transform: translateY(-1px); }
 .chip i { width: 8px; height: 8px; border-radius: 50%; }
 .chip b { padding: 0 .45rem; border-radius: 99px; background: rgba(255, 255, 255, .07); color: var(--texto); font-size: .75rem; font-weight: 600; }
-.chip.ativo { background: var(--sol); border-color: var(--sol); color: var(--sol-texto); }
-.chip.ativo b { background: rgba(0, 0, 0, .12); color: var(--sol-texto); }
+/* Filtro escolhido em verde-mata: o amarelo fica só para a ação principal da tela */
+.chip.ativo { background: var(--selecionado); border-color: var(--selecionado-borda); color: var(--selecionado-texto); }
+.chip.ativo b { background: rgba(79, 208, 140, .2); color: #e8fff1; }
 .chip.alerta { border-color: rgba(229, 96, 96, .4); color: #ff9a9a; }
 .chip.alerta.ativo { background: #c94b4b; border-color: #c94b4b; color: #fff; }
 .chip.alerta.ativo b { color: #fff; }
@@ -750,7 +762,7 @@ a:hover { text-decoration: underline; }
 .lista .ordenavel a { color: inherit; }
 .lista .ordenavel a:hover { color: var(--texto); text-decoration: none; }
 .lista .ordenavel .seta { margin-left: .15rem; opacity: .45; }
-.lista .ordenavel.ativa { color: var(--sol); }
+.lista .ordenavel.ativa { color: var(--selecionado-texto); font-weight: 600; }
 .lista .ordenavel.ativa .seta { opacity: 1; }
 
 .lista > tbody > tr > td {
@@ -840,8 +852,8 @@ a:hover { text-decoration: underline; }
 .valor-lista.riscado { color: var(--texto-2); text-decoration: line-through; }
 .lista .medidor { margin-left: 0; }
 
-/* Ações da linha: aparecem ao passar o mouse (em telas de toque ficam sempre visíveis) */
-.acoes-linha { display: flex; justify-content: flex-end; gap: .35rem; opacity: 0; transition: opacity .15s; }
+/* Ações da linha: sempre visíveis (mais fracas) para quem usa teclado ou toque; acendem ao passar o mouse */
+.acoes-linha { display: flex; justify-content: flex-end; gap: .35rem; opacity: .6; transition: opacity .15s; }
 .linha:hover .acoes-linha, .linha.aberta .acoes-linha, .acoes-linha:focus-within { opacity: 1; }
 @media (hover: none) { .acoes-linha { opacity: 1; } }
 .botao-icone {
@@ -868,7 +880,7 @@ a:hover { text-decoration: underline; }
 .alterna-visao { display: inline-flex; padding: 3px; border: 1px solid var(--borda); border-radius: 11px; background: var(--cartao); }
 .alterna-visao a { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .8rem; border-radius: 8px; color: var(--texto-2); font-size: .85rem; font-weight: 600; }
 .alterna-visao a:hover { color: var(--texto); text-decoration: none; }
-.alterna-visao a.ativo { background: var(--sol); color: var(--sol-texto); }
+.alterna-visao a.ativo { background: var(--selecionado); color: var(--selecionado-texto); box-shadow: inset 0 0 0 1px var(--selecionado-borda); }
 .alterna-visao svg { width: 16px; height: 16px; }
 
 /* Vitrine de produtos (cartões) */
@@ -901,4 +913,57 @@ a:hover { text-decoration: underline; }
     .resumo-lista { grid-template-columns: 1fr 1fr; }
     .detalhe .grade-detalhe { grid-template-columns: 1fr; }
     [data-lista-conteudo] { overflow-x: auto; }
+}
+
+/* =====================================================================
+   REVISÃO VISUAL E ACESSIBILIDADE
+   - Um amarelo cheio por tela (a ação principal); "selecionado" em verde-mata.
+   - Formulários com largura de leitura, trilha e rodapé de botões.
+   - Foco visível no teclado e respeito a "reduzir movimento".
+   ===================================================================== */
+
+/* "R$" pequeno igual em todos os indicadores do Dashboard */
+.kpi .valor small { font-size: 1rem; font-weight: 600; opacity: .8; margin-right: .2rem; }
+
+/* Trilha "Produtos › Novo produto" acima do título dos formulários */
+.trilha { display: flex; align-items: center; gap: .4rem; margin-bottom: .15rem; color: var(--texto-2); font-size: .82rem; }
+.trilha a { color: var(--texto-2); }
+.trilha a:hover { color: var(--texto); }
+
+/* Cartão do formulário: largura boa de ler e preencher (os campos não esticam pela tela toda) */
+.cartao-form { max-width: 820px; }
+.form-label { color: #b9cbc1; }
+
+/* Rodapé dos botões: Cancelar à esquerda da ação principal, tudo alinhado à direita */
+.pe-form { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; margin-top: 1rem; }
+/* Dentro do cartão, o rodapé encosta nas bordas, com uma linha em cima e fundo um pouco mais escuro */
+.cartao-form .pe-form {
+    margin: 1.25rem calc(-1 * var(--bs-card-spacer-x, 1rem)) calc(-1 * var(--bs-card-spacer-y, 1rem));
+    padding: .9rem var(--bs-card-spacer-x, 1rem);
+    border-top: 1px solid var(--borda);
+    border-radius: 0 0 var(--raio) var(--raio);
+    background: rgba(0, 0, 0, .12);
+}
+
+/* Foco visível para quem navega pelo teclado (Tab): anel amarelo-sol.
+   :focus-visible só aparece no teclado, não ao clicar com o mouse. */
+:focus-visible { outline: 2px solid var(--sol); outline-offset: 2px; }
+.btn:focus-visible, .form-control:focus-visible, .form-select:focus-visible { outline: 2px solid var(--sol); outline-offset: 2px; box-shadow: none; }
+.menu-item:focus-visible, .secao-titulo:focus-visible, .recolher:focus-visible, .usuario .sair:focus-visible { outline-offset: -2px; }
+/* Linha da lista com foco: mesmo destaque do mouse (fundo + barrinha) e o anel na linha toda */
+.lista > tbody > tr.linha:focus-visible { outline: 2px solid var(--sol); outline-offset: 2px; border-radius: 14px; }
+.lista > tbody > tr.linha:focus-visible > td { background: #1a2b24; }
+.lista > tbody > tr.linha:focus-visible > td:first-child::before { opacity: 1; }
+.lista > tbody > tr.linha:focus-within .acoes-linha { opacity: 1; }
+
+/* Quem pediu ao sistema para reduzir movimento não vê animações nem deslocamentos */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .lista > tbody > tr.linha:hover, .chip:hover, .cartao-produto:hover, .menu-item.filho:hover { transform: none; }
+}
+
+@media (max-width: 991.98px) {
+    /* O último indicador ("Para repor") ocupa a linha toda em vez de ficar sozinho pela metade */
+    .kpis > .kpi:last-child { grid-column: 1 / -1; }
+    .cartao-form { max-width: none; }
 }

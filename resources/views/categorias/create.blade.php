@@ -1,21 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Nova Categoria')
+@section('title', 'Nova categoria')
 
 @section('content')
-    <h1 class="h3 mb-3">Nova Categoria</h1>
+    @include('partials.cabeca-form', ['lista' => 'Categorias', 'rota' => 'categorias.index', 'titulo' => 'Nova categoria'])
 
     {{-- Formulário --}}
-    <div class="card">
+    <div class="card cartao-form">
         <div class="card-body">
             <form action="{{ route('categorias.store') }}" method="POST">
                 @csrf
 
                 @include('categorias._form')
 
-                {{-- Botões --}}
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <a href="{{ route('categorias.index') }}" class="btn btn-secondary">Cancelar</a>
+                {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
+                <div class="pe-form">
+                    <a href="{{ route('categorias.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
             </form>
         </div>
     </div>

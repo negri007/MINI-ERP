@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Movimentar Estoque')
+@section('title', 'Movimentar estoque')
 
 @section('content')
-    <h1 class="h3 mb-3">Movimentar Estoque</h1>
+    @include('partials.cabeca-form', ['lista' => 'Estoque', 'rota' => 'estoque.index', 'titulo' => 'Movimentar estoque'])
 
-    <div class="card">
+    <div class="card cartao-form">
         <div class="card-body">
             <form action="{{ route('estoque.store') }}" method="POST">
                 @csrf
@@ -62,8 +62,11 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="btn btn-success">Registrar</button>
-                <a href="{{ route('estoque.index') }}" class="btn btn-secondary">Cancelar</a>
+                {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
+                <div class="pe-form">
+                    <a href="{{ route('estoque.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                </div>
             </form>
         </div>
     </div>
