@@ -14,6 +14,15 @@
     {{-- Aplica o "menu recolhido" antes de desenhar a página (evita o menu piscar) --}}
     <script>
         try { if (JSON.parse(localStorage.getItem('menu-compacto'))) document.documentElement.classList.add('menu-compacto'); } catch (e) {}
+        // "Primeiros passos" ocultado: esconde antes de desenhar (a não ser que tenha pedido para mostrar)
+        try {
+            if (JSON.parse(localStorage.getItem('primeiros-passos-oculto')) && !location.search.includes('passos=1')) {
+                const estilo = document.createElement('style');
+                estilo.id = 'passos-oculto-css';
+                estilo.textContent = '#primeirosPassos { display: none; }';
+                document.head.appendChild(estilo);
+            }
+        } catch (e) {}
         // Esconde já as dicas que a pessoa marcou como "Entendi" (evita a dica aparecer e sumir)
         try {
             const ocultas = (JSON.parse(localStorage.getItem('dicas-ocultas')) || []).filter((k) => /^[a-z0-9-]+$/.test(k));
@@ -61,6 +70,7 @@
             ['Consultar', 'Vendas canceladas', route('vendas.index', ['status' => 'cancelada']), '×'],
             ['Consultar', 'Relatório do mês', route('relatorios.vendas'), '%'],
             ['Consultar', 'Exportar vendas do mês (Excel)', route('relatorios.vendas.exportar'), '↓'],
+            ['Ajuda', 'Mostrar primeiros passos', route('dashboard', ['passos' => 1]), '✓'],
         ];
 
         // Telas onde o Balcão rápido oferece "buscar o texto digitado"

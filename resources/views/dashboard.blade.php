@@ -16,6 +16,10 @@
     </div>
     @include('partials.dica', ['chave' => 'dashboard', 'texto' => 'Resumo do mês. Clique em "Para repor" para ver o que está acabando.'])
 
+    @if ($mostrarPassos)
+        @include('partials.primeiros-passos', ['passos' => $passos])
+    @endif
+
     {{-- Indicadores do mês --}}
     <section class="kpis">
         <div class="card kpi kpi-principal">

@@ -314,3 +314,27 @@ document.querySelectorAll('[data-ajuda]').forEach((botao) => {
     botao.addEventListener('click', () => alternar(texto.hidden));
     botao.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !texto.hidden) { e.stopPropagation(); alternar(false); } });
 });
+
+// ---------- Primeiros passos (Dashboard) ----------
+// "Ocultar" guarda a escolha no navegador; o comando "Mostrar primeiros passos"
+// da busca rápida abre o Dashboard com ?passos=1, que desfaz a escolha.
+const passos = document.getElementById('primeirosPassos');
+if (passos) {
+    const endereco = new URL(location.href);
+    if (endereco.searchParams.has('passos')) {
+        guardado.gravar('primeiros-passos-oculto', false);
+        endereco.searchParams.delete('passos');
+        history.replaceState(null, '', endereco); // tira o ?passos=1 da barra de endereço
+    }
+    passos.hidden = guardado.ler('primeiros-passos-oculto', false);
+    document.getElementById('passos-oculto-css')?.remove();
+
+    passos.querySelector('[data-ocultar-passos]').addEventListener('click', () => {
+        guardado.gravar('primeiros-passos-oculto', true);
+        passos.hidden = true;
+        // o foco vai para o título da página, para quem usa teclado não ficar perdido
+        const titulo = document.querySelector('.conteudo h1');
+        titulo.tabIndex = -1;
+        titulo.focus();
+    });
+}

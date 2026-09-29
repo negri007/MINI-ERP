@@ -1052,3 +1052,23 @@ a:hover { text-decoration: underline; }
 .lista-vazia h2 { margin-bottom: .35rem; color: var(--texto); }
 .lista-vazia p { max-width: 46ch; margin: 0 auto 1rem; }
 .acoes-vazio { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+
+/* =====================================================================
+   DASHBOARD: cartão "Primeiros passos"
+   ===================================================================== */
+.passos { margin-bottom: 1.1rem; border-color: rgba(67, 148, 232, .3); }
+.passos-contagem { margin: 0 0 .5rem; color: var(--texto-2); font-size: .85rem; font-weight: 500; }
+.passos-barra { height: 8px; margin-bottom: 1rem; border-radius: 99px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.passos-barra span { display: block; height: 100%; border-radius: 99px; background: var(--verde); }
+.passos-lista { margin: 0 0 .75rem; padding: 0; list-style: none; }
+.passos-lista li { display: flex; align-items: center; gap: .75rem; min-height: 48px; padding: .4rem 0; border-top: 1px solid var(--borda); }
+.passos-lista li:first-child { border-top: 0; }
+.passos-marca {
+    display: inline-grid; place-items: center; flex-shrink: 0;
+    width: 22px; height: 22px; border: 2px solid rgba(255, 255, 255, .25); border-radius: 50%;
+    color: var(--fundo); font-size: .75rem; font-weight: 700;
+}
+.passos-lista li.feito .passos-marca { border-color: var(--verde); background: var(--verde); }
+.passos-lista li.feito .passos-texto { color: var(--texto-2); }
+.passos-texto { flex: 1; }
+.passos-feito { color: var(--verde-texto); font-size: .82rem; font-weight: 600; }

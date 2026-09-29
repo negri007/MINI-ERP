@@ -5,6 +5,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
+use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\Venda;
 use Illuminate\Support\Carbon;
@@ -66,6 +68,16 @@ class DashboardController extends Controller
         // Últimas vendas
         $ultimasVendas = Venda::with('cliente')->withCount('itens')->latest('id')->limit(5)->get();
 
-        return view('dashboard', compact('mes', 'estoqueBaixo', 'qtdParaRepor', 'grafico', 'ultimasVendas'));
+        // Primeiros passos: cada um se marca sozinho pelo banco (o Consumidor final não conta como cliente)
+        $passos = [
+            ['chave' => 'categoria', 'titulo' => 'Cadastrar uma categoria', 'feito' => Categoria::exists(), 'url' => route('categorias.create'), 'acao' => 'Cadastrar categoria'],
+            ['chave' => 'produto', 'titulo' => 'Cadastrar um produto', 'feito' => Produto::exists(), 'url' => route('produtos.create'), 'acao' => 'Cadastrar produto'],
+            ['chave' => 'cliente', 'titulo' => 'Cadastrar um cliente', 'feito' => Cliente::comuns()->exists(), 'url' => route('clientes.create'), 'acao' => 'Cadastrar cliente'],
+            ['chave' => 'venda', 'titulo' => 'Registrar a primeira venda', 'feito' => Venda::exists(), 'url' => route('vendas.create'), 'acao' => 'Registrar venda'],
+        ];
+        // Com tudo feito o cartão some; o comando "Mostrar primeiros passos" (?passos=1) mostra mesmo assim
+        $mostrarPassos = collect($passos)->contains('feito', false) || request()->boolean('passos');
+
+        return view('dashboard', compact('mes', 'estoqueBaixo', 'qtdParaRepor', 'grafico', 'ultimasVendas', 'passos', 'mostrarPassos'));
     }
 }
