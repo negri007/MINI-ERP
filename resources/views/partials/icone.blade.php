@@ -19,6 +19,11 @@
         @case('atividade')<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>@break
         @case('seta-baixo')<path d="m6 9 6 6 6-6"/>@break
         @case('recolher')<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M16 15l-3-3 3-3"/>@break
+        @case('olho')<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>@break
+        @case('lapis')<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>@break
+        @case('lixo')<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>@break
+        @case('lista')<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>@break
+        @case('grade')<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>@break
         @case('impressora')<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/>@break
     @endswitch
 </svg>

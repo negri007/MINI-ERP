@@ -34,13 +34,15 @@ if (modalEl) {
     const modal = new bootstrap.Modal(modalEl);
     let formularioPendente = null;
 
-    document.querySelectorAll('form[data-confirmar]').forEach((form) => {
-        form.addEventListener('submit', (evento) => {
-            evento.preventDefault();
-            formularioPendente = form;
-            document.getElementById('modalConfirmarTexto').textContent = form.dataset.confirmar;
-            modal.show();
-        });
+    // "Delegação": um único ouvinte no documento, que vale também para as
+    // listas recarregadas pela busca instantânea
+    document.addEventListener('submit', (evento) => {
+        const form = evento.target.closest('form[data-confirmar]');
+        if (!form) return;
+        evento.preventDefault();
+        formularioPendente = form;
+        document.getElementById('modalConfirmarTexto').textContent = form.dataset.confirmar;
+        modal.show();
     });
 
     document.getElementById('modalConfirmarBotao').addEventListener('click', () => {
@@ -197,3 +199,66 @@ if (recolherMenu) {
         guardado.gravar('menu-compacto', compacto);
     });
 }
+
+
+// ---------- Listas: busca instantânea, filtros e ordenação sem recarregar ----------
+// A página busca a mesma URL com os novos filtros e troca só os pedaços marcados
+// com data-atualiza="..." (a lista, as pílulas, o resumo). O campo de busca fica
+// intacto, então o cursor não sai do lugar enquanto você digita.
+async function carregarLista(url) {
+    const conteudo = document.querySelector('[data-lista-conteudo]');
+    conteudo?.classList.add('carregando');
+    try {
+        const resposta = await fetch(url, { headers: { 'X-Requested-With': 'fetch' } });
+        const nova = new DOMParser().parseFromString(await resposta.text(), 'text/html');
+        document.querySelectorAll('[data-atualiza]').forEach((pedaco) => {
+            const substituto = nova.querySelector(`[data-atualiza="${pedaco.dataset.atualiza}"]`);
+            if (substituto) pedaco.replaceWith(substituto);
+        });
+        history.replaceState(null, '', url);
+    } catch {
+        window.location = url; // se algo der errado, carrega a página normalmente
+    } finally {
+        document.querySelector('[data-lista-conteudo]')?.classList.remove('carregando');
+    }
+}
+
+// Digitar na busca: espera 300 ms sem digitar e então filtra
+document.querySelectorAll('form[data-busca-viva]').forEach((form) => {
+    let espera;
+    const filtrar = () => {
+        const params = new URLSearchParams(new FormData(form));
+        if (!params.get('busca')) params.delete('busca');
+        carregarLista(`${location.pathname}?${params}`);
+    };
+    form.addEventListener('input', () => { clearTimeout(espera); espera = setTimeout(filtrar, 300); });
+    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(espera); filtrar(); });
+});
+
+// Pílulas de filtro, cabeçalhos que ordenam e paginação: carregam só a lista
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[data-link-lista], [data-lista-conteudo] .pagination a');
+    if (!link || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    carregarLista(link.href);
+});
+
+// ---------- Linhas que abrem ao clicar (detalhes logo abaixo) ----------
+function alternarLinha(linha) {
+    const detalhe = linha.nextElementSibling;
+    if (!detalhe?.classList.contains('detalhe')) return;
+    const abrir = !linha.classList.contains('aberta');
+    linha.classList.toggle('aberta', abrir);
+    detalhe.classList.toggle('aberto', abrir);
+    linha.setAttribute('aria-expanded', String(abrir));
+}
+document.addEventListener('click', (e) => {
+    const linha = e.target.closest('tr[data-expande]');
+    // Cliques em botões e links da linha não abrem os detalhes
+    if (!linha || e.target.closest('a, button, form, input, select, label')) return;
+    alternarLinha(linha);
+});
+document.addEventListener('keydown', (e) => {
+    const linha = e.target.closest?.('tr[data-expande]');
+    if (linha && (e.key === 'Enter' || e.key === ' ') && e.target === linha) { e.preventDefault(); alternarLinha(linha); }
+});

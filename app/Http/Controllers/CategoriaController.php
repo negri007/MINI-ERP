@@ -12,16 +12,34 @@ use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    // Lista as categorias (com busca e paginação)
+    // Lista as categorias: busca, filtro (com/sem produtos), ordenação e paginação
     public function index(Request $request)
     {
-        $categorias = Categoria::withCount('produtos')
-            ->busca($request->input('busca'))
-            ->orderBy('nome')
-            ->paginate(10)
-            ->withQueryString(); // mantém a busca ao trocar de página
+        $busca = $request->input('busca');
+        $filtro = $request->input('filtro');
 
-        return view('categorias.index', compact('categorias'));
+        $query = Categoria::withCount('produtos')
+            // Os 6 primeiros produtos de cada categoria aparecem ao abrir a linha
+            ->with(['produtos' => fn ($q) => $q->orderBy('nome')->limit(6)])
+            ->busca($busca)
+            ->when($filtro === 'com', fn ($q) => $q->has('produtos'))
+            ->when($filtro === 'vazias', fn ($q) => $q->doesntHave('produtos'));
+
+        [$ordem, $dir] = $this->ordenar($query, $request, [
+            'nome' => 'nome',
+            'produtos' => 'produtos_count',
+        ], 'nome');
+
+        $categorias = $query->paginate(10)->withQueryString(); // mantém filtros ao trocar de página
+
+        // Contagens das pílulas de filtro (respeitando a busca)
+        $contagem = [
+            'todas' => Categoria::busca($busca)->count(),
+            'com' => Categoria::busca($busca)->has('produtos')->count(),
+            'vazias' => Categoria::busca($busca)->doesntHave('produtos')->count(),
+        ];
+
+        return view('categorias.index', compact('categorias', 'contagem', 'filtro', 'ordem', 'dir'));
     }
 
     // Exibe o formulário de cadastro

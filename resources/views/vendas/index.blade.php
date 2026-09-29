@@ -3,86 +3,128 @@
 @section('title', 'Vendas')
 
 @section('content')
-    {{-- Cabeçalho com botão de nova venda --}}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Vendas</h1>
-        <a href="{{ route('vendas.create') }}" class="btn btn-primary">Nova Venda</a>
+    {{-- Cabeçalho: título e quantidade (o botão "Nova venda" já fica no topo da página) --}}
+    <div class="cabeca-lista">
+        <h1 class="h3">Vendas <span class="qtd" data-atualiza="qtd">{{ $vendas->total() }} {{ $vendas->total() === 1 ? 'venda' : 'vendas' }} · clique numa venda para ver os itens</span></h1>
     </div>
 
-    {{-- Filtros: cliente, situação e período --}}
-    <form method="GET" class="row g-2 mb-3 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label small mb-0">Cliente</label>
-            <input type="search" name="busca" value="{{ request('busca') }}" class="form-control" placeholder="Nome ou CPF/CNPJ">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-0">Situação</label>
-            <select name="status" class="form-select">
-                <option value="">Todas</option>
-                <option value="concluida" @selected(request('status') === 'concluida')>Concluída</option>
-                <option value="cancelada" @selected(request('status') === 'cancelada')>Cancelada</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-0">De</label>
-            <input type="date" name="de" value="{{ request('de') }}" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small mb-0">Até</label>
-            <input type="date" name="ate" value="{{ request('ate') }}" class="form-control">
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-primary">Filtrar</button>
-            @if (request()->hasAny(['busca', 'status', 'de', 'ate']))
-                <a href="{{ route('vendas.index') }}" class="btn btn-outline-secondary">Limpar</a>
+    {{-- Resumo do que está filtrado (muda junto com os filtros) --}}
+    <div class="resumo-lista" data-atualiza="resumo">
+        <div class="mini"><small>Faturamento no filtro</small><b>R$ {{ number_format($resumo['faturamento'], 2, ',', '.') }}</b></div>
+        <div class="mini"><small>Vendas concluídas</small><b>{{ $resumo['concluidas'] }}</b></div>
+        <div class="mini"><small>Canceladas</small><b>{{ $resumo['canceladas'] }}</b></div>
+        <div class="mini"><small>Ticket médio</small><b>R$ {{ number_format($resumo['ticket_medio'], 2, ',', '.') }}</b></div>
+    </div>
+
+    {{-- Filtros: período e situação em pílulas + busca instantânea --}}
+    <div class="filtros">
+        <span data-atualiza="chips" style="display: contents">
+            @include('partials.chips', ['chips' => [
+                ['Todas', request()->fullUrlWithQuery(['periodo' => null, 'page' => null]), $contagem['todos'], ! $periodo, '', null],
+                ['Hoje', request()->fullUrlWithQuery(['periodo' => 'hoje', 'page' => null]), $contagem['hoje'], $periodo === 'hoje', '', null],
+                ['7 dias', request()->fullUrlWithQuery(['periodo' => '7dias', 'page' => null]), $contagem['7dias'], $periodo === '7dias', '', null],
+                ['Este mês', request()->fullUrlWithQuery(['periodo' => 'mes', 'page' => null]), $contagem['mes'], $periodo === 'mes', '', null],
+            ]])
+            <span class="chips-separador"></span>
+            @include('partials.chips', ['chips' => [
+                ['✓ Concluídas', request()->fullUrlWithQuery(['status' => $status === 'concluida' ? null : 'concluida', 'page' => null]), $contagem['concluida'], $status === 'concluida', '', null],
+                ['× Canceladas', request()->fullUrlWithQuery(['status' => $status === 'cancelada' ? null : 'cancelada', 'page' => null]), $contagem['cancelada'], $status === 'cancelada', 'alerta', null],
+            ]])
+        </span>
+        @include('partials.busca', ['placeholder' => 'Cliente, CPF ou nº da venda...'])
+    </div>
+
+    {{-- Lista (esta parte é trocada pela busca instantânea) --}}
+    <div data-atualiza="conteudo">
+        <div data-lista-conteudo>
+            @if ($vendas->isEmpty())
+                <div class="lista-vazia">Nenhuma venda encontrada.</div>
+            @else
+                <table class="lista">
+                    <thead>
+                        <tr>
+                            @include('partials.th-ordem', ['campo' => 'numero', 'titulo' => 'Venda'])
+                            @include('partials.th-ordem', ['campo' => 'cliente', 'titulo' => 'Cliente'])
+                            @include('partials.th-ordem', ['campo' => 'data', 'titulo' => 'Data'])
+                            <th class="text-center">Itens</th>
+                            <th>Situação</th>
+                            @include('partials.th-ordem', ['campo' => 'total', 'titulo' => 'Total', 'classe' => 'text-end'])
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($vendas as $venda)
+                            {{-- Linha principal: clique para abrir os itens --}}
+                            <tr class="linha" data-expande tabindex="0" aria-expanded="false">
+                                <td class="text-nowrap"><span class="seta-abrir">›</span><span class="valor-lista">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</span></td>
+                                <td>
+                                    <div class="item-lista">
+                                        <span class="avatar-lista redondo">{{ \App\Support\Texto::iniciais($venda->cliente->nome) }}</span>
+                                        <div class="nome">{{ $venda->cliente->nome }}</div>
+                                    </div>
+                                </td>
+                                <td>{{ $venda->data->format('d/m/Y') }}</td>
+                                <td class="text-center">{{ $venda->itens_count }}</td>
+                                <td>
+                                    @if ($venda->estaCancelada())
+                                        <span class="badge bg-danger">Cancelada</span>
+                                    @else
+                                        <span class="badge bg-success">Concluída</span>
+                                    @endif
+                                </td>
+                                <td class="text-end valor-lista {{ $venda->estaCancelada() ? 'riscado' : '' }}">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
+                                <td>
+                                    {{-- Ações: aparecem ao passar o mouse --}}
+                                    <div class="acoes-linha">
+                                        <a href="{{ route('vendas.show', $venda) }}" class="botao-icone amarelo" title="Abrir venda">@include('partials.icone', ['nome' => 'olho'])</a>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {{-- Detalhes: itens, cliente e ações --}}
+                            <tr class="detalhe">
+                                <td colspan="7">
+                                    <div class="grade-detalhe">
+                                        <div class="bloco">
+                                            <h6>Itens da venda</h6>
+                                            <div class="itens-venda">
+                                                @foreach ($venda->itens as $item)
+                                                    <div><span>{{ $item->quantidade }}× {{ $item->produto->nome }}</span><b>R$ {{ number_format($item->subtotal, 2, ',', '.') }}</b></div>
+                                                @endforeach
+                                            </div>
+                                            @if ($venda->observacao)
+                                                <div class="text-muted small mt-2">Obs.: {{ $venda->observacao }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="bloco">
+                                            <h6>Cliente</h6>
+                                            <div>{{ $venda->cliente->nome }}</div>
+                                            <div class="text-muted small">{{ $venda->cliente->cpf_cnpj ?? 'Sem CPF/CNPJ' }}{{ $venda->cliente->telefone ? ' · '.$venda->cliente->telefone : '' }}</div>
+                                            <div class="text-muted small">{{ $venda->cliente->compras_no_mes }} {{ $venda->cliente->compras_no_mes === 1 ? 'compra' : 'compras' }} este mês</div>
+                                        </div>
+                                        <div class="bloco">
+                                            <h6>Ações</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <a href="{{ route('vendas.show', $venda) }}" class="btn btn-sm btn-outline-primary">Abrir venda</a>
+                                                @unless ($venda->estaCancelada())
+                                                    <form action="{{ route('vendas.cancelar', $venda) }}" method="POST"
+                                                          data-confirmar="Cancelar a venda #{{ $venda->id }}? Os produtos voltarão para o estoque.">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                                                    </form>
+                                                @endunless
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             @endif
-        </div>
-    </form>
 
-    {{-- Tabela de vendas --}}
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0 align-middle">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Data</th>
-                        <th>Cliente</th>
-                        <th class="text-center">Itens</th>
-                        <th class="text-end">Total</th>
-                        <th class="text-center">Situação</th>
-                        <th class="text-end">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($vendas as $venda)
-                        <tr>
-                            <td>{{ $venda->id }}</td>
-                            <td>{{ $venda->data->format('d/m/Y') }}</td>
-                            <td>{{ $venda->cliente->nome }}</td>
-                            <td class="text-center">{{ $venda->itens_count }}</td>
-                            <td class="text-end text-nowrap">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
-                            <td class="text-center">
-                                @if ($venda->estaCancelada())
-                                    <span class="badge bg-danger">Cancelada</span>
-                                @else
-                                    <span class="badge bg-success">Concluída</span>
-                                @endif
-                            </td>
-                            <td class="text-end">
-                                <a href="{{ route('vendas.show', $venda) }}" class="btn btn-sm btn-outline-primary">Ver</a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">Nenhuma venda encontrada.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            {{-- Links de paginação --}}
+            <div class="mt-3">{{ $vendas->links() }}</div>
         </div>
     </div>
-
-    {{-- Links de paginação --}}
-    <div class="mt-3">{{ $vendas->links() }}</div>
 @endsection

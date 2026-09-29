@@ -10,26 +10,85 @@ use App\Http\Requests\ProdutoRequest;
 use App\Models\Categoria;
 use App\Models\Fornecedor;
 use App\Models\Produto;
+use App\Models\Venda;
+use App\Models\VendaItem;
 use App\Services\EstoqueService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ProdutoController extends Controller
 {
-    // Lista os produtos com filtros de nome, categoria e estoque baixo
+    // Lista os produtos: busca, filtro por categoria e estoque baixo, ordenação,
+    // visualização em tabela ou vitrine, e os detalhes que aparecem ao abrir a linha
     public function index(Request $request)
     {
-        $produtos = Produto::with(['categoria', 'fornecedor'])
-            ->busca($request->input('busca'))
-            ->when($request->filled('categoria_id'), fn ($q) => $q->where('categoria_id', $request->input('categoria_id')))
-            ->when($request->boolean('estoque_baixo'), fn ($q) => $q->estoqueBaixo())
-            ->orderBy('nome')
-            ->paginate(10)
-            ->withQueryString();
+        $busca = $request->input('busca');
+        $categoriaId = $request->input('categoria_id');
+        $estoqueBaixo = $request->boolean('estoque_baixo');
+        $visao = $request->input('visao') === 'vitrine' ? 'vitrine' : 'tabela';
 
+        $query = Produto::with([
+            'categoria',
+            'fornecedor',
+            'movimentacoes' => fn ($q) => $q->latest()->latest('id')->limit(3), // últimas 3 movimentações
+        ])
+            ->busca($busca)
+            ->when($categoriaId, fn ($q) => $q->where('categoria_id', $categoriaId))
+            ->when($estoqueBaixo, fn ($q) => $q->estoqueBaixo());
+
+        [$ordem, $dir] = $this->ordenar($query, $request, [
+            'nome' => 'nome',
+            'preco' => 'preco',
+            'estoque' => 'estoque',
+            // ordena pelo nome da categoria (subconsulta)
+            'categoria' => Categoria::select('nome')->whereColumn('categorias.id', 'produtos.categoria_id'),
+        ], 'nome');
+
+        $produtos = $query->paginate($visao === 'vitrine' ? 12 : 10)->withQueryString();
+
+        // Pílulas: quantos produtos em cada categoria e com estoque baixo (respeitando a busca)
+        $porCategoria = Produto::busca($busca)->selectRaw('categoria_id, COUNT(*) as total')->groupBy('categoria_id')->pluck('total', 'categoria_id');
         $categorias = Categoria::orderBy('nome')->get();
+        $contagem = [
+            'todos' => $porCategoria->sum(),
+            'estoque_baixo' => Produto::busca($busca)->estoqueBaixo()->count(),
+        ];
 
-        return view('produtos.index', compact('produtos', 'categorias'));
+        $vendas7dias = $this->vendasUltimos7Dias($produtos->pluck('id')->all());
+
+        return view('produtos.index', compact('produtos', 'categorias', 'porCategoria', 'contagem', 'visao', 'ordem', 'dir', 'vendas7dias'));
+    }
+
+    // Quantidade vendida por dia nos últimos 7 dias, para o mini gráfico de cada produto:
+    // [produto_id => ['dias' => [q, q, ...7], 'quantidade' => total, 'valor' => total em R$]]
+    private function vendasUltimos7Dias(array $ids): array
+    {
+        $inicio = Carbon::today()->subDays(6);
+
+        $linhas = VendaItem::join('vendas', 'vendas.id', '=', 'venda_itens.venda_id')
+            ->where('vendas.status', Venda::CONCLUIDA)
+            ->whereDate('vendas.data', '>=', $inicio->toDateString())
+            ->whereIn('venda_itens.produto_id', $ids)
+            ->selectRaw('venda_itens.produto_id, DATE(vendas.data) as dia, SUM(venda_itens.quantidade) as quantidade, SUM(venda_itens.subtotal) as valor')
+            ->groupBy('venda_itens.produto_id', 'dia')
+            ->get();
+
+        $resultado = [];
+        foreach ($ids as $id) {
+            $doProduto = $linhas->where('produto_id', $id)->keyBy('dia');
+            $dias = [];
+            for ($d = $inicio->copy(); $d->lte(Carbon::today()); $d->addDay()) {
+                $dias[] = (int) ($doProduto[$d->toDateString()]->quantidade ?? 0);
+            }
+            $resultado[$id] = [
+                'dias' => $dias,
+                'quantidade' => array_sum($dias),
+                'valor' => (float) $doProduto->sum('valor'),
+            ];
+        }
+
+        return $resultado;
     }
 
     // Exibe o formulário de cadastro

@@ -12,16 +12,33 @@ use Illuminate\Http\Request;
 
 class FornecedorController extends Controller
 {
-    // Lista os fornecedores (com busca e paginação)
+    // Lista os fornecedores: busca, filtro (com/sem produtos), ordenação e paginação
     public function index(Request $request)
     {
-        $fornecedores = Fornecedor::withCount('produtos')
-            ->busca($request->input('busca'))
-            ->orderBy('nome')
-            ->paginate(10)
-            ->withQueryString();
+        $busca = $request->input('busca');
+        $filtro = $request->input('filtro');
 
-        return view('fornecedores.index', compact('fornecedores'));
+        $query = Fornecedor::withCount('produtos')
+            // Os produtos fornecidos aparecem ao abrir a linha
+            ->with(['produtos' => fn ($q) => $q->orderBy('nome')->limit(6)])
+            ->busca($busca)
+            ->when($filtro === 'com', fn ($q) => $q->has('produtos'))
+            ->when($filtro === 'sem', fn ($q) => $q->doesntHave('produtos'));
+
+        [$ordem, $dir] = $this->ordenar($query, $request, [
+            'nome' => 'nome',
+            'produtos' => 'produtos_count',
+        ], 'nome');
+
+        $fornecedores = $query->paginate(10)->withQueryString();
+
+        $contagem = [
+            'todos' => Fornecedor::busca($busca)->count(),
+            'com' => Fornecedor::busca($busca)->has('produtos')->count(),
+            'sem' => Fornecedor::busca($busca)->doesntHave('produtos')->count(),
+        ];
+
+        return view('fornecedores.index', compact('fornecedores', 'contagem', 'filtro', 'ordem', 'dir'));
     }
 
     // Exibe o formulário de cadastro

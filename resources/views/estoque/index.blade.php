@@ -3,83 +3,82 @@
 @section('title', 'Estoque')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Movimentações de Estoque</h1>
-        <a href="{{ route('estoque.create') }}" class="btn btn-primary">Nova Movimentação</a>
+    {{-- Cabeçalho: título, quantidade e botão de nova movimentação --}}
+    <div class="cabeca-lista">
+        <h1 class="h3">Movimentações de estoque <span class="qtd" data-atualiza="qtd">{{ $movimentacoes->total() }} {{ $movimentacoes->total() === 1 ? 'registro' : 'registros' }}</span></h1>
+        <div class="acoes-topo">
+            <a href="{{ route('estoque.create') }}" class="btn btn-primary">+ Nova movimentação</a>
+        </div>
     </div>
 
-    {{-- Filtros: produto e tipo --}}
-    <form method="GET" class="row g-2 mb-3">
-        <div class="col-md-4">
-            <select name="produto_id" class="form-select">
-                <option value="">Todos os produtos</option>
-                @foreach ($produtos as $produto)
-                    <option value="{{ $produto->id }}" @selected(request('produto_id') == $produto->id)>{{ $produto->nome }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2">
-            <select name="tipo" class="form-select">
-                <option value="">Entradas e saídas</option>
-                <option value="entrada" @selected(request('tipo') === 'entrada')>Só entradas</option>
-                <option value="saida" @selected(request('tipo') === 'saida')>Só saídas</option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-primary">Filtrar</button>
-            @if (request()->hasAny(['produto_id', 'tipo']))
-                <a href="{{ route('estoque.index') }}" class="btn btn-outline-secondary">Limpar</a>
+    {{-- Filtros: tipo em pílulas + busca instantânea --}}
+    <div class="filtros">
+        <span data-atualiza="chips" style="display: contents">
+            @include('partials.chips', ['chips' => [
+                ['Todas', request()->fullUrlWithQuery(['tipo' => null, 'page' => null]), $contagem['todas'], ! $tipo, '', null],
+                ['+ Entradas', request()->fullUrlWithQuery(['tipo' => 'entrada', 'page' => null]), $contagem['entrada'], $tipo === 'entrada', '', '#4fd08c'],
+                ['− Saídas', request()->fullUrlWithQuery(['tipo' => 'saida', 'page' => null]), $contagem['saida'], $tipo === 'saida', '', '#ff8a8a'],
+            ]])
+        </span>
+        @include('partials.busca', ['placeholder' => 'Produto ou motivo...'])
+    </div>
+
+    {{-- Lista (esta parte é trocada pela busca instantânea) --}}
+    <div data-atualiza="conteudo">
+        <div data-lista-conteudo>
+            @if ($movimentacoes->isEmpty())
+                <div class="lista-vazia">Nenhuma movimentação encontrada.</div>
+            @else
+                <table class="lista">
+                    <thead>
+                        <tr>
+                            @include('partials.th-ordem', ['campo' => 'data', 'titulo' => 'Data/hora'])
+                            @include('partials.th-ordem', ['campo' => 'produto', 'titulo' => 'Produto'])
+                            <th>Tipo</th>
+                            @include('partials.th-ordem', ['campo' => 'quantidade', 'titulo' => 'Quantidade', 'classe' => 'text-end'])
+                            <th class="text-end">Saldo após</th>
+                            <th>Motivo</th>
+                            <th>Usuário</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($movimentacoes as $mov)
+                            <tr class="linha" style="--cor: {{ $mov->produto->categoria->cor() }}">
+                                <td class="text-nowrap">
+                                    <div>{{ $mov->created_at->format('d/m/Y') }}</div>
+                                    <small class="text-muted">{{ $mov->created_at->format('H:i') }}</small>
+                                </td>
+                                <td>
+                                    <div class="item-lista">
+                                        <span class="avatar-lista" style="width: 34px; height: 34px; font-size: .75rem">{{ \App\Support\Texto::iniciais($mov->produto->nome) }}</span>
+                                        <div class="nome">{{ $mov->produto->nome }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if ($mov->tipo === 'entrada')
+                                        <span class="badge bg-success">Entrada</span>
+                                    @else
+                                        <span class="badge bg-danger">Saída</span>
+                                    @endif
+                                </td>
+                                <td class="text-end valor-lista" style="color: {{ $mov->tipo === 'entrada' ? '#4fd08c' : '#ff8a8a' }}">{{ $mov->tipo === 'entrada' ? '+' : '−' }}{{ $mov->quantidade }}</td>
+                                <td class="text-end">{{ $mov->estoque_apos }}</td>
+                                <td>
+                                    @if ($mov->venda_id)
+                                        <a href="{{ route('vendas.show', $mov->venda_id) }}">{{ $mov->motivo }}</a>
+                                    @else
+                                        {{ $mov->motivo }}
+                                    @endif
+                                </td>
+                                <td class="text-muted">{{ $mov->usuario->name ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             @endif
-        </div>
-    </form>
 
-    {{-- Histórico --}}
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0 align-middle">
-                <thead>
-                    <tr>
-                        <th>Data/hora</th>
-                        <th>Produto</th>
-                        <th class="text-center">Tipo</th>
-                        <th class="text-end">Quantidade</th>
-                        <th class="text-end">Saldo após</th>
-                        <th>Motivo</th>
-                        <th>Usuário</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($movimentacoes as $mov)
-                        <tr>
-                            <td class="text-nowrap">{{ $mov->created_at->format('d/m/Y H:i') }}</td>
-                            <td>{{ $mov->produto->nome }}</td>
-                            <td class="text-center">
-                                @if ($mov->tipo === 'entrada')
-                                    <span class="badge bg-success">Entrada</span>
-                                @else
-                                    <span class="badge bg-danger">Saída</span>
-                                @endif
-                            </td>
-                            <td class="text-end">{{ $mov->tipo === 'entrada' ? '+' : '-' }}{{ $mov->quantidade }}</td>
-                            <td class="text-end">{{ $mov->estoque_apos }}</td>
-                            <td>
-                                @if ($mov->venda_id)
-                                    <a href="{{ route('vendas.show', $mov->venda_id) }}">{{ $mov->motivo }}</a>
-                                @else
-                                    {{ $mov->motivo }}
-                                @endif
-                            </td>
-                            <td>{{ $mov->usuario->name ?? '-' }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">Nenhuma movimentação encontrada.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            {{-- Links de paginação --}}
+            <div class="mt-3">{{ $movimentacoes->links() }}</div>
         </div>
     </div>
-
-    <div class="mt-3">{{ $movimentacoes->links() }}</div>
 @endsection

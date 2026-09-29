@@ -20,6 +20,14 @@ class Categoria extends Model
     // Campos que podem ser preenchidos em massa
     protected $fillable = ['nome', 'descricao'];
 
+    // Cores das categorias (a mesma categoria sempre tem a mesma cor, pelo id)
+    public const CORES = ['#4394e8', '#d9a441', '#d9749b', '#2bb3a3', '#9b7be0', '#7fb069'];
+
+    public function cor(): string
+    {
+        return self::CORES[($this->id - 1) % count(self::CORES)];
+    }
+
     // Uma categoria possui vários produtos
     public function produtos(): HasMany
     {
