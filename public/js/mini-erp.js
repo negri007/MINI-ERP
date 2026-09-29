@@ -29,6 +29,10 @@ document.querySelectorAll('[data-mascara]').forEach((campo) => {
 
 // ---------- Confirmação com modal ----------
 // Uso no HTML: <form data-confirmar="Texto da pergunta"> ... </form>
+// Opcionais: data-confirmar-titulo, data-confirmar-sim (ex.: "Excluir categoria"),
+// data-confirmar-nao (ex.: "Manter categoria").
+// Bloqueio: <form data-bloqueio="Por que não pode"> mostra só a explicação, [Fechar]
+// e um atalho opcional (data-bloqueio-link + data-bloqueio-link-texto); nada é enviado.
 const modalEl = document.getElementById('modalConfirmar');
 if (modalEl) {
     const modal = new bootstrap.Modal(modalEl);
@@ -37,11 +41,25 @@ if (modalEl) {
     // "Delegação": um único ouvinte no documento, que vale também para as
     // listas recarregadas pela busca instantânea
     document.addEventListener('submit', (evento) => {
-        const form = evento.target.closest('form[data-confirmar]');
+        const form = evento.target.closest('form[data-confirmar], form[data-bloqueio]');
         if (!form) return;
         evento.preventDefault();
-        formularioPendente = form;
-        document.getElementById('modalConfirmarTexto').textContent = form.dataset.confirmar;
+
+        const d = form.dataset;
+        const bloqueado = Boolean(d.bloqueio);
+        const link = document.getElementById('modalConfirmarLink');
+        const sim = document.getElementById('modalConfirmarBotao');
+
+        document.getElementById('modalConfirmarTitulo').textContent = d.confirmarTitulo || (bloqueado ? 'Não é possível excluir' : 'Tem certeza?');
+        document.getElementById('modalConfirmarTexto').textContent = (bloqueado ? d.bloqueio : d.confirmar).replace(/\s+/g, ' ').trim();
+        document.getElementById('modalConfirmarNao').textContent = bloqueado ? 'Fechar' : (d.confirmarNao || 'Voltar').trim();
+        sim.textContent = (d.confirmarSim || 'Confirmar').trim();
+        sim.hidden = bloqueado;
+        link.hidden = !(bloqueado && d.bloqueioLink);
+        link.href = d.bloqueioLink || '#';
+        link.textContent = d.bloqueioLinkTexto || '';
+
+        formularioPendente = bloqueado ? null : form;
         modal.show();
     });
 

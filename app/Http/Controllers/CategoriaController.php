@@ -70,11 +70,19 @@ class CategoriaController extends Controller
         return redirect()->route('categorias.index')->with('success', 'Categoria atualizada com sucesso!');
     }
 
+    // Cadastro rápido feito pelo modal do formulário de produto (responde em JSON)
+    public function rapida(CategoriaRequest $request)
+    {
+        $categoria = Categoria::create($request->validated());
+
+        return response()->json(['id' => $categoria->id, 'nome' => $categoria->nome], 201);
+    }
+
     // Exclui uma categoria (bloqueia se houver produtos vinculados)
     public function destroy(Categoria $categoria)
     {
-        if ($categoria->produtos()->exists()) {
-            return redirect()->route('categorias.index')->with('error', 'Não é possível excluir: existem produtos nesta categoria.');
+        if ($motivo = $categoria->motivoParaNaoExcluir()) {
+            return redirect()->route('categorias.index')->with('error', $motivo);
         }
 
         $categoria->delete();

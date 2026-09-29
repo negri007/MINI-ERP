@@ -17,8 +17,14 @@
     @endif
 
     @if ($produtos->isEmpty())
-        <div class="alert alert-warning">
-            Para vender é preciso ter pelo menos um <a href="{{ route('produtos.create') }}">produto com estoque</a>.
+        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2">
+            @if ($esgotados->isEmpty())
+                <span>Nenhum produto cadastrado. Cadastre o que você vende para começar.</span>
+                <a href="{{ route('produtos.create') }}" class="btn btn-sm btn-outline-primary">Cadastrar produto</a>
+            @else
+                <span>Nenhum produto com estoque. Registre uma entrada para começar a vender.</span>
+                <a href="{{ route('estoque.create') }}" class="btn btn-sm btn-outline-primary">Movimentar estoque</a>
+            @endif
         </div>
     @endif
 
@@ -104,6 +110,12 @@
                     </tfoot>
                 </table>
             </div>
+            @if ($esgotados->isNotEmpty())
+                <p class="form-text px-3 pb-3 mb-0">
+                    {{ $esgotados->count() === 1 ? '1 produto sem estoque aparece' : $esgotados->count().' produtos sem estoque aparecem' }}
+                    no fim da lista, sem poder escolher. <a href="{{ route('estoque.create') }}">Registrar entrada</a>
+                </p>
+            @endif
         </div>
 
         {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
@@ -159,19 +171,30 @@
     <template id="modeloItem">
         <tr>
             <td>
-                <select class="form-select campo-produto" data-nome="produto_id">
+                <select class="form-select campo-produto" data-nome="produto_id" aria-label="Produto">
                     <option value="">Selecione...</option>
                     @foreach ($produtos as $produto)
                         <option value="{{ $produto->id }}" data-preco="{{ $produto->preco }}" data-estoque="{{ $produto->estoque }}">
                             {{ $produto->nome }} — estoque: {{ $produto->estoque }}
                         </option>
                     @endforeach
+                    {{-- Sem estoque: aparecem para a pessoa entender por que não dá para escolher --}}
+                    @if ($esgotados->isNotEmpty())
+                        <optgroup label="Sem estoque (registre uma entrada para vender)">
+                            @foreach ($esgotados as $produto)
+                                <option disabled>{{ $produto->nome }} — sem estoque</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
                 </select>
             </td>
-            <td><input type="number" min="1" value="1" class="form-control campo-quantidade" data-nome="quantidade"></td>
+            <td>
+                <input type="number" min="1" value="1" class="form-control campo-quantidade" data-nome="quantidade" aria-label="Quantidade">
+                <div class="invalid-feedback aviso-estoque"></div>
+            </td>
             <td class="text-end text-nowrap preco">-</td>
             <td class="text-end text-nowrap subtotal">-</td>
-            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remover">&times;</button></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remover" aria-label="Remover item">&times;</button></td>
         </tr>
     </template>
 @endsection
@@ -199,8 +222,18 @@
         if (item.produto_id) linha.querySelector('.campo-produto').value = item.produto_id;
         if (item.quantidade) linha.querySelector('.campo-quantidade').value = item.quantidade;
 
+        // Aviso de estoque: ligado à quantidade pelo aria-describedby
+        const campoQtd = linha.querySelector('.campo-quantidade');
+        const aviso = linha.querySelector('.aviso-estoque');
+        aviso.id = `aviso-estoque-${indice}`;
+        campoQtd.setAttribute('aria-describedby', aviso.id);
+
         linha.addEventListener('input', calcular);
         linha.addEventListener('change', calcular);
+        // Confere o estoque ao sair do campo ou trocar o produto; ao corrigir, o aviso some
+        campoQtd.addEventListener('blur', () => conferirEstoque(linha));
+        linha.querySelector('.campo-produto').addEventListener('change', () => conferirEstoque(linha));
+        campoQtd.addEventListener('input', () => { if (campoQtd.classList.contains('is-invalid')) conferirEstoque(linha); });
         linha.querySelector('.btn-remover').addEventListener('click', () => { linha.remove(); calcular(); });
 
         corpo.appendChild(linha);
@@ -225,6 +258,19 @@
             linha.querySelector('.subtotal').textContent = preco ? moeda(subtotal) : '-';
         });
         document.getElementById('totalVenda').textContent = moeda(total);
+    }
+
+    // Mostra "Só há N em estoque." abaixo da quantidade (o servidor confere de novo ao salvar)
+    function conferirEstoque(linha) {
+        const opcao = linha.querySelector('.campo-produto').selectedOptions[0];
+        const campoQtd = linha.querySelector('.campo-quantidade');
+        const aviso = linha.querySelector('.aviso-estoque');
+        const estoque = parseInt(opcao?.dataset.estoque || 0);
+        const passou = estoque > 0 && parseInt(campoQtd.value || 0) > estoque;
+
+        campoQtd.classList.toggle('is-invalid', passou);
+        campoQtd.toggleAttribute('aria-invalid', passou);
+        aviso.textContent = passou ? `Só há ${estoque} em estoque.` : '';
     }
 
     document.getElementById('btnAdicionarItem').addEventListener('click', () => adicionarItem());

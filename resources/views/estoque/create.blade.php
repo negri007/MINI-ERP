@@ -13,10 +13,10 @@
                 {{-- Campo: Produto --}}
                 <div class="mb-3">
                     <label for="produto_id" class="form-label">Produto <span class="text-danger">*</span></label>
-                    <select name="produto_id" id="produto_id" class="form-select @error('produto_id') is-invalid @enderror">
+                    <select name="produto_id" id="produto_id" class="form-select @error('produto_id') is-invalid @enderror" aria-describedby="estoqueAtual">
                         <option value="">Selecione...</option>
                         @foreach ($produtos as $produto)
-                            <option value="{{ $produto->id }}" @selected(old('produto_id', $produtoSelecionado) == $produto->id)>
+                            <option value="{{ $produto->id }}" data-estoque="{{ $produto->estoque }}" @selected(old('produto_id', $produtoSelecionado) == $produto->id)>
                                 {{ $produto->nome }} — estoque atual: {{ $produto->estoque }}
                             </option>
                         @endforeach
@@ -24,6 +24,8 @@
                     @error('produto_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    {{-- Estoque atual do produto escolhido (lido pelo leitor de tela ao mudar) --}}
+                    <p class="form-text mb-0" id="estoqueAtual" aria-live="polite"></p>
                 </div>
 
                 <div class="row">
@@ -76,3 +78,18 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Mostra o estoque atual do produto escolhido, para a saída não passar do que existe
+    const campoProduto = document.getElementById('produto_id');
+    const estoqueAtual = document.getElementById('estoqueAtual');
+    const mostrarEstoque = () => {
+        const opcao = campoProduto.selectedOptions[0];
+        estoqueAtual.textContent = opcao?.value ? `Estoque atual: ${opcao.dataset.estoque} un.` : '';
+    };
+    campoProduto.addEventListener('change', mostrarEstoque);
+    mostrarEstoque();
+</script>
+@endpush
+

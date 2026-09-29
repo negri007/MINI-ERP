@@ -61,7 +61,8 @@
                                     {{-- Ações: aparecem ao passar o mouse --}}
                                     <div class="acoes-linha">
                                         <a href="{{ route('fornecedores.edit', $fornecedor) }}" class="botao-icone amarelo" title="Editar">@include('partials.icone', ['nome' => 'lapis'])</a>
-                                        @include('partials.excluir', ['rota' => route('fornecedores.destroy', $fornecedor), 'nome' => $fornecedor->nome])
+                                        @include('partials.excluir', ['rota' => route('fornecedores.destroy', $fornecedor), 'nome' => $fornecedor->nome, 'tipo' => 'fornecedor',
+                                            'aviso' => match ($fornecedor->produtos_count) { 0 => '', 1 => '1 produto ficará sem fornecedor.', default => "{$fornecedor->produtos_count} produtos ficarão sem fornecedor." }])
                                     </div>
                                 </td>
                             </tr>

@@ -21,8 +21,12 @@ class EstoqueService
     public function saida(Produto $produto, int $quantidade, string $motivo, ?int $vendaId = null): MovimentacaoEstoque
     {
         if ($quantidade > $produto->estoque) {
+            // Diz quanto há e o que fazer; na venda, a saída sugere diminuir ou registrar entrada
+            $unidades = $produto->estoque === 1 ? 'unidade' : 'unidades';
+            $proximoPasso = $vendaId ? 'Diminua a quantidade ou registre uma entrada.' : 'Confira a quantidade.';
+
             throw ValidationException::withMessages([
-                'quantidade' => "Estoque insuficiente para \"{$produto->nome}\": disponível {$produto->estoque}, solicitado {$quantidade}.",
+                'quantidade' => "Só há {$produto->estoque} {$unidades} de \"{$produto->nome}\". {$proximoPasso}",
             ]);
         }
 

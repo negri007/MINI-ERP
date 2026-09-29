@@ -57,7 +57,7 @@
                             <div class="rodape-cartao">
                                 <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="botao-icone" title="Movimentar estoque">@include('partials.icone', ['nome' => 'caixa'])</a>
                                 <a href="{{ route('produtos.edit', $produto) }}" class="botao-icone amarelo" title="Editar">@include('partials.icone', ['nome' => 'lapis'])</a>
-                                @include('partials.excluir', ['rota' => route('produtos.destroy', $produto), 'nome' => $produto->nome])
+                                @include('partials.excluir', ['rota' => route('produtos.destroy', $produto), 'nome' => $produto->nome, 'tipo' => 'produto', 'bloqueio' => $produto->motivoParaNaoExcluir()])
                             </div>
                         </div>
                     @endforeach
@@ -99,7 +99,7 @@
                                     <div class="acoes-linha">
                                         <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="botao-icone" title="Movimentar estoque">@include('partials.icone', ['nome' => 'caixa'])</a>
                                         <a href="{{ route('produtos.edit', $produto) }}" class="botao-icone amarelo" title="Editar">@include('partials.icone', ['nome' => 'lapis'])</a>
-                                        @include('partials.excluir', ['rota' => route('produtos.destroy', $produto), 'nome' => $produto->nome])
+                                        @include('partials.excluir', ['rota' => route('produtos.destroy', $produto), 'nome' => $produto->nome, 'tipo' => 'produto', 'bloqueio' => $produto->motivoParaNaoExcluir()])
                                     </div>
                                 </td>
                             </tr>

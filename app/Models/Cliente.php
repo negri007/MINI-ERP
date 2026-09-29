@@ -71,4 +71,15 @@ class Cliente extends Model
             }
         });
     }
+
+    // Motivo para não excluir (null = pode excluir): vendas, mesmo canceladas, ficam no histórico.
+    // Usa o withCount('vendas as vendas_registradas') da lista, se houver.
+    public function motivoParaNaoExcluir(): ?string
+    {
+        $temVendas = isset($this->vendas_registradas) ? $this->vendas_registradas > 0 : $this->vendas()->exists();
+
+        return $temVendas
+            ? "O cliente \"{$this->nome}\" tem vendas registradas e precisa ficar no histórico, por isso não pode ser excluído."
+            : null;
+    }
 }

@@ -101,6 +101,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // CRUDs de cadastro (sem a rota "show", que não é usada)
+    // Cadastro rápido de categoria usado pelo formulário de produto
+    Route::post('/categorias/rapida', [CategoriaController::class, 'rapida'])->name('categorias.rapida');
     Route::resource('categorias', CategoriaController::class)->except('show');
 
     Route::resource('fornecedores', FornecedorController::class)

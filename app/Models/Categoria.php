@@ -43,4 +43,17 @@ class Categoria extends Model
 
         return $query->where('nome', 'like', "%{$termo}%");
     }
+
+    // Motivo para não excluir (null = pode excluir). O mesmo texto aparece na confirmação
+    // da lista e na mensagem do controller. Usa o withCount('produtos') da lista, se houver.
+    public function motivoParaNaoExcluir(): ?string
+    {
+        $qtd = $this->produtos_count ?? $this->produtos()->count();
+        if (! $qtd) {
+            return null;
+        }
+        $produtos = $qtd === 1 ? '1 produto' : "{$qtd} produtos";
+
+        return "A categoria \"{$this->nome}\" tem {$produtos}. Mova-os para outra categoria antes de excluir.";
+    }
 }

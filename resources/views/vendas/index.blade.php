@@ -109,7 +109,8 @@
                                                 <a href="{{ route('vendas.show', $venda) }}" class="btn btn-sm btn-outline-primary">Abrir venda</a>
                                                 @unless ($venda->estaCancelada())
                                                     <form action="{{ route('vendas.cancelar', $venda) }}" method="POST"
-                                                          data-confirmar="Cancelar a venda #{{ $venda->id }}? Os produtos voltarão para o estoque.">
+                                                          data-confirmar="Cancelar a venda #{{ $venda->id }}? Os produtos voltam para o estoque e a venda sai do faturamento."
+                                                          data-confirmar-titulo="Cancelar venda?" data-confirmar-sim="Cancelar venda" data-confirmar-nao="Manter venda">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
                                                     </form>

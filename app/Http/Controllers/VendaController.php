@@ -37,6 +37,7 @@ class VendaController extends Controller
                 ->when($usarPeriodo && $periodo === '7dias', fn ($q) => $q->whereDate('data', '>=', Carbon::today()->subDays(6)->toDateString()))
                 ->when($usarPeriodo && $periodo === 'mes', fn ($q) => $q->whereDate('data', '>=', Carbon::today()->startOfMonth()->toDateString()))
                 ->when($usarStatus && $status, fn ($q) => $q->where('status', $status))
+                ->when($request->filled('cliente'), fn ($q) => $q->where('cliente_id', (int) $request->input('cliente')))
                 // filtros de data manuais (links antigos e relatórios)
                 ->when($request->filled('de'), fn ($q) => $q->whereDate('data', '>=', $request->input('de')))
                 ->when($request->filled('ate'), fn ($q) => $q->whereDate('data', '<=', $request->input('ate')));
@@ -87,6 +88,8 @@ class VendaController extends Controller
             // Lista completa só para o <select> de reserva (usado se o JavaScript da busca não carregar)
             'clientes' => Cliente::ordemParaVenda()->get(),
             'produtos' => Produto::where('estoque', '>', 0)->orderBy('nome')->get(),
+            // Sem estoque: aparecem no fim da lista, sem poder escolher (o Service também barra)
+            'esgotados' => Produto::where('estoque', '<=', 0)->orderBy('nome')->get(['id', 'nome']),
         ]);
     }
 

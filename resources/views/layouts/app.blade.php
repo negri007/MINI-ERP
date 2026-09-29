@@ -211,16 +211,18 @@
     </div>
 
     {{-- Modal de confirmação usado pelos botões "Excluir" e "Cancelar venda" --}}
-    <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+    {{-- Os textos e os botões mudam conforme o formulário (data-confirmar-*, data-bloqueio*) --}}
+    <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-labelledby="modalConfirmarTitulo" aria-describedby="modalConfirmarTexto" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tem certeza?</h5>
+                    <h2 class="modal-title h5" id="modalConfirmarTitulo">Tem certeza?</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body" id="modalConfirmarTexto">Deseja realmente continuar?</div>
+                <div class="modal-body"><p class="mb-0" id="modalConfirmarTexto">Deseja realmente continuar?</p></div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="modalConfirmarNao">Voltar</button>
+                    <a class="btn btn-primary" id="modalConfirmarLink" href="#" hidden></a>
                     <button type="button" class="btn btn-danger" id="modalConfirmarBotao">Confirmar</button>
                 </div>
             </div>

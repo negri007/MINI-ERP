@@ -33,6 +33,7 @@ class ProdutoController extends Controller
             'fornecedor',
             'movimentacoes' => fn ($q) => $q->latest()->latest('id')->limit(3), // últimas 3 movimentações
         ])
+            ->withCount('itensVenda') // produto já vendido não pode ser excluído
             ->busca($busca)
             ->when($categoriaId, fn ($q) => $q->where('categoria_id', $categoriaId))
             ->when($estoqueBaixo, fn ($q) => $q->estoqueBaixo());
@@ -140,8 +141,8 @@ class ProdutoController extends Controller
     // Exclui um produto (bloqueia se ele já apareceu em alguma venda)
     public function destroy(Produto $produto)
     {
-        if ($produto->itensVenda()->exists()) {
-            return redirect()->route('produtos.index')->with('error', 'Não é possível excluir: este produto já foi vendido.');
+        if ($motivo = $produto->motivoParaNaoExcluir()) {
+            return redirect()->route('produtos.index')->with('error', $motivo);
         }
 
         $produto->delete();

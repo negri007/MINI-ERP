@@ -63,7 +63,8 @@
                                     {{-- Ações: aparecem ao passar o mouse --}}
                                     <div class="acoes-linha">
                                         <a href="{{ route('clientes.edit', $cliente) }}" class="botao-icone amarelo" title="Editar">@include('partials.icone', ['nome' => 'lapis'])</a>
-                                        @include('partials.excluir', ['rota' => route('clientes.destroy', $cliente), 'nome' => $cliente->nome])
+                                        @include('partials.excluir', ['rota' => route('clientes.destroy', $cliente), 'nome' => $cliente->nome, 'tipo' => 'cliente',
+                                            'bloqueio' => $cliente->motivoParaNaoExcluir(), 'link' => ['Ver vendas do cliente', route('vendas.index', ['cliente' => $cliente->id])]])
                                     </div>
                                 </td>
                             </tr>

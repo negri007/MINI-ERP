@@ -57,7 +57,8 @@
                                     {{-- Ações: aparecem ao passar o mouse --}}
                                     <div class="acoes-linha">
                                         <a href="{{ route('categorias.edit', $categoria) }}" class="botao-icone amarelo" title="Editar">@include('partials.icone', ['nome' => 'lapis'])</a>
-                                        @include('partials.excluir', ['rota' => route('categorias.destroy', $categoria), 'nome' => $categoria->nome])
+                                        @include('partials.excluir', ['rota' => route('categorias.destroy', $categoria), 'nome' => $categoria->nome, 'tipo' => 'categoria',
+                                            'bloqueio' => $categoria->motivoParaNaoExcluir(), 'link' => ['Ver produtos', route('produtos.index', ['categoria_id' => $categoria->id])]])
                                     </div>
                                 </td>
                             </tr>

@@ -21,4 +21,6 @@
             </form>
         </div>
     </div>
+
+    @include('partials.modal-categoria')
 @endsection

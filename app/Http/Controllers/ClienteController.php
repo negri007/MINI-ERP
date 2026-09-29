@@ -22,7 +22,7 @@ class ClienteController extends Controller
         $concluidas = fn ($q) => $q->where('status', Venda::CONCLUIDA);
 
         // O Consumidor final não aparece na lista nem nas contagens (ele não é um cadastro de verdade)
-        $query = Cliente::comuns()->withCount(['vendas' => $concluidas])
+        $query = Cliente::comuns()->withCount(['vendas' => $concluidas, 'vendas as vendas_registradas'])
             ->withSum(['vendas as total_gasto' => $concluidas], 'total')
             // As 3 últimas compras aparecem ao abrir a linha
             ->with(['vendas' => fn ($q) => $q->latest('data')->latest('id')->limit(3)])
@@ -112,8 +112,8 @@ class ClienteController extends Controller
             return $bloqueio;
         }
 
-        if ($cliente->vendas()->exists()) {
-            return redirect()->route('clientes.index')->with('error', 'Não é possível excluir: este cliente possui vendas registradas.');
+        if ($motivo = $cliente->motivoParaNaoExcluir()) {
+            return redirect()->route('clientes.index')->with('error', $motivo);
         }
 
         $cliente->delete();

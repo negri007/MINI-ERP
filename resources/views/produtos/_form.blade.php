@@ -1,12 +1,5 @@
 {{-- Campos do formulário, usados tanto no create quanto no edit --}}
 
-{{-- Aviso caso ainda não existam categorias --}}
-@if ($categorias->isEmpty())
-    <div class="alert alert-warning">
-        Cadastre uma <a href="{{ route('categorias.create') }}">categoria</a> antes de cadastrar produtos.
-    </div>
-@endif
-
 {{-- Campo: Nome --}}
 <div class="mb-3">
     <label for="nome" class="form-label">Nome <span class="text-danger">*</span></label>
@@ -70,7 +63,11 @@
 <div class="row">
     {{-- Campo: Categoria --}}
     <div class="col-md-6 mb-3">
-        <label for="categoria_id" class="form-label">Categoria <span class="text-danger">*</span></label>
+        <div class="rotulo-com-acao">
+            <label for="categoria_id" class="form-label">Categoria <span class="text-danger">*</span></label>
+            {{-- Com JavaScript abre o modal; sem JavaScript vai para o cadastro normal de categoria --}}
+            <a href="{{ route('categorias.create') }}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalCategoria">+ Nova categoria</a>
+        </div>
         <select name="categoria_id" id="categoria_id" class="form-select @error('categoria_id') is-invalid @enderror">
             <option value="">Selecione...</option>
             @foreach ($categorias as $categoria)
@@ -80,6 +77,9 @@
         @error('categoria_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
+        @if ($categorias->isEmpty())
+            <p class="form-text mb-0" id="semCategoria">Nenhuma categoria ainda. Crie a primeira em "+ Nova categoria".</p>
+        @endif
     </div>
 
     {{-- Campo: Fornecedor (opcional) --}}

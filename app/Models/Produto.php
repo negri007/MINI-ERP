@@ -86,4 +86,15 @@ class Produto extends Model
             },
         ];
     }
+
+    // Motivo para não excluir (null = pode excluir). Usa o withCount('itensVenda') da lista, se houver.
+    // Melhoria futura: produto "inativo" (sai da venda e fica no histórico).
+    public function motivoParaNaoExcluir(): ?string
+    {
+        $vendido = isset($this->itens_venda_count) ? $this->itens_venda_count > 0 : $this->itensVenda()->exists();
+
+        return $vendido
+            ? "O produto \"{$this->nome}\" aparece em vendas e o histórico precisa dele. Se não vende mais, deixe o estoque em zero."
+            : null;
+    }
 }

@@ -17,7 +17,8 @@
             {{-- Cancelar devolve os produtos ao estoque --}}
             @unless ($venda->estaCancelada())
                 <form action="{{ route('vendas.cancelar', $venda) }}" method="POST"
-                      data-confirmar="Cancelar a venda #{{ $venda->id }}? Os produtos voltarão para o estoque.">
+                      data-confirmar="Cancelar a venda #{{ $venda->id }}? Os produtos voltam para o estoque e a venda sai do faturamento."
+                                                          data-confirmar-titulo="Cancelar venda?" data-confirmar-sim="Cancelar venda" data-confirmar-nao="Manter venda">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger">Cancelar venda</button>
                 </form>

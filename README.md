@@ -25,6 +25,8 @@ O visual (`public/css/tema.css`) é escuro, com as cores do Brasil: verde-mata, 
 - Cores dos gráficos e medidores validadas para contraste e daltonismo (skill dataviz).
 - **Um amarelo por tela**: o amarelo-sol cheio fica só na ação principal; filtros, Tabela/Vitrine e a coluna ordenada escolhidos aparecem em verde-mata.
 - **Formulários** com trilha (ex.: Produtos › Novo produto), largura de leitura e rodapé com Cancelar e a ação principal.
+- **Ajuda na própria tela**: cada tela tem uma dica curta abaixo do título (o botão "Entendi" esconde), os campos que confundem
+  têm um "?" com explicação, e as listas vazias dizem qual é o próximo passo.
 - **Acessibilidade**: anel amarelo no foco do teclado (Tab), contrastes de texto no padrão WCAG AA (mínimo 4,5:1)
   e animações desligadas para quem ativou "reduzir movimento" no sistema.
 
@@ -64,6 +66,8 @@ ou `php artisan migrate:fresh --seed` para apagar tudo e recomeçar com os dados
 ## Melhorias futuras
 
 - **Venda a prazo (fiado)**: quando existir, não poderá usar o Consumidor final, porque a dívida precisa de um cliente identificado.
+- **Produto "inativo"**: hoje um produto já vendido não pode ser excluído (o histórico precisa dele). Um campo "inativo"
+  tiraria o produto da Nova venda sem apagar o histórico. Exige mudar o banco.
 
 ## Testes
 
