@@ -477,16 +477,17 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
 }
 .painel-caixa .rotulo { color: #b9ae9a; }
 .painel-caixa .valor {
-    font-family: var(--fonte-numero);
-    font-size: clamp(2.4rem, 4.5vw, 3.8rem);
-    font-weight: 500;
+    font-family: var(--fonte-texto);
+    font-variant-numeric: proportional-nums;
+    font-size: clamp(2.6rem, 4.8vw, 4rem);
+    font-weight: 600;
     line-height: 1.05;
     letter-spacing: -.03em;
     margin: .6rem 0 1rem;
 }
 .painel-caixa .valor small { font-size: .38em; color: #b9ae9a; margin-right: .3rem; letter-spacing: 0; }
 .painel-caixa .resumo { display: flex; flex-wrap: wrap; gap: 1rem 2rem; font-size: .9rem; color: #d8cfbf; }
-.painel-caixa .resumo strong { display: block; font-family: var(--fonte-numero); font-size: 1.3rem; color: var(--folha); font-weight: 500; }
+.painel-caixa .resumo strong { display: block; font-family: var(--fonte-texto); font-size: 1.35rem; color: var(--folha); font-weight: 600; }
 /* Linhas de "papel de caixa registradora" ao fundo */
 .painel-caixa::after {
     content: '';
@@ -534,8 +535,15 @@ nav .small.text-muted, nav p.small { font-family: var(--fonte-numero); font-size
     transition: transform .18s, box-shadow .18s;
 }
 .gaveta:hover { transform: translateY(-3px); box-shadow: 0 14px 22px -18px rgba(60, 40, 10, .8); color: var(--tinta); }
-.gaveta .qtd { font-family: var(--fonte-titulo); font-size: 2.6rem; font-weight: 600; line-height: 1; margin: .35rem 0 .5rem; }
+.gaveta .qtd { font-family: var(--fonte-texto); font-size: 2.4rem; font-weight: 600; line-height: 1; margin: .35rem 0 .5rem; }
 .gaveta .abrir { font-family: var(--fonte-numero); font-size: .72rem; color: var(--tinta-2); }
+
+/* Gráficos: área com altura fixa que já inclui o eixo, e a versão em tabela logo abaixo */
+.grafico { position: relative; }
+.ver-tabela { margin-top: .75rem; }
+.ver-tabela summary { cursor: pointer; font-family: var(--fonte-numero); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-2); }
+.ver-tabela summary:hover { color: var(--tinta); }
+.ver-tabela table { margin-top: .5rem; }
 
 /* ---------- Cupom de venda ---------- */
 .balcao-cupom {

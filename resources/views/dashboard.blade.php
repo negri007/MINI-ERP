@@ -59,18 +59,44 @@
         @endforeach
     </div>
 
-    {{-- Gráficos (Chart.js) --}}
+    {{-- Gráficos (Chart.js). Cada gráfico tem também uma versão em tabela (acessibilidade) --}}
     <div class="row g-3 mb-4">
         <div class="col-lg-8">
             <div class="card h-100">
-                <div class="card-header">Faturamento dos últimos 14 dias</div>
-                <div class="card-body"><canvas id="graficoVendas" height="120"></canvas></div>
+                <div class="card-header">Faturamento dos últimos 14 dias · hoje em destaque</div>
+                <div class="card-body">
+                    <div class="grafico" style="height: 260px"><canvas id="graficoVendas" aria-label="Gráfico de colunas do faturamento por dia" role="img"></canvas></div>
+                    <details class="ver-tabela">
+                        <summary>Ver como tabela</summary>
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Dia</th><th class="text-end">Faturamento</th></tr></thead>
+                            <tbody>
+                                @foreach ($graficoVendas['labels'] as $i => $dia)
+                                    <tr><td>{{ $dia }}</td><td class="text-end">R$ {{ number_format($graficoVendas['valores'][$i], 2, ',', '.') }}</td></tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </details>
+                </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card h-100">
                 <div class="card-header">Produtos por categoria</div>
-                <div class="card-body"><canvas id="graficoCategorias"></canvas></div>
+                <div class="card-body">
+                    <div class="grafico" style="height: {{ max(120, count($graficoCategorias['labels']) * 44) }}px"><canvas id="graficoCategorias" aria-label="Gráfico de barras com a quantidade de produtos por categoria" role="img"></canvas></div>
+                    <details class="ver-tabela">
+                        <summary>Ver como tabela</summary>
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Categoria</th><th class="text-end">Produtos</th></tr></thead>
+                            <tbody>
+                                @foreach ($graficoCategorias['labels'] as $i => $categoria)
+                                    <tr><td>{{ $categoria }}</td><td class="text-end">{{ $graficoCategorias['valores'][$i] }}</td></tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </details>
+                </div>
             </div>
         </div>
     </div>
@@ -124,45 +150,101 @@
     const vendas = @json($graficoVendas);
     const categorias = @json($graficoCategorias);
 
-    // Visual dos gráficos combinando com o tema: tinta preta, carimbo vermelho, fonte de máquina
-    Chart.defaults.font.family = "'Plex Mono', monospace";
-    Chart.defaults.color = '#6d6558';
-    Chart.defaults.borderColor = '#e2d7c3';
+    // Cores dos gráficos, validadas com a skill dataviz (contraste >= 3:1 sobre a folha):
+    // destaque = azul carbono; contexto = cinza quente; texto sempre em tinta, nunca na cor da barra
+    const COR = { destaque: '#3456a3', contexto: '#8a7f6d', texto: '#1e1b16', eixo: '#6d6558', grade: '#ebe3d3', folha: '#fffcf5' };
+    const reais = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const reaisCurto = (v) => 'R$ ' + v.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 
+    Chart.defaults.font.family = "'Plex Mono', monospace";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = COR.eixo;
+    Chart.defaults.maintainAspectRatio = false;
+
+    // Plugin: escreve o valor na ponta de barras escolhidas (rótulo direto, sem poluir o gráfico)
+    const rotuloNaPonta = {
+        id: 'rotuloNaPonta',
+        afterDatasetsDraw(chart, _args, opcoes) {
+            const { ctx } = chart;
+            const barras = chart.getDatasetMeta(0).data;
+            ctx.save();
+            ctx.font = "500 11px 'Plex Mono', monospace";
+            ctx.fillStyle = COR.texto;
+            barras.forEach((barra, i) => {
+                if (!opcoes.mostrar(i)) return;
+                const texto = opcoes.formatar(chart.data.datasets[0].data[i], i);
+                if (chart.options.indexAxis === 'y') {
+                    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                    ctx.fillText(texto, barra.x + 6, barra.y);
+                } else {
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                    ctx.fillText(texto, barra.x, barra.y - 6);
+                }
+            });
+            ctx.restore();
+        },
+    };
+
+    // Gráfico 1: colunas por dia. Forma "destaque": hoje em azul, os outros dias em cinza de contexto
+    const hoje = vendas.valores.length - 1;
     new Chart(document.getElementById('graficoVendas'), {
         type: 'bar',
+        plugins: [rotuloNaPonta],
         data: {
-            labels: vendas.labels,
+            labels: vendas.labels.map((d, i) => (i === hoje ? 'hoje' : d)),
             datasets: [{
-                label: 'Faturamento (R$)',
+                label: 'Faturamento',
                 data: vendas.valores,
-                // Barras em tinta; a de hoje em vermelho
-                backgroundColor: vendas.valores.map((_, i) => i === vendas.valores.length - 1 ? '#c2362b' : '#1e1b16'),
-                borderRadius: 2,
-                barPercentage: .6,
+                backgroundColor: vendas.valores.map((_, i) => (i === hoje ? COR.destaque : COR.contexto)),
+                borderRadius: { topLeft: 4, topRight: 4 }, // ponta arredondada, base reta
+                borderSkipped: 'bottom',
+                maxBarThickness: 24,
             }],
         },
         options: {
+            layout: { padding: { top: 22, right: 30 } }, // espaço para o rótulo da última barra não ser cortado
+            interaction: { mode: 'index', intersect: false }, // passar o mouse em qualquer ponto da coluna
             plugins: {
-                legend: { display: false },
-                tooltip: { callbacks: { label: (c) => c.parsed.y.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) } },
+                legend: { display: false }, // uma série só: o título já diz o que é
+                tooltip: { callbacks: { label: (c) => reais(c.parsed.y) } },
+                rotuloNaPonta: { mostrar: (i) => i === hoje, formatar: (v) => reais(v) },
             },
-            scales: { y: { beginAtZero: true, grid: { borderDash: [3, 3] } }, x: { grid: { display: false } } },
+            scales: {
+                y: { beginAtZero: true, border: { display: false }, grid: { color: COR.grade }, ticks: { maxTicksLimit: 5, callback: reaisCurto } },
+                x: { grid: { display: false }, border: { color: '#c9bea9' } },
+            },
         },
     });
 
+    // Gráfico 2: barras horizontais (valores próximos se comparam melhor em barra do que em rosca)
+    const ordem = categorias.labels.map((l, i) => [l, categorias.valores[i]]).sort((a, b) => b[1] - a[1]);
     new Chart(document.getElementById('graficoCategorias'), {
-        type: 'doughnut',
+        type: 'bar',
+        plugins: [rotuloNaPonta],
         data: {
-            labels: categorias.labels,
+            labels: ordem.map((o) => o[0]),
             datasets: [{
-                data: categorias.valores,
-                backgroundColor: ['#1e1b16', '#2c4a94', '#2e6b4c', '#d49a2a', '#c2362b', '#8a7f6d'],
-                borderColor: '#fffcf5',
-                borderWidth: 3,
+                label: 'Produtos',
+                data: ordem.map((o) => o[1]),
+                backgroundColor: COR.destaque, // uma série = uma cor para todas as barras
+                borderRadius: { topRight: 4, bottomRight: 4 },
+                borderSkipped: 'left',
+                maxBarThickness: 20,
             }],
         },
-        options: { cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } },
+        options: {
+            indexAxis: 'y',
+            layout: { padding: { right: 28 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `${c.parsed.x} produto(s)` } },
+                rotuloNaPonta: { mostrar: () => true, formatar: (v) => v },
+            },
+            scales: {
+                x: { display: false, beginAtZero: true },
+                y: { grid: { display: false }, border: { color: '#c9bea9' }, ticks: { color: COR.texto, font: { family: "'Plex Sans', sans-serif", size: 12 } } },
+            },
+        },
     });
 </script>
 @endpush
