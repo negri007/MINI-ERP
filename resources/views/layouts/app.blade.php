@@ -71,6 +71,7 @@
             ['Consultar', 'Relatório do mês', route('relatorios.vendas'), '%'],
             ['Consultar', 'Exportar vendas do mês (Excel)', route('relatorios.vendas.exportar'), '↓'],
             ['Ajuda', 'Mostrar primeiros passos', route('dashboard', ['passos' => 1]), '✓'],
+            ['Ajuda', 'Sobre o Mini ERP', route('sobre'), 'i'],
         ];
 
         // Telas onde o Balcão rápido oferece "buscar o texto digitado"
@@ -158,6 +159,14 @@
                 <path d="M10 200 C5 150 25 110 70 80 C60 130 45 170 10 200Z"/>
                 <path d="M30 220 C60 160 100 125 150 95" fill="none"/>
             </svg>
+
+            {{-- Apresentação do sistema, no fim do menu, acima do usuário --}}
+            <nav class="menu menu-rodape" aria-label="Sobre o sistema">
+                <a href="{{ route('sobre') }}" title="Sobre o Mini ERP" class="menu-item raiz">
+                    <span class="secao-icone">@include('partials.icone', ['nome' => 'info'])</span>
+                    <span class="rotulo-menu">Sobre o Mini ERP</span>
+                </a>
+            </nav>
 
             {{-- Usuário logado e botão de sair --}}
             <div class="usuario">

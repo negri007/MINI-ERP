@@ -1072,3 +1072,7 @@ a:hover { text-decoration: underline; }
 .passos-lista li.feito .passos-texto { color: var(--texto-2); }
 .passos-texto { flex: 1; }
 .passos-feito { color: var(--verde-texto); font-size: .82rem; font-weight: 600; }
+
+/* "Sobre o Mini ERP" no fim do menu: empurrado para baixo, logo acima do usuário */
+.menu-rodape { position: relative; z-index: 1; margin-top: auto; padding-top: .5rem; }
+.menu-rodape + .usuario { margin-top: .5rem; }

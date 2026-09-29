@@ -44,4 +44,13 @@ class ApresentacaoTest extends TestCase
 
         $this->assertSame(0, Produto::count());
     }
+
+    public function test_menu_tem_o_link_sobre_o_mini_erp(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/produtos')
+            ->assertSee('Sobre o Mini ERP')
+            ->assertSee('href="'.route('sobre').'"', false);
+    }
 }
