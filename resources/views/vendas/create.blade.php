@@ -16,10 +16,9 @@
         </div>
     @endif
 
-    @if ($clientes->isEmpty() || $produtos->isEmpty())
+    @if ($produtos->isEmpty())
         <div class="alert alert-warning">
-            Para vender é preciso ter pelo menos um <a href="{{ route('clientes.create') }}">cliente</a>
-            e um <a href="{{ route('produtos.create') }}">produto com estoque</a>.
+            Para vender é preciso ter pelo menos um <a href="{{ route('produtos.create') }}">produto com estoque</a>.
         </div>
     @endif
 
@@ -30,18 +29,39 @@
         <div class="card mb-3">
             <div class="card-body row">
                 <div class="col-md-6 mb-3">
-                    <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                    <div class="rotulo-com-acao">
+                        <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                        {{-- Com JavaScript abre o modal; sem JavaScript vai para o cadastro normal --}}
+                        <a href="{{ route('clientes.create') }}" class="btn btn-sm btn-outline-secondary" id="btnNovoCliente"
+                           data-bs-toggle="modal" data-bs-target="#modalCliente">+ Novo cliente</a>
+                    </div>
+
+                    {{-- Reserva: <select> comum. Se o JavaScript carregar, ele fica escondido e a busca abaixo
+                         aparece no lugar; o valor escolhido continua sendo enviado por este campo. --}}
                     <select name="cliente_id" id="cliente_id" class="form-select @error('cliente_id') is-invalid @enderror">
                         <option value="">Selecione...</option>
                         @foreach ($clientes as $cliente)
-                            <option value="{{ $cliente->id }}" @selected(old('cliente_id') == $cliente->id)>
-                                {{ $cliente->nome }}{{ $cliente->cpf_cnpj ? " ({$cliente->cpf_cnpj})" : '' }}
+                            <option value="{{ $cliente->id }}" data-nome="{{ $cliente->nome }}" data-documento="{{ $cliente->cpf_cnpj }}"
+                                    data-consumidor-final="{{ $cliente->ehConsumidorFinal() ? 1 : 0 }}" @selected(old('cliente_id') == $cliente->id)>
+                                {{ $cliente->nome }}{{ $cliente->cpf_cnpj ? " · {$cliente->cpf_cnpj}" : '' }}{{ $cliente->ehConsumidorFinal() ? ' (venda sem identificar o cliente)' : '' }}
                             </option>
                         @endforeach
                     </select>
-                    @error('cliente_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+
+                    {{-- Busca enquanto digita (padrão "combobox" do ARIA) --}}
+                    <div class="combo" id="comboCliente" data-url="{{ route('clientes.buscar') }}" hidden>
+                        <input type="text" id="clienteBusca" class="form-control @error('cliente_id') is-invalid @enderror" role="combobox"
+                               aria-autocomplete="list" aria-expanded="false" aria-controls="clienteOpcoes"
+                               aria-describedby="clienteErro" autocomplete="off" placeholder="Ex.: Maria ou 123.456.789-09">
+                        <ul class="combo-lista" id="clienteOpcoes" role="listbox" aria-label="Clientes encontrados" hidden></ul>
+                        <div class="combo-vazio" id="clienteVazio" hidden>
+                            <span></span>
+                            <button type="button" class="btn btn-sm btn-outline-primary">Cadastrar</button>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback d-block" id="clienteErro">@error('cliente_id'){{ $message }}@enderror</div>
+                    {{-- Avisos para o leitor de tela (quantos clientes apareceram, qual foi escolhido) --}}
+                    <div class="visually-hidden" id="clienteAviso" aria-live="polite"></div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="data" class="form-label">Data <span class="text-danger">*</span></label>
@@ -93,6 +113,44 @@
         </div>
     </form>
 
+    {{-- Modal "Novo cliente": cadastro rápido sem sair da venda (os itens continuam na tela).
+         O Bootstrap prende o foco dentro dele, fecha no Esc e devolve o foco ao botão. --}}
+    <div class="modal fade" id="modalCliente" tabindex="-1" aria-labelledby="modalClienteTitulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" id="formClienteRapido" action="{{ route('clientes.rapido') }}" method="POST" novalidate data-cadastro-rapido>
+                @csrf
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="modalClienteTitulo">Novo cliente</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" data-erro-geral hidden></div>
+                    <div class="mb-3">
+                        <label for="rapido_nome" class="form-label">Nome <span class="text-danger">*</span></label>
+                        <input type="text" name="nome" id="rapido_nome" class="form-control" autocomplete="off" aria-describedby="rapido_nome_erro" required>
+                        <div class="invalid-feedback" id="rapido_nome_erro" data-erro="nome"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rapido_cpf_cnpj" class="form-label">CPF/CNPJ</label>
+                        <input type="text" name="cpf_cnpj" id="rapido_cpf_cnpj" class="form-control" data-mascara="cpfcnpj" inputmode="numeric"
+                               placeholder="000.000.000-00" aria-describedby="rapido_cpf_cnpj_erro">
+                        <div class="invalid-feedback" id="rapido_cpf_cnpj_erro" data-erro="cpf_cnpj"></div>
+                    </div>
+                    <div>
+                        <label for="rapido_telefone" class="form-label">Telefone</label>
+                        <input type="tel" name="telefone" id="rapido_telefone" class="form-control" data-mascara="telefone" inputmode="numeric"
+                               placeholder="(00) 00000-0000" aria-describedby="rapido_telefone_erro">
+                        <div class="invalid-feedback" id="rapido_telefone_erro" data-erro="telefone"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Modelo de uma linha de item (copiado pelo JavaScript) --}}
     <template id="modeloItem">
         <tr>
@@ -115,6 +173,8 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/cadastro-rapido.js') }}"></script>
+<script src="{{ asset('js/combo-cliente.js') }}"></script>
 <script>
     // Monta as linhas de itens da venda e calcula os totais
     const corpo = document.getElementById('itens');

@@ -84,7 +84,8 @@ class VendaController extends Controller
     public function create()
     {
         return view('vendas.create', [
-            'clientes' => Cliente::orderBy('nome')->get(),
+            // Lista completa só para o <select> de reserva (usado se o JavaScript da busca não carregar)
+            'clientes' => Cliente::ordemParaVenda()->get(),
             'produtos' => Produto::where('estoque', '>', 0)->orderBy('nome')->get(),
         ]);
     }

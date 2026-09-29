@@ -107,6 +107,9 @@ Route::middleware('auth')->group(function () {
         ->except('show')
         ->parameters(['fornecedores' => 'fornecedor']);
 
+    // Busca e cadastro rápido de clientes usados pela Nova venda (antes do resource)
+    Route::get('/clientes/buscar', [ClienteController::class, 'buscar'])->name('clientes.buscar');
+    Route::post('/clientes/rapido', [ClienteController::class, 'rapido'])->name('clientes.rapido');
     Route::resource('clientes', ClienteController::class)->except('show');
 
     Route::resource('produtos', ProdutoController::class)->except('show');

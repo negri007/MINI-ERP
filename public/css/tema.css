@@ -978,3 +978,35 @@ a:hover { text-decoration: underline; }
 @media (max-width: 991.98px) {
     .estoque-item .btn-sm { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
 }
+
+/* =====================================================================
+   NOVA VENDA: campo Cliente com busca e cadastro rápido
+   ===================================================================== */
+
+/* Rótulo com um botão à direita (ex.: "Cliente" + "+ Novo cliente") */
+.rotulo-com-acao { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .35rem; }
+.rotulo-com-acao .form-label { margin-bottom: 0; }
+
+/* Lista de sugestões embaixo do campo */
+.combo { position: relative; }
+.combo-lista {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 280px;
+    overflow: auto;
+    margin: 0;
+    padding: .3rem;
+    list-style: none;
+    background: var(--cartao-2);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 10px;
+    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, .6);
+}
+.combo-lista li { display: flex; justify-content: space-between; gap: .75rem; padding: .55rem .7rem; border-radius: 8px; cursor: pointer; }
+.combo-lista li small { color: var(--texto-2); white-space: nowrap; }
+.combo-lista li.ativo { background: var(--selecionado); color: var(--selecionado-texto); }
+.combo-lista li.ativo small { color: var(--selecionado-texto); }
+.combo-vazio { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .4rem; color: var(--texto-2); font-size: .85rem; }

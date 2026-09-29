@@ -107,14 +107,14 @@ class MiniErpTest extends TestCase
     public function test_crud_cliente(): void
     {
         $this->post('/clientes', ['nome' => 'Maria', 'cpf_cnpj' => '529.982.247-25'])->assertRedirect('/clientes');
-        $cliente = Cliente::firstOrFail();
+        $cliente = Cliente::comuns()->firstOrFail(); // o Consumidor final já vem criado pela migration
 
         $this->get('/clientes')->assertSee('529.982.247-25');
         $this->put("/clientes/{$cliente->id}", ['nome' => 'Maria Silva', 'cpf_cnpj' => '529.982.247-25'])->assertRedirect('/clientes');
         $this->assertSame('Maria Silva', $cliente->fresh()->nome);
 
         $this->delete("/clientes/{$cliente->id}")->assertRedirect('/clientes');
-        $this->assertDatabaseCount('clientes', 0);
+        $this->assertSame(0, Cliente::comuns()->count());
     }
 
     public function test_crud_produto(): void

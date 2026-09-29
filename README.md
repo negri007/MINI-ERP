@@ -6,6 +6,8 @@ Mini ERP em Laravel + Blade + Bootstrap 5, com MySQL (Laragon).
 - **Login**: só usuários autenticados acessam o sistema.
 - **Cadastros**: Categorias, Fornecedores, Clientes (CPF/CNPJ validado e único) e Produtos (com estoque mínimo).
 - **Vendas**: vários produtos por venda, total calculado, baixa automática de estoque e cancelamento que devolve o estoque.
+  O campo Cliente busca por nome ou CPF/CNPJ enquanto você digita, e o botão **+ Novo cliente** cadastra sem sair da venda.
+  Para vender sem identificar o cliente, use **Consumidor final** (cliente especial criado pela migration, que não pode ser editado nem excluído).
 - **Estoque**: histórico de entradas e saídas e movimentação manual (compra, perda, ajuste).
 - **Relatórios**: vendas por período, produtos mais vendidos e exportação para Excel (CSV).
 - **Dashboard**: faturamento do mês, gráficos e alerta de estoque baixo.
@@ -58,6 +60,10 @@ ou `php artisan migrate:fresh --seed` para apagar tudo e recomeçar com os dados
 | `database/seeders` | Dados de exemplo |
 | `lang/pt_BR` | Mensagens de validação em português |
 | `docs/APRESENTACAO.md` | Roteiro para apresentar o CRUD de Produtos |
+
+## Melhorias futuras
+
+- **Venda a prazo (fiado)**: quando existir, não poderá usar o Consumidor final, porque a dívida precisa de um cliente identificado.
 
 ## Testes
 
