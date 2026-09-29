@@ -144,3 +144,14 @@ if (balcao) {
         if (e.key === '/' && !digitando && balcao.hidden) { e.preventDefault(); abrir(); }
     });
 }
+
+// ---------- Menu lateral no celular ----------
+// O botão ☰ abre o menu; clicar fora dele fecha
+const lateral = document.getElementById('lateral');
+const abrirMenu = document.getElementById('abrirMenu');
+if (lateral && abrirMenu) {
+    abrirMenu.addEventListener('click', (e) => { e.stopPropagation(); lateral.classList.toggle('aberta'); });
+    document.addEventListener('click', (e) => {
+        if (lateral.classList.contains('aberta') && !lateral.contains(e.target)) lateral.classList.remove('aberta');
+    });
+}

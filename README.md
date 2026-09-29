@@ -12,16 +12,17 @@ Mini ERP em Laravel + Blade + Bootstrap 5, com MySQL (Laragon).
 
 Funciona sem internet: Bootstrap, Chart.js e as fontes estão em `public/vendor`.
 
-## Tema "Balcão"
+## Tema "Mata"
 
-O visual (`public/css/balcao.css`) trata o sistema como a mesa de um comércio:
-- **Fichário**: o menu são abas de pasta presas na folha de trabalho.
-- **Cupom**: a venda aparece como cupom saindo da impressora, com código de barras; dá para imprimir de verdade (só o cupom sai no papel).
-- **Carimbo**: ao cancelar, um carimbo vermelho de CANCELADA bate no cupom.
-- **Régua de estoque**: barra de nível com a marca do estoque mínimo.
-- **Balcão rápido**: aperte **Ctrl + K** (ou **/**) e digite para ir a qualquer tela, criar algo ou buscar produtos, clientes e vendas.
+O visual (`public/css/tema.css`) é escuro, com as cores do Brasil: verde-mata, amarelo-sol e azul-céu.
+- **Amarelo-sol** marca as ações principais e o item ativo do menu.
+- **Menu lateral** com ícones e contador de produtos para repor; no celular ele abre pelo botão ☰.
+- **Dashboard**: faturamento do mês comparado ao mês anterior, vendas, ticket médio, gráfico dos últimos 14 dias, estoque baixo e últimas vendas.
+- **Medidor de estoque**: barra de nível com a marca do mínimo e a situação escrita (OK, Baixo, Esgotado).
+- **Busca rápida**: aperte **Ctrl + K** (ou **/**) e digite para ir a qualquer tela, criar algo ou buscar produtos, clientes e vendas.
+- Cores dos gráficos e medidores validadas para contraste e daltonismo (skill dataviz).
 
-Fontes: Fraunces e IBM Plex (licença SIL Open Font, em `public/vendor/fonts`).
+Fontes: Outfit e Inter (licença SIL Open Font, em `public/vendor/fonts`).
 
 ## Como rodar (Laragon / MySQL)
 

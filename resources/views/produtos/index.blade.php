@@ -46,7 +46,7 @@
                         <th>Categoria</th>
                         <th>Fornecedor</th>
                         <th class="text-end">Preço</th>
-                        <th class="text-end">Estoque</th>
+                        <th>Estoque</th>
                         <th class="text-end">Ações</th>
                     </tr>
                 </thead>
@@ -57,11 +57,8 @@
                             <td>{{ $produto->categoria->nome ?? '-' }}</td>
                             <td>{{ $produto->fornecedor->nome ?? '-' }}</td>
                             <td class="text-end text-nowrap">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
-                            <td class="text-end text-nowrap">
-                                {{-- Régua de nível (vermelha quando está no mínimo ou abaixo) + quantidade --}}
-                                @include('partials.regua', ['produto' => $produto])
-                                <span class="numero ms-2 {{ $produto->estaComEstoqueBaixo() ? 'text-danger' : '' }}">{{ $produto->estoque }}</span>
-                            </td>
+                            {{-- Medidor de estoque: nível, marca do mínimo e situação (OK / Baixo / Esgotado) --}}
+                            <td>@include('partials.medidor', ['produto' => $produto])</td>
                             <td class="text-end text-nowrap">
                                 <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="btn btn-sm btn-outline-secondary">Estoque</a>
                                 <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-warning">Editar</a>

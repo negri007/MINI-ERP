@@ -70,15 +70,20 @@ class Produto extends Model
         return $this->estoque <= $this->estoque_minimo;
     }
 
-    // Posições (em %) para desenhar a régua de estoque:
-    // a escala vai até 3x o mínimo, e o traço marca onde fica o mínimo
-    public function reguaEstoque(): array
+    // Dados do medidor de estoque: nível e marca do mínimo (em %) e a situação.
+    // A escala vai até 3x o mínimo, para o traço do mínimo ficar em 1/3 da barra.
+    public function medidorEstoque(): array
     {
         $maximo = max($this->estoque_minimo * 3, $this->estoque, 1);
 
         return [
             'nivel' => round($this->estoque / $maximo * 100),
             'minimo' => round($this->estoque_minimo / $maximo * 100),
+            'situacao' => match (true) {
+                $this->estoque <= 0 => 'esgotado',
+                $this->estaComEstoqueBaixo() => 'baixo',
+                default => 'ok',
+            },
         ];
     }
 }
