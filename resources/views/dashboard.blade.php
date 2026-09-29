@@ -22,9 +22,7 @@
             <div class="valor"><small>R$</small>{{ number_format($mes['faturamento'], 2, ',', '.') }}</div>
             <div>
                 @if (! is_null($mes['variacao']))
-                    <span class="variacao {{ $mes['variacao'] >= 0 ? 'sobe' : 'desce' }}">
-                        {{ $mes['variacao'] >= 0 ? '▲' : '▼' }} {{ number_format(abs($mes['variacao']), 1, ',', '.') }}%
-                    </span>
+                    @include('partials.variacao', ['valor' => $mes['variacao']])
                     <span class="rodape">vs. mesmo período do mês passado</span>
                 @else
                     <span class="rodape ms-0">sem vendas no mês passado para comparar</span>
@@ -35,28 +33,28 @@
         <div class="card kpi">
             <div class="rotulo">Vendas no mês <span class="icone verde">@include('partials.icone', ['nome' => 'carrinho'])</span></div>
             <div class="valor">{{ $mes['quantidade'] }}</div>
-            <div class="rodape">{{ $mes['hoje'] }} hoje</div>
+            <div class="rodape">@include('partials.variacao', ['valor' => $mes['variacao_quantidade']]) {{ $mes['hoje'] }} hoje</div>
         </div>
 
         <div class="card kpi">
             <div class="rotulo">Ticket médio <span class="icone sol">@include('partials.icone', ['nome' => 'dinheiro'])</span></div>
-            <div class="valor">R$ {{ number_format($mes['ticket_medio'], 2, ',', '.') }}</div>
-            <div class="rodape">por venda</div>
+            <div class="valor"><small>R$</small>{{ number_format($mes['ticket_medio'], 2, ',', '.') }}</div>
+            <div class="rodape">@include('partials.variacao', ['valor' => $mes['variacao_ticket']]) por venda</div>
         </div>
 
-        <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}" class="card kpi text-decoration-none text-reset">
+        <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}" class="card kpi kpi-link text-decoration-none text-reset">
             <div class="rotulo">Para repor <span class="icone perigo">@include('partials.icone', ['nome' => 'alerta'])</span></div>
             <div class="valor">{{ $qtdParaRepor }}</div>
-            <div class="rodape">produtos no estoque mínimo</div>
+            <div class="rodape d-flex justify-content-between">produtos no estoque mínimo <span class="ir" aria-hidden="true">ver lista →</span></div>
         </a>
     </section>
 
     <section class="painel">
         {{-- Gráfico de faturamento (Chart.js), com versão em tabela --}}
         <div class="card">
-            <div class="card-header">Faturamento dos últimos 14 dias <small class="text-muted">hoje em destaque</small></div>
+            <div class="card-header">Faturamento dos últimos 14 dias <small class="text-muted">hoje ainda em andamento</small></div>
             <div class="card-body">
-                <div class="grafico"><canvas id="graficoVendas" role="img" aria-label="Gráfico de colunas do faturamento por dia"></canvas></div>
+                <div class="grafico"><canvas id="graficoVendas" role="img" aria-label="Gráfico de colunas do faturamento por dia. Total no período: R$ {{ number_format(array_sum($grafico['valores']), 2, ',', '.') }}. Maior dia: {{ $grafico['labels'][array_search(max($grafico['valores']), $grafico['valores'])] }}, com R$ {{ number_format(max($grafico['valores']), 2, ',', '.') }}. Detalhes em Ver como tabela."></canvas></div>
                 <details class="ver-tabela">
                     <summary>Ver como tabela</summary>
                     <table class="table table-sm">
@@ -73,7 +71,7 @@
 
         {{-- Produtos com estoque baixo --}}
         <div class="card">
-            <div class="card-header">Estoque baixo <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">ver todos →</a></div>
+            <div class="card-header">Estoque baixo <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">ver todos <span aria-hidden="true">→</span></a></div>
             <div class="card-body p-0">
                 @forelse ($estoqueBaixo as $produto)
                     <div class="estoque-item">
@@ -93,7 +91,7 @@
 
     {{-- Últimas vendas --}}
     <div class="card">
-        <div class="card-header">Últimas vendas <a href="{{ route('vendas.index') }}">ver todas →</a></div>
+        <div class="card-header">Últimas vendas <a href="{{ route('vendas.index') }}">ver todas <span aria-hidden="true">→</span></a></div>
         <div class="card-body p-0">
             <table class="table table-hover align-middle">
                 <thead>
@@ -113,11 +111,11 @@
                             <td><a href="{{ route('vendas.show', $venda) }}">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</a></td>
                             <td>
                                 <div class="cliente-cel">
-                                    <span class="iniciais">{{ mb_strtoupper(mb_substr($nomes[0], 0, 1).mb_substr(end($nomes), 0, 1)) }}</span>
+                                    <span class="iniciais" aria-hidden="true">{{ mb_strtoupper(mb_substr($nomes[0], 0, 1).mb_substr(end($nomes), 0, 1)) }}</span>
                                     {{ $venda->cliente->nome }}
                                 </div>
                             </td>
-                            <td>{{ $venda->data->format('d/m') }}</td>
+                            <td>{{ $venda->data->isToday() ? 'hoje, '.$venda->created_at->format('H:i') : $venda->data->format('d/m') }}</td>
                             <td class="text-center">{{ $venda->itens_count }}</td>
                             <td>
                                 @if ($venda->estaCancelada())
@@ -126,10 +124,10 @@
                                     <span class="badge bg-success">Concluída</span>
                                 @endif
                             </td>
-                            <td class="text-end fw-semibold">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
+                            <td class="text-end valor-lista {{ $venda->estaCancelada() ? 'riscado' : '' }}">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma venda ainda.</td></tr>
+                        <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma venda ainda. <a href="{{ route('vendas.create') }}">Registrar primeira venda</a></td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -153,6 +151,8 @@
     Chart.defaults.font.size = 11;
     Chart.defaults.color = COR.eixo;
     Chart.defaults.maintainAspectRatio = false;
+    // Sem animação para quem pediu menos movimento no sistema
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) Chart.defaults.animation = false;
 
     // Plugin: escreve o valor em cima da barra de hoje (rótulo direto só no que importa)
     const rotuloHoje = {

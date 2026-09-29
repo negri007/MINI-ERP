@@ -32,15 +32,18 @@ class DashboardController extends Controller
         // Mesmo período do mês passado (do dia 1 até o mesmo dia), para comparar
         $inicioAnterior = $hoje->copy()->subMonthNoOverflow()->startOfMonth();
         $fimAnterior = $hoje->copy()->subMonthNoOverflow();
-        $faturamentoAnterior = $concluidas()
+        $mesAnterior = $concluidas()
             ->whereDate('data', '>=', $inicioAnterior->toDateString())
-            ->whereDate('data', '<=', $fimAnterior->toDateString())
-            ->sum('total');
+            ->whereDate('data', '<=', $fimAnterior->toDateString());
+        $faturamentoAnterior = (clone $mesAnterior)->sum('total');
+        $quantidadeAnterior = (clone $mesAnterior)->count();
+        $ticketAnterior = $quantidadeAnterior ? $faturamentoAnterior / $quantidadeAnterior : 0;
 
         // Variação em %; fica null quando não há mês anterior para comparar
-        $mes['variacao'] = $faturamentoAnterior > 0
-            ? ($mes['faturamento'] - $faturamentoAnterior) / $faturamentoAnterior * 100
-            : null;
+        $variacao = fn ($atual, $anterior) => $anterior > 0 ? ($atual - $anterior) / $anterior * 100 : null;
+        $mes['variacao'] = $variacao($mes['faturamento'], $faturamentoAnterior);
+        $mes['variacao_quantidade'] = $variacao($mes['quantidade'], $quantidadeAnterior);
+        $mes['variacao_ticket'] = $variacao($mes['ticket_medio'], $ticketAnterior);
 
         // Produtos no estoque mínimo ou abaixo dele
         $estoqueBaixo = Produto::with('categoria')->estoqueBaixo()->orderBy('estoque')->limit(6)->get();

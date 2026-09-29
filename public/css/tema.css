@@ -902,3 +902,43 @@ a:hover { text-decoration: underline; }
     .detalhe .grade-detalhe { grid-template-columns: 1fr; }
     [data-lista-conteudo] { overflow-x: auto; }
 }
+
+/* =====================================================================
+   DASHBOARD: ajustes da revisão de design (design-critique)
+   ===================================================================== */
+
+/* Variação é dado, não ação: verde para alta (o amarelo fica só para botões e menu) */
+.variacao.sobe { background: rgba(45, 171, 106, .18); color: var(--verde-texto); }
+.kpi-principal .variacao.sobe { background: rgba(79, 208, 140, .2); color: #c9f5dc; }
+.kpi .rodape .variacao { margin-right: .35rem; }
+
+/* Ícone do ticket médio em azul (dado), não em amarelo */
+.icone.sol { background: rgba(67, 148, 232, .14); color: #8cc0f5; }
+
+/* Cartão principal: só o brilho verde; a faixa colorida saía disputando com o valor */
+.kpi-principal::after { display: none; }
+
+/* Números dos cartões com dígitos de mesma largura; "R$" menor em todos */
+.kpi .valor { font-variant-numeric: tabular-nums; }
+.kpi .valor small { font-size: .55em; font-weight: 600; opacity: .8; margin-right: .25rem; }
+
+/* Cartão que é link: mostra que dá para clicar */
+.kpi-link { transition: border-color .15s ease, background-color .15s ease; }
+.kpi-link .ir { color: var(--ceu); font-weight: 500; }
+.kpi-link:hover, .kpi-link:focus-visible { border-color: rgba(67, 148, 232, .45); background-color: var(--cartao-2); }
+.kpi-link:focus-visible { outline: 2px solid var(--ceu); outline-offset: 2px; }
+
+/* Celular: botão "Repor" com área de toque de 44px e medidor em linha própria */
+@media (max-width: 991.98px) {
+    .estoque-item .btn-sm { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 575.98px) {
+    .estoque-item { flex-wrap: wrap; }
+    .estoque-item > .text-truncate { flex: 1 1 calc(100% - 5rem); }
+    .estoque-item .medidor { order: 3; width: 100%; margin-left: 0; }
+}
+
+/* Quem pede menos movimento no sistema não vê as animações */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
