@@ -75,7 +75,7 @@ class ConsumidorFinalTest extends TestCase
 
         $resposta = $this->get('/clientes')->assertOk();
         $resposta->assertSee('Bruno Costa');
-        $resposta->assertDontSee('Consumidor final');
+        $this->assertFalse($resposta->viewData('clientes')->contains(fn (Cliente $c) => $c->ehConsumidorFinal()));
         $this->assertSame(['todos' => 1, 'com' => 0, 'sem' => 1], $resposta->viewData('contagem'));
     }
 

@@ -11,8 +11,12 @@
 
 {{-- Campo: CPF/CNPJ --}}
 <div class="mb-3">
-    <label for="cpf_cnpj" class="form-label">CPF/CNPJ</label>
-    <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control @error('cpf_cnpj') is-invalid @enderror" value="{{ old('cpf_cnpj', $cliente->cpf_cnpj) }}" data-mascara="cpfcnpj">
+    <div class="rotulo-com-ajuda">
+        <label for="cpf_cnpj" class="form-label">CPF/CNPJ</label>
+        @include('partials.ajuda-campo', ['id' => 'ajuda-cpf-cnpj', 'campo' => 'o campo CPF/CNPJ'])
+    </div>
+    <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control @error('cpf_cnpj') is-invalid @enderror" value="{{ old('cpf_cnpj', $cliente->cpf_cnpj) }}" data-mascara="cpfcnpj" inputmode="numeric" aria-describedby="ajuda-cpf-cnpj">
+    <p class="ajuda-texto" id="ajuda-cpf-cnpj" hidden>Pode digitar só os números; a máscara entra sozinha. Não é obrigatório.</p>
     @error('cpf_cnpj')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror

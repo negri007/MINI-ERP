@@ -10,6 +10,7 @@
             <a href="{{ route('clientes.create') }}" class="btn btn-primary">+ Novo cliente</a>
         </div>
     </div>
+    @include('partials.dica', ['chave' => 'clientes', 'texto' => 'Quem compra de você. Para vender sem identificar, use "Consumidor final".'])
 
     {{-- Filtros em pílulas + busca instantânea --}}
     <div class="filtros">
@@ -27,7 +28,7 @@
     <div data-atualiza="conteudo">
         <div data-lista-conteudo>
             @if ($clientes->isEmpty())
-                <div class="lista-vazia">Nenhum cliente encontrado.</div>
+                @include('partials.vazio', ['nome' => 'cliente', 'nomePlural' => 'clientes', 'texto' => 'Cadastre quem compra de você para ver o histórico de compras. Para vender sem identificar, use Consumidor final.', 'rotaLista' => 'clientes.index', 'acao' => ['Cadastrar cliente', route('clientes.create')]])
             @else
                 <table class="lista">
                     <thead>

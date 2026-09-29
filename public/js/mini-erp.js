@@ -262,3 +262,37 @@ document.addEventListener('keydown', (e) => {
     const linha = e.target.closest?.('tr[data-expande]');
     if (linha && (e.key === 'Enter' || e.key === ' ') && e.target === linha) { e.preventDefault(); alternarLinha(linha); }
 });
+
+// ---------- Dica de cada tela ("Entendi" esconde, "Mostrar dica" traz de volta) ----------
+// As telas com a dica escondida ficam guardadas no navegador (localStorage).
+const dicasOcultas = new Set(guardado.ler('dicas-ocultas', []));
+document.querySelectorAll('.dica[data-dica]').forEach((dica) => {
+    const chave = dica.dataset.dica;
+    const fechar = dica.querySelector('[data-dica-fechar]');
+    const abrir = dica.querySelector('[data-dica-abrir]');
+
+    const mostrar = (visivel) => {
+        dica.classList.toggle('oculta', !visivel);
+        visivel ? dicasOcultas.delete(chave) : dicasOcultas.add(chave);
+        guardado.gravar('dicas-ocultas', [...dicasOcultas]);
+    };
+
+    dica.classList.toggle('oculta', dicasOcultas.has(chave));
+    // o foco vai para o outro botão, para quem usa teclado não "cair" no começo da página
+    fechar.addEventListener('click', () => { mostrar(false); abrir.focus(); });
+    abrir.addEventListener('click', () => { mostrar(true); fechar.focus(); });
+});
+// A regra provisória que escondia as dicas antes da página desenhar já não é necessária
+document.getElementById('dicas-ocultas-css')?.remove();
+
+// ---------- "?" dos campos que confundem: abre e fecha a explicação ----------
+document.querySelectorAll('[data-ajuda]').forEach((botao) => {
+    const texto = document.getElementById(botao.getAttribute('aria-controls'));
+    if (!texto) return;
+    const alternar = (abrir) => {
+        texto.hidden = !abrir;
+        botao.setAttribute('aria-expanded', String(abrir));
+    };
+    botao.addEventListener('click', () => alternar(texto.hidden));
+    botao.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !texto.hidden) { e.stopPropagation(); alternar(false); } });
+});

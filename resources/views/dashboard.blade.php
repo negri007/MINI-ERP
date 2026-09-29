@@ -14,6 +14,7 @@
         <h1 class="h3 mb-0">{{ $saudacao }}, {{ $primeiroNome }}</h1>
         <p class="subtitulo mb-0">{{ ucfirst(now()->locale('pt_BR')->translatedFormat('l, d \\d\\e F')) }} · aqui está o resumo da loja</p>
     </div>
+    @include('partials.dica', ['chave' => 'dashboard', 'texto' => 'Resumo do mês. Clique em "Para repor" para ver o que está acabando.'])
 
     {{-- Indicadores do mês --}}
     <section class="kpis">

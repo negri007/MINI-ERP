@@ -3,7 +3,7 @@
 @section('title', 'Novo produto')
 
 @section('content')
-    @include('partials.cabeca-form', ['lista' => 'Produtos', 'rota' => 'produtos.index', 'titulo' => 'Novo produto'])
+    @include('partials.cabeca-form', ['lista' => 'Produtos', 'rota' => 'produtos.index', 'titulo' => 'Novo produto', 'chaveDica' => 'produto-form', 'dica' => 'Estoque mínimo é o alerta de reposição, não um limite de venda.'])
 
     {{-- Formulário --}}
     <div class="card cartao-form">

@@ -3,7 +3,7 @@
 @section('title', 'Editar fornecedor')
 
 @section('content')
-    @include('partials.cabeca-form', ['lista' => 'Fornecedores', 'rota' => 'fornecedores.index', 'titulo' => 'Editar fornecedor'])
+    @include('partials.cabeca-form', ['lista' => 'Fornecedores', 'rota' => 'fornecedores.index', 'titulo' => 'Editar fornecedor', 'chaveDica' => 'fornecedor-form', 'dica' => 'Só o nome é obrigatório. O CNPJ evita cadastro repetido.'])
 
     {{-- Formulário --}}
     <div class="card cartao-form">

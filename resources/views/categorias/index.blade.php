@@ -10,6 +10,7 @@
             <a href="{{ route('categorias.create') }}" class="btn btn-primary">+ Nova categoria</a>
         </div>
     </div>
+    @include('partials.dica', ['chave' => 'categorias', 'texto' => 'Agrupam os produtos (ex.: Bebidas, Limpeza). Todo produto precisa de uma.'])
 
     {{-- Filtros em pílulas + busca instantânea --}}
     <div class="filtros">
@@ -27,7 +28,7 @@
     <div data-atualiza="conteudo">
         <div data-lista-conteudo>
             @if ($categorias->isEmpty())
-                <div class="lista-vazia">Nenhuma categoria encontrada.</div>
+                @include('partials.vazio', ['nome' => 'categoria', 'nomePlural' => 'categorias', 'feminino' => true, 'texto' => 'Crie categorias para organizar os produtos, como Bebidas ou Limpeza.', 'rotaLista' => 'categorias.index', 'acao' => ['Cadastrar categoria', route('categorias.create')]])
             @else
                 <table class="lista">
                     <thead>

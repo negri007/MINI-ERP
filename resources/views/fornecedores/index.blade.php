@@ -10,6 +10,7 @@
             <a href="{{ route('fornecedores.create') }}" class="btn btn-primary">+ Novo fornecedor</a>
         </div>
     </div>
+    @include('partials.dica', ['chave' => 'fornecedores', 'texto' => 'Quem vende para você. Ligar o produto ao fornecedor ajuda na hora de repor.'])
 
     {{-- Filtros em pílulas + busca instantânea --}}
     <div class="filtros">
@@ -27,7 +28,7 @@
     <div data-atualiza="conteudo">
         <div data-lista-conteudo>
             @if ($fornecedores->isEmpty())
-                <div class="lista-vazia">Nenhum fornecedor encontrado.</div>
+                @include('partials.vazio', ['nome' => 'fornecedor', 'nomePlural' => 'fornecedores', 'texto' => 'Cadastre quem vende para você e saiba de quem comprar na hora de repor.', 'rotaLista' => 'fornecedores.index', 'acao' => ['Cadastrar fornecedor', route('fornecedores.create')]])
             @else
                 <table class="lista">
                     <thead>

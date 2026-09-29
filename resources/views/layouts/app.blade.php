@@ -14,6 +14,16 @@
     {{-- Aplica o "menu recolhido" antes de desenhar a página (evita o menu piscar) --}}
     <script>
         try { if (JSON.parse(localStorage.getItem('menu-compacto'))) document.documentElement.classList.add('menu-compacto'); } catch (e) {}
+        // Esconde já as dicas que a pessoa marcou como "Entendi" (evita a dica aparecer e sumir)
+        try {
+            const ocultas = (JSON.parse(localStorage.getItem('dicas-ocultas')) || []).filter((k) => /^[a-z0-9-]+$/.test(k));
+            if (ocultas.length) {
+                const estilo = document.createElement('style');
+                estilo.id = 'dicas-ocultas-css';
+                estilo.textContent = ocultas.map((k) => `.dica[data-dica="${k}"] .dica-texto, .dica[data-dica="${k}"] .dica-fechar { display: none; } .dica[data-dica="${k}"] .dica-abrir { display: inline-flex; }`).join(' ');
+                document.head.appendChild(estilo);
+            }
+        } catch (e) {}
     </script>
 </head>
 <body>

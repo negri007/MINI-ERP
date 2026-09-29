@@ -4,6 +4,7 @@
 
 @section('content')
     <h1 class="h3 mb-3">Relatório de Vendas</h1>
+    @include('partials.dica', ['chave' => 'relatorio', 'texto' => 'Escolha o período. Vendas canceladas não entram no total.'])
 
     {{-- Filtro de período --}}
     <form method="GET" class="row g-2 mb-4 align-items-end">

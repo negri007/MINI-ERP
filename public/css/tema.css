@@ -1010,3 +1010,45 @@ a:hover { text-decoration: underline; }
 .combo-lista li.ativo { background: var(--selecionado); color: var(--selecionado-texto); }
 .combo-lista li.ativo small { color: var(--selecionado-texto); }
 .combo-vazio { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .4rem; color: var(--texto-2); font-size: .85rem; }
+
+/* =====================================================================
+   MICROAJUDA: dica de cada tela, "?" dos campos e telas vazias
+   ===================================================================== */
+
+/* Dica abaixo do título (azul-céu = informação) */
+.dica { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin: -.35rem 0 1.1rem; }
+.dica-texto { display: flex; align-items: flex-start; gap: .5rem; margin: 0; color: var(--texto-2); font-size: .88rem; }
+.dica-marca {
+    display: inline-grid; place-items: center; flex-shrink: 0;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(67, 148, 232, .16); color: #8cc0f5; font-size: .72rem; font-weight: 700;
+}
+.dica-fechar, .dica-abrir {
+    display: inline-flex; align-items: center; gap: .35rem;
+    min-height: 32px; padding: .2rem .6rem; border: 1px solid var(--borda); border-radius: 8px;
+    background: transparent; color: var(--ceu); font-size: .8rem; font-weight: 500;
+}
+.dica-fechar:hover, .dica-abrir:hover { background: var(--cartao-2); color: #7ab4f0; }
+.dica-abrir { display: none; }
+.dica.oculta .dica-texto, .dica.oculta .dica-fechar { display: none; }
+.dica.oculta .dica-abrir { display: inline-flex; }
+
+/* "?" ao lado do rótulo e o texto de explicação embaixo do campo */
+.rotulo-com-ajuda { display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; }
+.rotulo-com-ajuda .form-label { margin-bottom: 0; }
+.legenda-com-ajuda { float: none; display: inline-block; width: auto; margin: 0 .4rem .35rem 0; font-size: .8rem; }
+.ajuda-botao {
+    display: inline-grid; place-items: center;
+    width: 24px; height: 24px; padding: 0; border: 1px solid rgba(67, 148, 232, .45); border-radius: 50%;
+    background: transparent; color: #8cc0f5; font-size: .75rem; font-weight: 700; line-height: 1;
+}
+.ajuda-botao:hover, .ajuda-botao[aria-expanded="true"] { background: rgba(67, 148, 232, .16); }
+.ajuda-texto {
+    margin: .4rem 0 0; padding: .5rem .7rem; border-left: 3px solid var(--ceu); border-radius: 0 8px 8px 0;
+    background: rgba(67, 148, 232, .08); color: var(--texto); font-size: .82rem;
+}
+
+/* Telas vazias: título, uma frase e o botão da próxima ação */
+.lista-vazia h2 { margin-bottom: .35rem; color: var(--texto); }
+.lista-vazia p { max-width: 46ch; margin: 0 auto 1rem; }
+.acoes-vazio { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }

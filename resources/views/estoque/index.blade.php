@@ -10,6 +10,7 @@
             <a href="{{ route('estoque.create') }}" class="btn btn-primary">+ Nova movimentação</a>
         </div>
     </div>
+    @include('partials.dica', ['chave' => 'estoque', 'texto' => 'Tudo que entrou e saiu, com o motivo. As vendas aparecem aqui sozinhas.'])
 
     {{-- Filtros: tipo em pílulas + busca instantânea --}}
     <div class="filtros">
@@ -27,7 +28,7 @@
     <div data-atualiza="conteudo">
         <div data-lista-conteudo>
             @if ($movimentacoes->isEmpty())
-                <div class="lista-vazia">Nenhuma movimentação encontrada.</div>
+                @include('partials.vazio', ['nome' => 'movimentação', 'nomePlural' => 'movimentações', 'feminino' => true, 'texto' => 'Aqui aparece tudo que entra e sai do estoque. Registre a chegada de mercadoria para começar.', 'rotaLista' => 'estoque.index', 'acao' => ['Movimentar estoque', route('estoque.create')]])
             @else
                 <table class="lista">
                     <thead>

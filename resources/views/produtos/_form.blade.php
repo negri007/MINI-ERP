@@ -55,8 +55,12 @@
 
     {{-- Campo: Estoque mínimo (abaixo disso o produto aparece no alerta do Dashboard) --}}
     <div class="col-md-4 mb-3">
-        <label for="estoque_minimo" class="form-label">Estoque mínimo <span class="text-danger">*</span></label>
-        <input type="number" step="1" min="0" name="estoque_minimo" id="estoque_minimo" class="form-control @error('estoque_minimo') is-invalid @enderror" value="{{ old('estoque_minimo', $produto->estoque_minimo) }}">
+        <div class="rotulo-com-ajuda">
+            <label for="estoque_minimo" class="form-label">Estoque mínimo <span class="text-danger">*</span></label>
+            @include('partials.ajuda-campo', ['id' => 'ajuda-estoque-minimo', 'campo' => 'estoque mínimo'])
+        </div>
+        <input type="number" step="1" min="0" name="estoque_minimo" id="estoque_minimo" class="form-control @error('estoque_minimo') is-invalid @enderror" value="{{ old('estoque_minimo', $produto->estoque_minimo) }}" aria-describedby="ajuda-estoque-minimo">
+        <p class="ajuda-texto" id="ajuda-estoque-minimo" hidden>Quando o estoque chegar neste número, o produto aparece em "Para repor". Não impede a venda.</p>
         @error('estoque_minimo')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror

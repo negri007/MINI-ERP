@@ -25,6 +25,10 @@
         </div>
     </div>
 
+    <div class="no-print">
+        @include('partials.dica', ['chave' => 'venda-detalhe', 'texto' => 'Cancelar devolve os produtos ao estoque e tira a venda do faturamento.'])
+    </div>
+
     @error('venda')
         <div class="alert alert-danger">{{ $message }}</div>
     @enderror

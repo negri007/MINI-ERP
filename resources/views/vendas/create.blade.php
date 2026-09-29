@@ -3,7 +3,7 @@
 @section('title', 'Nova venda')
 
 @section('content')
-    @include('partials.cabeca-form', ['lista' => 'Vendas', 'rota' => 'vendas.index', 'titulo' => 'Nova venda'])
+    @include('partials.cabeca-form', ['lista' => 'Vendas', 'rota' => 'vendas.index', 'titulo' => 'Nova venda', 'chaveDica' => 'venda-form', 'dica' => 'Não achou o cliente? Cadastre sem sair daqui em "+ Novo cliente".'])
 
     {{-- Erros gerais (ex.: estoque insuficiente, venda sem itens) --}}
     @if ($errors->any())
@@ -131,9 +131,13 @@
                         <div class="invalid-feedback" id="rapido_nome_erro" data-erro="nome"></div>
                     </div>
                     <div class="mb-3">
-                        <label for="rapido_cpf_cnpj" class="form-label">CPF/CNPJ</label>
+                        <div class="rotulo-com-ajuda">
+                            <label for="rapido_cpf_cnpj" class="form-label">CPF/CNPJ</label>
+                            @include('partials.ajuda-campo', ['id' => 'ajuda-rapido-cpf-cnpj', 'campo' => 'o campo CPF/CNPJ'])
+                        </div>
                         <input type="text" name="cpf_cnpj" id="rapido_cpf_cnpj" class="form-control" data-mascara="cpfcnpj" inputmode="numeric"
-                               placeholder="000.000.000-00" aria-describedby="rapido_cpf_cnpj_erro">
+                               placeholder="000.000.000-00" aria-describedby="rapido_cpf_cnpj_erro ajuda-rapido-cpf-cnpj">
+                        <p class="ajuda-texto" id="ajuda-rapido-cpf-cnpj" hidden>Pode digitar só os números; a máscara entra sozinha. Não é obrigatório.</p>
                         <div class="invalid-feedback" id="rapido_cpf_cnpj_erro" data-erro="cpf_cnpj"></div>
                     </div>
                     <div>

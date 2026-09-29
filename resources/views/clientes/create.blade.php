@@ -3,7 +3,7 @@
 @section('title', 'Novo cliente')
 
 @section('content')
-    @include('partials.cabeca-form', ['lista' => 'Clientes', 'rota' => 'clientes.index', 'titulo' => 'Novo cliente'])
+    @include('partials.cabeca-form', ['lista' => 'Clientes', 'rota' => 'clientes.index', 'titulo' => 'Novo cliente', 'chaveDica' => 'cliente-form', 'dica' => 'Só o nome é obrigatório. O CPF/CNPJ evita cadastro repetido.'])
 
     {{-- Formulário --}}
     <div class="card cartao-form">

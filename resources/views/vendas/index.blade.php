@@ -7,6 +7,7 @@
     <div class="cabeca-lista">
         <h1 class="h3">Vendas <span class="qtd" data-atualiza="qtd">{{ $vendas->total() }} {{ $vendas->total() === 1 ? 'venda' : 'vendas' }} · clique numa venda para ver os itens</span></h1>
     </div>
+    @include('partials.dica', ['chave' => 'vendas', 'texto' => 'Venda registrada não se edita: se errar, cancele e registre de novo.'])
 
     {{-- Resumo do que está filtrado (muda junto com os filtros) --}}
     <div class="resumo-lista" data-atualiza="resumo">
@@ -38,7 +39,7 @@
     <div data-atualiza="conteudo">
         <div data-lista-conteudo>
             @if ($vendas->isEmpty())
-                <div class="lista-vazia">Nenhuma venda encontrada.</div>
+                @include('partials.vazio', ['nome' => 'venda', 'nomePlural' => 'vendas', 'feminino' => true, 'texto' => 'Registre a primeira venda: o estoque baixa sozinho e ela aparece no Dashboard.', 'rotaLista' => 'vendas.index', 'acao' => ['Registrar venda', route('vendas.create')]])
             @else
                 <table class="lista">
                     <thead>

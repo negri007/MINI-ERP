@@ -48,7 +48,7 @@ class MiniErpTest extends TestCase
             ->assertRedirect('/categorias')->assertSessionHas('success');
         $categoria = Categoria::firstOrFail();
 
-        $this->get("/categorias/{$categoria->id}/edit")->assertOk()->assertSee('Bebidas');
+        $this->get("/categorias/{$categoria->id}/edit")->assertOk()->assertSee('value="Bebidas"', false); // o valor no campo (a dica também cita "Bebidas")
         $this->put("/categorias/{$categoria->id}", ['nome' => 'Sucos'])->assertRedirect('/categorias');
         $this->assertSame('Sucos', $categoria->fresh()->nome);
 
@@ -66,10 +66,11 @@ class MiniErpTest extends TestCase
 
     public function test_busca_e_paginacao(): void
     {
-        Categoria::factory()->create(['nome' => 'Bebidas']);
-        Categoria::factory()->create(['nome' => 'Limpeza']);
+        // nomes que não aparecem nos textos de ajuda da tela (a dica cita "Bebidas, Limpeza")
+        Categoria::factory()->create(['nome' => 'Sucos']);
+        Categoria::factory()->create(['nome' => 'Higiene']);
 
-        $this->get('/categorias?busca=bebi')->assertSee('Bebidas')->assertDontSee('Limpeza');
+        $this->get('/categorias?busca=suc')->assertSee('Sucos')->assertDontSee('Higiene');
 
         Categoria::factory(12)->create();
         $this->get('/categorias')->assertSee('page=2');

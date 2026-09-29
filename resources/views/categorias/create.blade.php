@@ -3,7 +3,7 @@
 @section('title', 'Nova categoria')
 
 @section('content')
-    @include('partials.cabeca-form', ['lista' => 'Categorias', 'rota' => 'categorias.index', 'titulo' => 'Nova categoria'])
+    @include('partials.cabeca-form', ['lista' => 'Categorias', 'rota' => 'categorias.index', 'titulo' => 'Nova categoria', 'chaveDica' => 'categoria-form', 'dica' => 'Use um nome curto, como Bebidas ou Limpeza.'])
 
     {{-- Formulário --}}
     <div class="card cartao-form">

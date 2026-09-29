@@ -14,6 +14,7 @@
             <a href="{{ route('produtos.create') }}" class="btn btn-primary">+ Novo produto</a>
         </div>
     </div>
+    @include('partials.dica', ['chave' => 'produtos', 'texto' => 'O que você vende. O estoque muda sozinho com vendas e movimentações.'])
 
     {{-- Filtros em pílulas (categorias com cor + estoque baixo) e busca instantânea --}}
     <div class="filtros">
@@ -35,7 +36,7 @@
     <div data-atualiza="conteudo">
         <div data-lista-conteudo>
             @if ($produtos->isEmpty())
-                <div class="lista-vazia">Nenhum produto encontrado.</div>
+                @include('partials.vazio', ['nome' => 'produto', 'nomePlural' => 'produtos', 'texto' => 'Cadastre o que você vende para registrar vendas e controlar o estoque.', 'rotaLista' => 'produtos.index', 'acao' => ['Cadastrar produto', route('produtos.create')]])
 
             @elseif ($visao === 'vitrine')
                 {{-- Visualização em cartões --}}
