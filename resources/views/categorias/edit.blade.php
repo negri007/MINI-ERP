@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Editar Categoria')
+@section('title', 'Editar categoria')
 
 @section('content')
-    <h1 class="h3 mb-3">Editar Categoria</h1>
+    @include('partials.cabeca-form', ['lista' => 'Categorias', 'rota' => 'categorias.index', 'titulo' => 'Editar categoria'])
 
     {{-- Formulário --}}
-    <div class="card">
+    <div class="card cartao-form">
         <div class="card-body">
             <form action="{{ route('categorias.update', $categoria) }}" method="POST">
                 @csrf
@@ -14,9 +14,11 @@
 
                 @include('categorias._form')
 
-                {{-- Botões --}}
-                <button type="submit" class="btn btn-success">Atualizar</button>
-                <a href="{{ route('categorias.index') }}" class="btn btn-secondary">Cancelar</a>
+                {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
+                <div class="pe-form">
+                    <a href="{{ route('categorias.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Atualizar</button>
+                </div>
             </form>
         </div>
     </div>

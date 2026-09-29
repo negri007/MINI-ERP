@@ -75,10 +75,7 @@
             <div class="card-body p-0">
                 @forelse ($estoqueBaixo as $produto)
                     <div class="estoque-item">
-                        <div class="text-truncate">
-                            <div class="nome text-truncate">{{ $produto->nome }}</div>
-                            <small>{{ $produto->categoria->nome ?? '-' }}</small>
-                        </div>
+                        <div class="nome text-truncate">{{ $produto->nome }} <small>{{ $produto->categoria->nome ?? '-' }}</small></div>
                         @include('partials.medidor', ['produto' => $produto])
                         <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="btn btn-sm btn-outline-primary">Repor</a>
                     </div>

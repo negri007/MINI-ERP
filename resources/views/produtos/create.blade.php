@@ -1,21 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Novo Produto')
+@section('title', 'Novo produto')
 
 @section('content')
-    <h1 class="h3 mb-3">Novo Produto</h1>
+    @include('partials.cabeca-form', ['lista' => 'Produtos', 'rota' => 'produtos.index', 'titulo' => 'Novo produto'])
 
     {{-- Formulário --}}
-    <div class="card">
+    <div class="card cartao-form">
         <div class="card-body">
             <form action="{{ route('produtos.store') }}" method="POST">
                 @csrf
 
                 @include('produtos._form')
 
-                {{-- Botões --}}
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <a href="{{ route('produtos.index') }}" class="btn btn-secondary">Cancelar</a>
+                {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
+                <div class="pe-form">
+                    <a href="{{ route('produtos.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
             </form>
         </div>
     </div>

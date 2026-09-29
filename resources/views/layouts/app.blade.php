@@ -160,15 +160,20 @@
                 <button type="button" class="btn btn-secondary abrir-menu" id="abrirMenu" aria-label="Abrir menu" style="width: 42px; padding: .5rem">
                     @include('partials.icone', ['nome' => 'menu'])
                 </button>
-                <button type="button" class="abrir-rapido" data-abrir-rapido>
+                <button type="button" class="abrir-rapido" data-abrir-rapido aria-label="Buscar ou ir para (Ctrl + K)">
                     <span style="display: contents">@include('partials.icone', ['nome' => 'busca'])</span>
                     <span>Buscar ou ir para…</span>
                     <kbd>Ctrl K</kbd>
                 </button>
-                <a href="{{ route('vendas.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-2">
-                    <span style="width: 16px; height: 16px; display: inline-flex">@include('partials.icone', ['nome' => 'mais'])</span>
-                    Nova venda
-                </a>
+                {{-- Um amarelo cheio por tela: no Dashboard "Nova venda" é a ação principal;
+                     nas outras telas vira contorno, porque a página já tem o seu botão principal.
+                     Na própria tela de nova venda o atalho não aparece. --}}
+                @unless (request()->routeIs('vendas.create'))
+                    <a href="{{ route('vendas.create') }}" class="btn {{ request()->routeIs('dashboard') ? 'btn-primary' : 'btn-outline-primary' }} d-inline-flex align-items-center gap-2">
+                        <span style="width: 16px; height: 16px; display: inline-flex">@include('partials.icone', ['nome' => 'mais'])</span>
+                        Nova venda
+                    </a>
+                @endunless
             </header>
 
             {{-- Conteúdo da página --}}

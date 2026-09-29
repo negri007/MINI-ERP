@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Nova Venda')
+@section('title', 'Nova venda')
 
 @section('content')
-    <h1 class="h3 mb-3">Nova Venda</h1>
+    @include('partials.cabeca-form', ['lista' => 'Vendas', 'rota' => 'vendas.index', 'titulo' => 'Nova venda'])
 
     {{-- Erros gerais (ex.: estoque insuficiente, venda sem itens) --}}
     @if ($errors->any())
@@ -86,8 +86,11 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-success">Registrar Venda</button>
-        <a href="{{ route('vendas.index') }}" class="btn btn-secondary">Cancelar</a>
+        {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
+        <div class="pe-form">
+            <a href="{{ route('vendas.index') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Registrar venda</button>
+        </div>
     </form>
 
     {{-- Modelo de uma linha de item (copiado pelo JavaScript) --}}
