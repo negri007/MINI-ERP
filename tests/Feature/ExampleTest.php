@@ -9,10 +9,11 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    // Quem não está logado é mandado para a tela de login
-    public function test_visitante_e_redirecionado_para_o_login(): void
+    // Quem não está logado vê a apresentação em "/"; as telas internas mandam para o login
+    public function test_visitante_ve_a_apresentacao_e_as_telas_internas_pedem_login(): void
     {
-        $this->get('/')->assertRedirect('/login');
+        $this->get('/')->assertOk()->assertViewIs('apresentacao');
+        $this->get('/produtos')->assertRedirect('/login');
         $this->get('/login')->assertOk()->assertSee('Entrar');
     }
 }

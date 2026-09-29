@@ -1,0 +1,91 @@
+/*
+|--------------------------------------------------------------------------
+| Página de apresentação (/sobre e "/" para visitantes)
+|--------------------------------------------------------------------------
+| Usa as cores e fontes do tema Mata (tema.css). O destaque é a amostra do
+| sistema na abertura, feita com os componentes reais (cartão + medidor);
+| o resto é uma coluna de leitura, sem enfeites.
+*/
+
+.apresentacao { min-height: 100vh; }
+
+/* Largura de leitura, centralizada */
+.ap-topo, .ap-abertura, .ap-corpo { width: min(100% - 2rem, 1080px); margin-inline: auto; }
+
+.ap-topo { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 0; }
+.ap-topo .logo { color: var(--texto); font-family: var(--fonte-titulo); font-weight: 600; }
+
+/* Abertura: título à esquerda, amostra à direita */
+.ap-abertura {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding: clamp(2.5rem, 7vw, 5.5rem) 0 clamp(3rem, 7vw, 5rem);
+    border-bottom: 1px solid var(--borda);
+}
+.ap-abertura h1 {
+    max-width: 16ch;
+    margin: 0 0 1.25rem;
+    font-size: clamp(2.3rem, 5.2vw, 3.9rem);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -.03em;
+}
+.ap-lead { max-width: 38ch; margin: 0 0 2rem; color: var(--texto-2); font-size: 1.15rem; line-height: 1.55; }
+
+/* A amostra: um cartão do sistema levemente inclinado sobre o verde-mata */
+.ap-amostra { margin: 0; }
+.ap-amostra .card {
+    transform: rotate(-1.2deg);
+    border: 1px solid rgba(79, 208, 140, .22);
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .8), 0 0 0 10px rgba(18, 82, 55, .35);
+}
+.ap-amostra .card-header { font-size: 1.05rem; }
+.ap-contagem { color: #ff8a8a; font-family: var(--fonte-texto); font-size: .8rem; font-weight: 600; }
+.ap-amostra figcaption { margin-top: 1.1rem; color: var(--texto-2); font-size: .82rem; text-align: center; }
+
+/* Corpo: seções em coluna, título à esquerda e texto à direita nas telas largas */
+.ap-corpo section {
+    display: grid;
+    grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+    gap: 1rem 3rem;
+    padding: 2.75rem 0;
+    border-bottom: 1px solid var(--borda);
+}
+.ap-corpo h2 { margin: 0; font-size: 1.35rem; }
+.ap-corpo p { max-width: 62ch; margin: 0; color: var(--texto-2); font-size: 1.02rem; line-height: 1.65; }
+
+/* "O que ele resolve": lista de definições com linhas finas */
+.ap-lista { margin: 0; }
+.ap-lista > div { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); gap: .25rem 1.5rem; padding: .9rem 0; border-top: 1px solid var(--borda); }
+.ap-lista > div:first-child { border-top: 0; padding-top: 0; }
+.ap-lista dt { color: var(--texto); font-family: var(--fonte-titulo); font-weight: 600; }
+.ap-lista dd { margin: 0; color: var(--texto-2); }
+
+/* "Como funciona": é uma sequência de verdade, então leva número */
+.ap-passos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 0; padding: 0; list-style: none; counter-reset: passo; }
+.ap-passos li { counter-increment: passo; }
+.ap-passos li::before {
+    content: counter(passo);
+    display: block;
+    margin-bottom: .5rem;
+    color: var(--verde-texto);
+    font-family: var(--fonte-titulo);
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1;
+}
+.ap-passos h3 { margin: 0 0 .35rem; font-size: 1.05rem; }
+.ap-passos p { font-size: .95rem; }
+
+/* Fechamento */
+.ap-corpo .ap-fim { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 0; padding-bottom: 4rem; }
+
+/* Celular: tudo em uma coluna */
+@media (max-width: 767.98px) {
+    .ap-abertura { grid-template-columns: minmax(0, 1fr); }
+    .ap-amostra .card { transform: none; }
+    .ap-corpo section, .ap-lista > div { grid-template-columns: minmax(0, 1fr); }
+    .ap-passos { grid-template-columns: minmax(0, 1fr); }
+}

@@ -75,16 +75,21 @@
 |
 */
 
+use App\Http\Controllers\ApresentacaoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\MovimentacaoEstoqueController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\VendaController;
 use Illuminate\Support\Facades\Route;
+
+// Página inicial: visitante vê a apresentação; quem entrou vê o Dashboard (por isso o nome "dashboard")
+Route::get('/', [ApresentacaoController::class, 'inicio'])->name('dashboard');
+// Apresentação do sistema, com ou sem login (link "Sobre o Mini ERP" no menu)
+Route::get('/sobre', [ApresentacaoController::class, 'sobre'])->name('sobre');
 
 // Rotas para quem NÃO está logado (tela de login)
 Route::middleware('guest')->group(function () {
@@ -97,8 +102,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-    // Página inicial (Dashboard)
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // CRUDs de cadastro (sem a rota "show", que não é usada)
     // Cadastro rápido de categoria usado pelo formulário de produto

@@ -3,7 +3,8 @@
 Mini ERP em Laravel + Blade + Bootstrap 5, com MySQL (Laragon).
 
 **Módulos**
-- **Login**: só usuários autenticados acessam o sistema.
+- **Apresentação**: quem abre o endereço sem estar logado vê uma página explicando o sistema (também em `/sobre`).
+- **Login**: só usuários autenticados acessam as telas do sistema.
 - **Cadastros**: Categorias, Fornecedores, Clientes (CPF/CNPJ validado e único) e Produtos (com estoque mínimo).
 - **Vendas**: vários produtos por venda, total calculado, baixa automática de estoque e cancelamento que devolve o estoque.
   O campo Cliente busca por nome ou CPF/CNPJ enquanto você digita, e o botão **+ Novo cliente** cadastra sem sair da venda.
@@ -64,6 +65,9 @@ ou `php artisan migrate:fresh --seed` para apagar tudo e recomeçar com os dados
 | `docs/APRESENTACAO.md` | Roteiro para apresentar o CRUD de Produtos |
 
 ## Melhorias futuras
+
+- **Perfis de usuário (dono e caixa)**: hoje todo usuário acessa tudo. A ideia é o dono ver tudo e o caixa só registrar
+  e consultar vendas. Exige um campo de perfil nos usuários e checagem nas rotas.
 
 - **Venda a prazo (fiado)**: quando existir, não poderá usar o Consumidor final, porque a dívida precisa de um cliente identificado.
 - **Produto "inativo"**: hoje um produto já vendido não pode ser excluído (o histórico precisa dele). Um campo "inativo"
