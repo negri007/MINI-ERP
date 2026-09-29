@@ -5,7 +5,7 @@
 @section('content')
     {{-- Cabeçalho: título, quantidade e botão de cadastro --}}
     <div class="cabeca-lista">
-        <h1 class="h3">Clientes <span class="qtd" data-atualiza="qtd">{{ $clientes->total() }} {{ $clientes->total() === 1 ? 'cliente' : 'clientes' }} · clique numa linha para ver as compras</span></h1>
+        <h1 class="h3">Clientes <span class="qtd"><span role="status"><span data-atualiza="qtd">{{ $clientes->total() }} {{ $clientes->total() === 1 ? 'cliente' : 'clientes' }}</span></span><span class="dica-lista"> · clique numa linha para ver as compras</span></span></h1>
         <div class="acoes-topo">
             <a href="{{ route('clientes.create') }}" class="btn btn-primary">+ Novo cliente</a>
         </div>
@@ -42,11 +42,11 @@
                     </thead>
                     <tbody>
                         @foreach ($clientes as $cliente)
-                            {{-- Linha principal: clique para abrir os detalhes --}}
-                            <tr class="linha" data-expande tabindex="0" aria-expanded="false" style="--cor: var(--ceu)">
+                            {{-- Linha principal: clique na linha (mouse) ou no botão da seta (teclado) para abrir os detalhes --}}
+                            <tr class="linha" data-expande style="--cor: var(--ceu)">
                                 <td>
                                     <div class="item-lista">
-                                        <span class="seta-abrir">›</span>
+                                        <button type="button" class="seta-abrir" aria-expanded="false" aria-controls="detalhe-{{ $cliente->id }}" aria-label="Ver detalhes de {{ $cliente->nome }}"><span aria-hidden="true">›</span></button>
                                         <span class="avatar-lista redondo">{{ \App\Support\Texto::iniciais($cliente->nome) }}</span>
                                         <div class="nome">{{ $cliente->nome }}</div>
                                     </div>
@@ -68,17 +68,17 @@
                             </tr>
 
                             {{-- Detalhes (aparecem ao clicar na linha) --}}
-                            <tr class="detalhe">
+                            <tr class="detalhe" id="detalhe-{{ $cliente->id }}">
                                 <td colspan="6">
                                     <div class="grade-detalhe">
                                         <div class="bloco">
-                                            <h6>Contato</h6>
+                                            <h2>Contato</h2>
                                             <div>{{ $cliente->nome }}</div>
                                             <div class="text-muted small">{{ $cliente->telefone ?? 'Sem telefone' }} · {{ $cliente->email ?? 'sem e-mail' }}</div>
                                             <div class="text-muted small">Cliente desde {{ $cliente->created_at->format('d/m/Y') }}</div>
                                         </div>
                                         <div class="bloco">
-                                            <h6>Últimas compras</h6>
+                                            <h2>Últimas compras</h2>
                                             @forelse ($cliente->vendas as $venda)
                                                 <div class="d-flex justify-content-between small py-1">
                                                     <a href="{{ route('vendas.show', $venda) }}">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }} · {{ $venda->data->format('d/m') }}</a>
@@ -89,7 +89,7 @@
                                             @endforelse
                                         </div>
                                         <div class="bloco">
-                                            <h6>Atalhos</h6>
+                                            <h2>Atalhos</h2>
                                             <div class="d-flex flex-wrap gap-2">
                                                 <a href="{{ route('vendas.create') }}" class="btn btn-sm btn-outline-primary">Nova venda</a>
                                                 <a href="{{ route('vendas.index', ['busca' => $cliente->nome]) }}" class="btn btn-sm btn-secondary">Ver todas as compras</a>

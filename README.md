@@ -19,12 +19,17 @@ O visual (`public/css/tema.css`) é escuro, com as cores do Brasil: verde-mata, 
 - **Menu lateral** com ícones e contador de produtos para repor; no celular ele abre pelo botão ☰.
 - **Dashboard**: faturamento do mês comparado ao mês anterior, vendas, ticket médio, gráfico dos últimos 14 dias, estoque baixo e últimas vendas.
 - **Medidor de estoque**: barra de nível com a marca do mínimo e a situação escrita (OK, Baixo, Esgotado).
-- **Busca rápida**: aperte **Ctrl + K** (ou **/**) e digite para ir a qualquer tela, criar algo ou buscar produtos, clientes e vendas.
+- **Busca rápida**: aperte **Ctrl + K** e digite para ir a qualquer tela, criar algo ou buscar produtos, clientes e vendas.
 - Cores dos gráficos e medidores validadas para contraste e daltonismo (skill dataviz).
 - **Um amarelo por tela**: o amarelo-sol cheio fica só na ação principal; filtros, Tabela/Vitrine e a coluna ordenada escolhidos aparecem em verde-mata.
 - **Formulários** com trilha (ex.: Produtos › Novo produto), largura de leitura e rodapé com Cancelar e a ação principal.
 - **Acessibilidade**: anel amarelo no foco do teclado (Tab), contrastes de texto no padrão WCAG AA (mínimo 4,5:1)
   e animações desligadas para quem ativou "reduzir movimento" no sistema.
+  Revisado contra a WCAG 2.2 AA:
+  - link "Pular para o conteúdo" no primeiro Tab e menu do celular que abre/fecha pelo teclado (Esc fecha);
+  - bordas dos campos com contraste 3:1, erros e campos obrigatórios anunciados pelo leitor de tela;
+  - linhas que abrem têm um botão (›) próprio; busca, filtros e ordenação avisam o que mudou;
+  - a busca rápida (Ctrl + K) funciona só pelo teclado e prende o foco enquanto está aberta.
 
 Fontes: Outfit e Inter (licença SIL Open Font, em `public/vendor/fonts`).
 

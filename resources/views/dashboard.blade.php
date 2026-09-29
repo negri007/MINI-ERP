@@ -54,7 +54,7 @@
     <section class="painel">
         {{-- Gráfico de faturamento (Chart.js), com versão em tabela --}}
         <div class="card">
-            <div class="card-header">Faturamento dos últimos 14 dias <small class="text-muted">hoje em destaque</small></div>
+            <div class="card-header"><h2 class="titulo-cartao">Faturamento dos últimos 14 dias</h2> <small class="text-muted">hoje em destaque</small></div>
             <div class="card-body">
                 <div class="grafico"><canvas id="graficoVendas" role="img" aria-label="Gráfico de colunas do faturamento por dia"></canvas></div>
                 <details class="ver-tabela">
@@ -73,7 +73,7 @@
 
         {{-- Produtos com estoque baixo --}}
         <div class="card">
-            <div class="card-header">Estoque baixo <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">ver todos →</a></div>
+            <div class="card-header"><h2 class="titulo-cartao">Estoque baixo</h2> <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">ver todos →</a></div>
             <div class="card-body p-0">
                 @forelse ($estoqueBaixo as $produto)
                     <div class="estoque-item">
@@ -90,7 +90,7 @@
 
     {{-- Últimas vendas --}}
     <div class="card">
-        <div class="card-header">Últimas vendas <a href="{{ route('vendas.index') }}">ver todas →</a></div>
+        <div class="card-header"><h2 class="titulo-cartao">Últimas vendas</h2> <a href="{{ route('vendas.index') }}">ver todas →</a></div>
         <div class="card-body p-0">
             <table class="table table-hover align-middle">
                 <thead>

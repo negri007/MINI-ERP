@@ -12,8 +12,8 @@
 
                 {{-- Campo: Produto --}}
                 <div class="mb-3">
-                    <label for="produto_id" class="form-label">Produto <span class="text-danger">*</span></label>
-                    <select name="produto_id" id="produto_id" class="form-select @error('produto_id') is-invalid @enderror">
+                    <label for="produto_id" class="form-label">Produto <span class="text-danger" aria-hidden="true">*</span></label>
+                    <select name="produto_id" id="produto_id" aria-required="true" class="form-select @error('produto_id') is-invalid @enderror" @error('produto_id') aria-invalid="true" aria-describedby="produto_id-erro" @enderror>
                         <option value="">Selecione...</option>
                         @foreach ($produtos as $produto)
                             <option value="{{ $produto->id }}" @selected(old('produto_id', $produtoSelecionado) == $produto->id)>
@@ -22,14 +22,14 @@
                         @endforeach
                     </select>
                     @error('produto_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback" id="produto_id-erro">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="row">
-                    {{-- Campo: Tipo --}}
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label d-block">Tipo <span class="text-danger">*</span></label>
+                    {{-- Campo: Tipo (fieldset + legend: o leitor de tela lê "Tipo" junto de cada opção) --}}
+                    <fieldset class="col-md-6 mb-3" @error('tipo') aria-describedby="tipo-erro" @enderror>
+                        <legend class="form-label">Tipo <span class="text-danger" aria-hidden="true">*</span></legend>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="tipo" id="tipo_entrada" value="entrada" @checked(old('tipo', 'entrada') === 'entrada')>
                             <label class="form-check-label" for="tipo_entrada">Entrada (compra, devolução...)</label>
@@ -39,26 +39,26 @@
                             <label class="form-check-label" for="tipo_saida">Saída (perda, avaria...)</label>
                         </div>
                         @error('tipo')
-                            <div class="text-danger small">{{ $message }}</div>
+                            <div class="text-danger small" id="tipo-erro">{{ $message }}</div>
                         @enderror
-                    </div>
+                    </fieldset>
 
                     {{-- Campo: Quantidade --}}
                     <div class="col-md-6 mb-3">
-                        <label for="quantidade" class="form-label">Quantidade <span class="text-danger">*</span></label>
-                        <input type="number" min="1" step="1" name="quantidade" id="quantidade" class="form-control @error('quantidade') is-invalid @enderror" value="{{ old('quantidade') }}">
+                        <label for="quantidade" class="form-label">Quantidade <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="number" min="1" step="1" name="quantidade" id="quantidade" aria-required="true" class="form-control @error('quantidade') is-invalid @enderror" @error('quantidade') aria-invalid="true" aria-describedby="quantidade-erro" @enderror value="{{ old('quantidade') }}">
                         @error('quantidade')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback" id="quantidade-erro">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
 
                 {{-- Campo: Motivo --}}
                 <div class="mb-3">
-                    <label for="motivo" class="form-label">Motivo <span class="text-danger">*</span></label>
-                    <input type="text" name="motivo" id="motivo" class="form-control @error('motivo') is-invalid @enderror" value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X">
+                    <label for="motivo" class="form-label">Motivo <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input type="text" name="motivo" id="motivo" aria-required="true" class="form-control @error('motivo') is-invalid @enderror" @error('motivo') aria-invalid="true" aria-describedby="motivo-erro" @enderror value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X">
                     @error('motivo')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback" id="motivo-erro">{{ $message }}</div>
                     @enderror
                 </div>
 

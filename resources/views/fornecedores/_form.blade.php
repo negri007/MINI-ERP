@@ -2,36 +2,36 @@
 
 {{-- Campo: Nome --}}
 <div class="mb-3">
-    <label for="nome" class="form-label">Nome <span class="text-danger">*</span></label>
-    <input type="text" name="nome" id="nome" class="form-control @error('nome') is-invalid @enderror" value="{{ old('nome', $fornecedor->nome) }}">
+    <label for="nome" class="form-label">Nome <span class="text-danger" aria-hidden="true">*</span></label>
+    <input type="text" name="nome" id="nome" aria-required="true" class="form-control @error('nome') is-invalid @enderror" @error('nome') aria-invalid="true" aria-describedby="nome-erro" @enderror value="{{ old('nome', $fornecedor->nome) }}">
     @error('nome')
-        <div class="invalid-feedback">{{ $message }}</div>
+        <div class="invalid-feedback" id="nome-erro">{{ $message }}</div>
     @enderror
 </div>
 
 {{-- Campo: CNPJ --}}
 <div class="mb-3">
     <label for="cnpj" class="form-label">CNPJ</label>
-    <input type="text" name="cnpj" id="cnpj" class="form-control @error('cnpj') is-invalid @enderror" value="{{ old('cnpj', $fornecedor->cnpj) }}" data-mascara="cnpj">
+    <input type="text" name="cnpj" id="cnpj" class="form-control @error('cnpj') is-invalid @enderror" @error('cnpj') aria-invalid="true" aria-describedby="cnpj-erro" @enderror value="{{ old('cnpj', $fornecedor->cnpj) }}" data-mascara="cnpj">
     @error('cnpj')
-        <div class="invalid-feedback">{{ $message }}</div>
+        <div class="invalid-feedback" id="cnpj-erro">{{ $message }}</div>
     @enderror
 </div>
 
 {{-- Campo: Telefone --}}
 <div class="mb-3">
     <label for="telefone" class="form-label">Telefone</label>
-    <input type="text" name="telefone" id="telefone" class="form-control @error('telefone') is-invalid @enderror" value="{{ old('telefone', $fornecedor->telefone) }}" data-mascara="telefone">
+    <input type="text" name="telefone" id="telefone" class="form-control @error('telefone') is-invalid @enderror" @error('telefone') aria-invalid="true" aria-describedby="telefone-erro" @enderror value="{{ old('telefone', $fornecedor->telefone) }}" data-mascara="telefone">
     @error('telefone')
-        <div class="invalid-feedback">{{ $message }}</div>
+        <div class="invalid-feedback" id="telefone-erro">{{ $message }}</div>
     @enderror
 </div>
 
 {{-- Campo: E-mail --}}
 <div class="mb-3">
     <label for="email" class="form-label">E-mail</label>
-    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $fornecedor->email) }}">
+    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" @error('email') aria-invalid="true" aria-describedby="email-erro" @enderror value="{{ old('email', $fornecedor->email) }}">
     @error('email')
-        <div class="invalid-feedback">{{ $message }}</div>
+        <div class="invalid-feedback" id="email-erro">{{ $message }}</div>
     @enderror
 </div>
