@@ -10,25 +10,31 @@
 
     {{-- Tema "Mata": base escura com verde-mata, amarelo-sol e azul-céu --}}
     <link href="{{ asset('css/tema.css') }}" rel="stylesheet">
+
+    {{-- Aplica o "menu recolhido" antes de desenhar a página (evita o menu piscar) --}}
+    <script>
+        try { if (JSON.parse(localStorage.getItem('menu-compacto'))) document.documentElement.classList.add('menu-compacto'); } catch (e) {}
+    </script>
 </head>
 <body>
     @php
-        // Menu lateral: [grupo, [título, rota, padrão da rota ativa, ícone]]
+        // Menu lateral: [seção-mãe, ícone da seção, [itens-filhos: título, rota, padrão da rota ativa, ícone]]
+        // A seção null é o Dashboard, que fica solto no topo, sem seção.
         $menu = [
-            [null, [
+            [null, null, [
                 ['Dashboard', 'dashboard', 'dashboard', 'inicio'],
             ]],
-            ['Cadastros', [
+            ['Cadastros', 'pasta', [
                 ['Categorias', 'categorias.index', 'categorias.*', 'etiqueta'],
                 ['Fornecedores', 'fornecedores.index', 'fornecedores.*', 'caminhao'],
                 ['Clientes', 'clientes.index', 'clientes.*', 'pessoas'],
                 ['Produtos', 'produtos.index', 'produtos.*', 'caixa'],
             ]],
-            ['Operações', [
+            ['Operações', 'atividade', [
                 ['Vendas', 'vendas.index', 'vendas.*', 'carrinho'],
                 ['Estoque', 'estoque.index', 'estoque.*', 'camadas'],
             ]],
-            ['Relatórios', [
+            ['Relatórios', 'grafico', [
                 ['Vendas por período', 'relatorios.vendas', 'relatorios.vendas*', 'grafico'],
             ]],
         ];
@@ -54,7 +60,7 @@
             'Vendas' => route('vendas.index'),
         ];
 
-        foreach ($menu as [, $itens]) {
+        foreach ($menu as [, , $itens]) {
             foreach ($itens as [$titulo, $rota]) {
                 $comandos[] = ['Ir para', $titulo, route($rota), '→'];
             }
@@ -70,30 +76,73 @@
 
         {{-- Menu lateral --}}
         <aside class="lateral" id="lateral">
-            <a href="{{ route('dashboard') }}" class="logo"><span class="marca">ME</span> Mini ERP</a>
+            <div class="lateral-topo">
+                <a href="{{ route('dashboard') }}" class="logo"><span class="marca">ME</span> <span class="rotulo-menu">Mini ERP</span></a>
+                {{-- Recolhe o menu para mostrar só os ícones (a escolha fica salva no navegador) --}}
+                <button type="button" class="recolher" id="recolherMenu" title="Recolher menu" aria-label="Recolher menu">
+                    @include('partials.icone', ['nome' => 'recolher'])
+                </button>
+            </div>
 
-            <nav aria-label="Menu principal">
-                @foreach ($menu as [$grupo, $itens])
-                    @if ($grupo)
-                        <div class="menu-grupo">{{ $grupo }}</div>
+            <nav class="menu" aria-label="Menu principal">
+                @foreach ($menu as [$secao, $iconeSecao, $itens])
+                    @if (! $secao)
+                        {{-- Itens soltos (sem seção): o Dashboard --}}
+                        @foreach ($itens as [$titulo, $rota, $padrao, $icone])
+                            <a href="{{ route($rota) }}" title="{{ $titulo }}" class="menu-item raiz {{ request()->routeIs($padrao) ? 'ativo' : '' }}">
+                                <span class="secao-icone">@include('partials.icone', ['nome' => $icone])</span>
+                                <span class="rotulo-menu">{{ $titulo }}</span>
+                            </a>
+                        @endforeach
+                    @else
+                        @php($secaoAtiva = collect($itens)->contains(fn ($i) => request()->routeIs($i[2])))
+
+                        {{-- Seção-mãe: título grande e clicável que abre/fecha os itens-filhos --}}
+                        <div class="secao {{ $secaoAtiva ? 'tem-ativo' : '' }}" data-secao="{{ \Illuminate\Support\Str::slug($secao) }}">
+                            <button type="button" class="secao-titulo" aria-expanded="true" title="{{ $secao }}">
+                                <span class="secao-icone">@include('partials.icone', ['nome' => $iconeSecao])</span>
+                                <span class="rotulo-menu">{{ $secao }}</span>
+
+                                {{-- Informação viva ao lado do título --}}
+                                @if ($secao === 'Operações' && $vendasHoje > 0)
+                                    <span class="secao-info" title="Vendas registradas hoje">{{ $vendasHoje }} hoje</span>
+                                @endif
+
+                                <span class="secao-seta">@include('partials.icone', ['nome' => 'seta-baixo'])</span>
+                            </button>
+
+                            {{-- Itens-filhos, ligados ao título por "galhos" --}}
+                            <div class="secao-itens">
+                                <div>
+                                    @foreach ($itens as [$titulo, $rota, $padrao, $icone])
+                                        <a href="{{ route($rota) }}" title="{{ $titulo }}" class="menu-item filho {{ request()->routeIs($padrao) ? 'ativo' : '' }}">
+                                            @include('partials.icone', ['nome' => $icone])
+                                            <span class="rotulo-menu">{{ $titulo }}</span>
+                                            {{-- Contador de produtos para repor (vem do AppServiceProvider) --}}
+                                            @if ($rota === 'produtos.index' && $qtdEstoqueBaixo > 0)
+                                                <span class="contador" title="Produtos com estoque baixo">{{ $qtdEstoqueBaixo }}</span>
+                                            @endif
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     @endif
-                    @foreach ($itens as [$titulo, $rota, $padrao, $icone])
-                        <a href="{{ route($rota) }}" class="menu-item {{ request()->routeIs($padrao) ? 'ativo' : '' }}">
-                            @include('partials.icone', ['nome' => $icone])
-                            {{ $titulo }}
-                            {{-- Contador de produtos para repor (vem do AppServiceProvider) --}}
-                            @if ($rota === 'produtos.index' && $qtdEstoqueBaixo > 0)
-                                <span class="contador" title="Produtos com estoque baixo">{{ $qtdEstoqueBaixo }}</span>
-                            @endif
-                        </a>
-                    @endforeach
                 @endforeach
             </nav>
 
+            {{-- Folhas decorativas ao fundo do menu (tema "Mata") --}}
+            <svg class="folhas" viewBox="0 0 240 220" aria-hidden="true">
+                <path d="M30 220 C40 150 90 110 150 95 C120 140 90 180 30 220Z"/>
+                <path d="M60 220 C85 170 140 150 210 150 C170 185 120 205 60 220Z"/>
+                <path d="M10 200 C5 150 25 110 70 80 C60 130 45 170 10 200Z"/>
+                <path d="M30 220 C60 160 100 125 150 95" fill="none"/>
+            </svg>
+
             {{-- Usuário logado e botão de sair --}}
             <div class="usuario">
-                <span class="avatar">{{ $iniciais }}</span>
-                <div class="text-truncate">
+                <span class="avatar" title="{{ $usuario->name }}">{{ $iniciais }}</span>
+                <div class="text-truncate rotulo-menu">
                     <div class="nome text-truncate">{{ $usuario->name }}</div>
                     <small class="text-truncate">{{ $usuario->email }}</small>
                 </div>

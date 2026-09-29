@@ -155,3 +155,45 @@ if (lateral && abrirMenu) {
         if (lateral.classList.contains('aberta') && !lateral.contains(e.target)) lateral.classList.remove('aberta');
     });
 }
+
+// ---------- Seções do menu (abrir/fechar) e menu recolhido ----------
+// As escolhas ficam salvas no navegador (localStorage) para a próxima página.
+const guardado = {
+    ler(chave, padrao) { try { return JSON.parse(localStorage.getItem(chave)) ?? padrao; } catch { return padrao; } },
+    gravar(chave, valor) { try { localStorage.setItem(chave, JSON.stringify(valor)); } catch { /* navegador sem armazenamento: só não lembra */ } },
+};
+
+const fechadas = guardado.ler('menu-secoes-fechadas', []);
+document.querySelectorAll('.secao').forEach((secao) => {
+    const nome = secao.dataset.secao;
+    const botao = secao.querySelector('.secao-titulo');
+
+    // Aplica o estado salvo, mas nunca esconde a seção da página aberta
+    const fechar = (sim) => {
+        secao.classList.toggle('fechada', sim);
+        botao.setAttribute('aria-expanded', String(!sim));
+    };
+    fechar(fechadas.includes(nome) && !secao.classList.contains('tem-ativo'));
+
+    botao.addEventListener('click', () => {
+        const agoraFechada = !secao.classList.contains('fechada');
+        fechar(agoraFechada);
+        const lista = guardado.ler('menu-secoes-fechadas', []).filter((n) => n !== nome);
+        if (agoraFechada) lista.push(nome);
+        guardado.gravar('menu-secoes-fechadas', lista);
+    });
+});
+
+const recolherMenu = document.getElementById('recolherMenu');
+if (recolherMenu) {
+    const aplicar = (compacto) => {
+        document.documentElement.classList.toggle('menu-compacto', compacto);
+        recolherMenu.title = compacto ? 'Expandir menu' : 'Recolher menu';
+    };
+    aplicar(guardado.ler('menu-compacto', false));
+    recolherMenu.addEventListener('click', () => {
+        const compacto = !document.documentElement.classList.contains('menu-compacto');
+        aplicar(compacto);
+        guardado.gravar('menu-compacto', compacto);
+    });
+}

@@ -15,6 +15,10 @@
         @case('alerta')<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>@break
         @case('sair')<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>@break
         @case('menu')<path d="M3 6h18M3 12h18M3 18h18"/>@break
+        @case('pasta')<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>@break
+        @case('atividade')<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>@break
+        @case('seta-baixo')<path d="m6 9 6 6 6-6"/>@break
+        @case('recolher')<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M16 15l-3-3 3-3"/>@break
         @case('impressora')<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/>@break
     @endswitch
 </svg>
