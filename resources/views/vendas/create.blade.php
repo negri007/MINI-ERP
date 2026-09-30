@@ -113,11 +113,54 @@
             @endif
         </div>
 
+        {{-- Pagamento: forma (obrigatória, nenhuma marcada de início), desconto e troco.
+             Os valores mostrados aqui são só uma prévia: o VendaService recalcula tudo ao salvar. --}}
+        <div class="card mb-3">
+            <div class="card-header"><h2 class="titulo-cartao">Pagamento</h2></div>
+            <div class="card-body row">
+                <fieldset class="col-12 mb-3" @error('forma_pagamento') aria-describedby="forma-erro" @enderror>
+                    <legend class="form-label">Forma de pagamento <span class="text-danger" aria-hidden="true">*</span></legend>
+                    <div class="formas-pagamento">
+                        @foreach (\App\Models\Venda::FORMAS_PAGAMENTO as $valor => $nome)
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="forma_pagamento" id="forma_{{ $valor }}" value="{{ $valor }}"
+                                       aria-required="true" @error('forma_pagamento') aria-invalid="true" @enderror @checked(old('forma_pagamento') === $valor)>
+                                <label class="form-check-label" for="forma_{{ $valor }}">{{ $nome }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('forma_pagamento')
+                        <div class="invalid-feedback d-block" id="forma-erro">{{ $message }}</div>
+                    @enderror
+                </fieldset>
+
+                <div class="col-md-4 mb-3">
+                    <label for="desconto" class="form-label">Desconto (R$)</label>
+                    <input type="text" inputmode="decimal" name="desconto" id="desconto" placeholder="0,00" autocomplete="off"
+                           class="form-control @error('desconto') is-invalid @enderror" value="{{ old('desconto') }}"
+                           @error('desconto') aria-invalid="true" @enderror aria-describedby="desconto-ajuda desconto-erro">
+                    <div class="form-text" id="desconto-ajuda">Não pode passar do subtotal.</div>
+                    <div class="invalid-feedback d-block" id="desconto-erro">@error('desconto'){{ $message }}@enderror</div>
+                </div>
+
+                {{-- Só em Dinheiro: valor recebido e troco (não é gravado, serve só para o caixa) --}}
+                <div class="col-md-4 mb-3" id="blocoTroco" hidden>
+                    <label for="recebido" class="form-label">Valor recebido (R$)</label>
+                    <input type="text" inputmode="decimal" id="recebido" placeholder="0,00" autocomplete="off" class="form-control" aria-describedby="troco">
+                    <div class="form-text troco" id="troco" aria-live="polite"></div>
+                </div>
+            </div>
+        </div>
+
         {{-- Rodapé da venda: o total fica grande ao lado do botão de registrar e acompanha a rolagem
              (sticky), para o total nunca sumir quando a venda tem muitos itens.
              aria-live: o leitor de tela anuncia o total novo quando ele muda. --}}
         <div class="pe-form pe-venda">
             <div class="total-venda">
+                <dl class="resumo-venda">
+                    <div><dt>Subtotal</dt><dd id="subtotalVenda">R$ 0,00</dd></div>
+                    <div><dt>Desconto</dt><dd id="descontoVenda">R$ 0,00</dd></div>
+                </dl>
                 <small>Total da venda</small>
                 <strong id="totalVenda" aria-live="polite">R$ 0,00</strong>
             </div>
@@ -274,9 +317,53 @@
             linha.querySelector('.preco').textContent = preco ? moeda(preco) : '-';
             linha.querySelector('.subtotal').textContent = preco ? moeda(subtotal) : '-';
         });
-        document.getElementById('totalVenda').textContent = moeda(total);
+        // Prévia do subtotal, desconto e total (o servidor recalcula tudo ao salvar)
+        const desconto = Math.max(lerValor(document.getElementById('desconto').value), 0);
+        document.getElementById('subtotalVenda').textContent = moeda(total);
+        document.getElementById('descontoVenda').textContent = desconto ? `− ${moeda(desconto)}` : moeda(0);
+        document.getElementById('totalVenda').textContent = moeda(Math.max(total - desconto, 0));
+        subtotalAtual = total;
+        mostrarTroco();
         numerarItens();
     }
+
+    // "5,50", "5.50" ou "1.234,56" -> número (vazio ou inválido -> 0).
+    // Com vírgula, ela é o decimal e os pontos são milhar; sem vírgula, o ponto é o decimal.
+    function lerValor(texto) {
+        let t = String(texto).trim();
+        if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+        const numero = Number(t);
+        return Number.isFinite(numero) ? numero : 0;
+    }
+    let subtotalAtual = 0;
+
+    // Desconto: confere ao sair do campo; o erro some assim que a pessoa corrige
+    const campoDesconto = document.getElementById('desconto');
+    const erroDesconto = document.getElementById('desconto-erro');
+    function conferirDesconto() {
+        const passou = lerValor(campoDesconto.value) > subtotalAtual;
+        campoDesconto.classList.toggle('is-invalid', passou);
+        campoDesconto.toggleAttribute('aria-invalid', passou);
+        erroDesconto.textContent = passou ? `O desconto não pode passar do subtotal (${moeda(subtotalAtual)}).` : '';
+    }
+    campoDesconto.addEventListener('input', () => { calcular(); if (campoDesconto.classList.contains('is-invalid')) conferirDesconto(); });
+    campoDesconto.addEventListener('blur', conferirDesconto);
+
+    // Dinheiro: mostra "Valor recebido" e calcula o troco (só na tela)
+    const blocoTroco = document.getElementById('blocoTroco');
+    const campoRecebido = document.getElementById('recebido');
+    const troco = document.getElementById('troco');
+    function mostrarTroco() {
+        const dinheiro = document.getElementById('forma_dinheiro').checked;
+        blocoTroco.hidden = !dinheiro;
+        if (!dinheiro || campoRecebido.value.trim() === '') { troco.textContent = ''; return; }
+        const aPagar = Math.max(subtotalAtual - Math.max(lerValor(campoDesconto.value), 0), 0);
+        const diferenca = lerValor(campoRecebido.value) - aPagar;
+        troco.textContent = diferenca >= 0 ? `Troco: ${moeda(diferenca)}` : `Faltam ${moeda(-diferenca)}`;
+        troco.classList.toggle('falta', diferenca < 0);
+    }
+    campoRecebido.addEventListener('input', mostrarTroco);
+    document.querySelectorAll('input[name="forma_pagamento"]').forEach((r) => r.addEventListener('change', mostrarTroco));
 
     // Mostra "Só há N em estoque." abaixo da quantidade (o servidor confere de novo ao salvar)
     function conferirEstoque(linha) {

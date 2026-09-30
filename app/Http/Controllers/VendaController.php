@@ -98,7 +98,14 @@ class VendaController extends Controller
     {
         $dados = $request->validated();
 
-        $venda = $service->registrar($dados['cliente_id'], $dados['data'], $dados['itens'], $dados['observacao'] ?? null);
+        $venda = $service->registrar(
+            $dados['cliente_id'],
+            $dados['data'],
+            $dados['itens'],
+            $dados['forma_pagamento'],
+            $dados['desconto'] ?? 0,
+            $dados['observacao'] ?? null,
+        );
 
         return redirect()->route('vendas.show', $venda)->with('success', "Venda #{$venda->id} registrada com sucesso!");
     }

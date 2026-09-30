@@ -20,12 +20,24 @@ class Venda extends Model
     protected $table = 'vendas';
 
     // Campos que podem ser preenchidos em massa
-    protected $fillable = ['cliente_id', 'user_id', 'data', 'status', 'total', 'observacao'];
+    protected $fillable = ['cliente_id', 'user_id', 'data', 'status', 'subtotal', 'desconto', 'total', 'forma_pagamento', 'observacao'];
+
+    // Formas de pagamento aceitas (a mesma lista está na regra CHECK do banco).
+    // Fiado (venda a prazo) fica para a fase do financeiro: vai entrar aqui e na regra do banco
+    // numa migration própria, e NÃO poderá ser usado com o Consumidor final.
+    public const FORMAS_PAGAMENTO = [
+        'dinheiro' => 'Dinheiro',
+        'pix' => 'Pix',
+        'debito' => 'Cartão de débito',
+        'credito' => 'Cartão de crédito',
+    ];
 
     // Conversão automática de tipos
     protected $casts = [
         'data' => 'date',
         'total' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+        'desconto' => 'decimal:2',
     ];
 
     // Uma venda pertence a um cliente
@@ -50,5 +62,11 @@ class Venda extends Model
     public function estaCancelada(): bool
     {
         return $this->status === self::CANCELADA;
+    }
+
+    // Nome da forma de pagamento para mostrar na tela ("não informada" nas vendas antigas)
+    public function nomeFormaPagamento(): string
+    {
+        return self::FORMAS_PAGAMENTO[$this->forma_pagamento] ?? 'não informada';
     }
 }

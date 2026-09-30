@@ -12,6 +12,7 @@ use App\Models\Cliente;
 use App\Models\Fornecedor;
 use App\Models\Produto;
 use App\Models\User;
+use App\Models\Venda;
 use App\Services\EstoqueService;
 use App\Services\VendaService;
 use Illuminate\Database\Seeder;
@@ -79,7 +80,7 @@ class DatabaseSeeder extends Seeder
             $itens = $disponiveis->map(fn ($p) => ['produto_id' => $p->id, 'quantidade' => rand(1, 3)])->all();
 
             if ($itens) {
-                $vendas->registrar($clientes->random()->id, Carbon::today()->subDays(rand(0, 13))->toDateString(), $itens);
+                $vendas->registrar($clientes->random()->id, Carbon::today()->subDays(rand(0, 13))->toDateString(), $itens, array_rand(Venda::FORMAS_PAGAMENTO));
             }
         }
 

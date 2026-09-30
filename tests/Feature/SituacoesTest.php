@@ -28,6 +28,7 @@ class SituacoesTest extends TestCase
         return $this->post('/vendas', [
             'cliente_id' => $cliente->id,
             'data' => now()->toDateString(),
+            'forma_pagamento' => 'dinheiro',
             'itens' => [['produto_id' => $produto->id, 'quantidade' => $quantidade]],
         ]);
     }

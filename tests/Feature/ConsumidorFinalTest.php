@@ -42,6 +42,7 @@ class ConsumidorFinalTest extends TestCase
         $this->post('/vendas', [
             'cliente_id' => $this->consumidor->id,
             'data' => now()->toDateString(),
+            'forma_pagamento' => 'dinheiro',
             'itens' => [['produto_id' => $produto->id, 'quantidade' => 2]],
         ])->assertRedirect();
 

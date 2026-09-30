@@ -30,7 +30,7 @@ class LucroTest extends TestCase
     {
         return app(VendaService::class)->registrar($this->cliente->id, now()->toDateString(), [
             ['produto_id' => $produto->id, 'quantidade' => $quantidade],
-        ]);
+        ], 'dinheiro');
     }
 
     private function lucroDeHoje(): array
