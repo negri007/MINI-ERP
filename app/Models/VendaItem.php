@@ -14,12 +14,13 @@ class VendaItem extends Model
     protected $table = 'venda_itens';
 
     // Campos que podem ser preenchidos em massa
-    protected $fillable = ['venda_id', 'produto_id', 'quantidade', 'preco_unitario', 'subtotal'];
+    protected $fillable = ['venda_id', 'produto_id', 'quantidade', 'preco_unitario', 'custo_unitario', 'subtotal'];
 
     // Conversão automática de tipos
     protected $casts = [
         'quantidade' => 'integer',
         'preco_unitario' => 'decimal:2',
+        'custo_unitario' => 'decimal:2', // custo guardado na hora da venda; null = sem custo informado
         'subtotal' => 'decimal:2',
     ];
 

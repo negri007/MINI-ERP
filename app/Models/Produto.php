@@ -19,11 +19,12 @@ class Produto extends Model
     protected $table = 'produtos';
 
     // Campos que podem ser preenchidos em massa
-    protected $fillable = ['nome', 'descricao', 'preco', 'estoque', 'estoque_minimo', 'categoria_id', 'fornecedor_id'];
+    protected $fillable = ['nome', 'descricao', 'preco', 'custo', 'estoque', 'estoque_minimo', 'categoria_id', 'fornecedor_id'];
 
     // Conversão automática de tipos
     protected $casts = [
         'preco' => 'decimal:2',
+        'custo' => 'decimal:2', // null = custo não informado
         'estoque' => 'integer',
         'estoque_minimo' => 'integer',
     ];

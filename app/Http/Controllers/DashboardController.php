@@ -29,6 +29,10 @@ class DashboardController extends Controller
             'quantidade' => (clone $mesAtual)->count(),
             'hoje' => $concluidas()->whereDate('data', $hoje->toDateString())->count(),
         ];
+        // Lucro bruto do mês (só vendas com custo em todos os itens; as outras são contadas à parte)
+        $mes['lucro'] = app(\App\Services\LucroService::class)
+            ->calcular(Venda::whereDate('data', '>=', $hoje->copy()->startOfMonth()->toDateString()));
+
         $mes['ticket_medio'] = $mes['quantidade'] ? $mes['faturamento'] / $mes['quantidade'] : 0;
 
         // Mesmo período do mês passado (do dia 1 até o mesmo dia), para comparar

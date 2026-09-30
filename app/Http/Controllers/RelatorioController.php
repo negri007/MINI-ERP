@@ -25,6 +25,10 @@ class RelatorioController extends Controller
             'ticket_medio' => $vendas->count() ? $vendas->sum('total') / $vendas->count() : 0,
         ];
 
+        // Lucro bruto do período (vendas sem custo em algum item ficam de fora e são contadas)
+        $lucro = app(\App\Services\LucroService::class)
+            ->calcular(Venda::whereDate('data', '>=', $de)->whereDate('data', '<=', $ate));
+
         // Produtos mais vendidos no período (soma das quantidades de cada produto)
         $maisVendidos = VendaItem::with('produto')
             ->selectRaw('produto_id, SUM(quantidade) as quantidade, SUM(subtotal) as total')
@@ -34,7 +38,7 @@ class RelatorioController extends Controller
             ->limit(10)
             ->get();
 
-        return view('relatorios.vendas', compact('vendas', 'resumo', 'maisVendidos', 'de', 'ate'));
+        return view('relatorios.vendas', compact('vendas', 'resumo', 'lucro', 'maisVendidos', 'de', 'ate'));
     }
 
     // Exporta as vendas do período em CSV (abre no Excel)

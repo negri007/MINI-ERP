@@ -46,6 +46,8 @@ class VendaService
                     'produto_id' => $produto->id,
                     'quantidade' => $quantidade,
                     'preco_unitario' => $produto->preco,
+                    // custo do momento da venda (como o preço); vazio se o produto não tem custo
+                    'custo_unitario' => $produto->custo,
                     'subtotal' => $subtotal,
                 ]);
 

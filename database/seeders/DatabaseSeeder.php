@@ -51,10 +51,12 @@ class DatabaseSeeder extends Seeder
         foreach ($catalogo as $nomeCategoria => $produtos) {
             $categoria = Categoria::create(['nome' => $nomeCategoria, 'descricao' => "Produtos de {$nomeCategoria}"]);
 
-            foreach ($produtos as [$nome, $preco, $inicial, $minimo]) {
+            foreach ($produtos as $i => [$nome, $preco, $inicial, $minimo]) {
                 $produto = Produto::create([
                     'nome' => $nome,
                     'preco' => $preco,
+                    // custo entre 55% e 70% do preço (sempre abaixo do preço de venda)
+                    'custo' => round($preco * (0.55 + ($i % 4) * 0.05), 2),
                     'estoque' => 0,
                     'estoque_minimo' => $minimo,
                     'categoria_id' => $categoria->id,

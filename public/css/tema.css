@@ -1188,3 +1188,15 @@ legend.form-label { float: none; width: auto; padding: 0; font-size: var(--texto
     .resumo-3 { grid-template-columns: 1fr; }
     .filtro-periodo .form-control { flex: 1; }
 }
+
+/* =====================================================================
+   CUSTO E LUCRO
+   ===================================================================== */
+.custo-produto { display: block; color: var(--texto-2); font-size: .78rem; }
+.custo-produto.sem-custo { font-style: italic; }
+.aviso-custo:empty { display: none; }
+.aviso-custo { color: #e8a15a; }
+/* Aviso de vendas sem custo que ficaram fora do lucro */
+.aviso-lucro, .kpi .aviso-lucro { color: #e8a15a; font-size: .8rem; }
+.resumo-5 { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 991.98px) { .resumo-5 { grid-template-columns: 1fr 1fr; } }

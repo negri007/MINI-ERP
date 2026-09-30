@@ -21,6 +21,7 @@ class ProdutoRequest extends FormRequest
             'nome' => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'preco' => 'required|numeric|min:0',
+            'custo' => 'nullable|numeric|min:0|max:99999999.99', // opcional: vazio = não informado
             'estoque_minimo' => 'required|integer|min:0',
             'categoria_id' => 'required|exists:categorias,id',
             'fornecedor_id' => 'nullable|exists:fornecedores,id',

@@ -35,6 +35,22 @@
             </div>
         </div>
 
+        {{-- Lucro bruto: só vendas com custo em todos os itens (as outras ficam de fora e são avisadas) --}}
+        <div class="card kpi">
+            <div class="rotulo">Lucro bruto <span class="icone verde">@include('partials.icone', ['nome' => 'grafico'])</span></div>
+            <div class="valor"><small>R$</small>{{ number_format($mes['lucro']['lucro'], 2, ',', '.') }}</div>
+            <div class="rodape">
+                @if (! is_null($mes['lucro']['margem']))
+                    margem {{ number_format($mes['lucro']['margem'], 1, ',', '.') }}%
+                @else
+                    sem vendas com custo no mês
+                @endif
+            </div>
+            @if ($mes['lucro']['sem_custo'] > 0)
+                <div class="rodape aviso-lucro">{{ $mes['lucro']['sem_custo'] }} {{ $mes['lucro']['sem_custo'] === 1 ? 'venda sem custo ficou' : 'vendas sem custo ficaram' }} fora</div>
+            @endif
+        </div>
+
         <div class="card kpi">
             <div class="rotulo">Vendas no mês <span class="icone verde">@include('partials.icone', ['nome' => 'carrinho'])</span></div>
             <div class="valor">{{ $mes['quantidade'] }}</div>
@@ -47,13 +63,6 @@
             <div class="rodape">@include('partials.variacao', ['valor' => $mes['variacao_ticket']]) por venda</div>
         </div>
 
-        <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}" class="card kpi kpi-link text-decoration-none text-reset">
-            <div class="rotulo">Para repor <span class="icone perigo">@include('partials.icone', ['nome' => 'alerta'])</span></div>
-            <div class="valor">{{ $qtdParaRepor }}</div>
-            <div class="rodape">produtos no estoque mínimo</div>
-            {{-- Linha própria: ao lado do texto, "ver lista" quebrava em duas linhas --}}
-            <div class="rodape ir mt-1">ver lista <span aria-hidden="true">→</span></div>
-        </a>
     </section>
 
     <section class="painel">
@@ -78,7 +87,7 @@
 
         {{-- Produtos com estoque baixo --}}
         <div class="card">
-            <div class="card-header"><h2 class="titulo-cartao">Estoque baixo</h2> <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">ver todos <span aria-hidden="true">→</span></a></div>
+            <div class="card-header"><h2 class="titulo-cartao">Estoque baixo · {{ $qtdParaRepor }}</h2> <a href="{{ route('produtos.index', ['estoque_baixo' => 1]) }}">ver todos <span aria-hidden="true">→</span></a></div>
             <div class="card-body p-0">
                 @forelse ($estoqueBaixo as $produto)
                     <div class="estoque-item">

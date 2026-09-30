@@ -20,7 +20,7 @@
 
 <div class="row">
     {{-- Campo: Preço --}}
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <label for="preco" class="form-label">Preço (R$) <span class="text-danger" aria-hidden="true">*</span></label>
         <input type="number" step="0.01" min="0" name="preco" id="preco" aria-required="true" class="form-control @error('preco') is-invalid @enderror" @error('preco') aria-invalid="true" aria-describedby="preco-erro" @enderror value="{{ old('preco', $produto->preco) }}">
         @error('preco')
@@ -28,8 +28,25 @@
         @enderror
     </div>
 
+    {{-- Campo: Custo (opcional; vazio = não informado, fica fora do lucro) --}}
+    <div class="col-md-3 mb-3">
+        <div class="rotulo-com-ajuda">
+            <label for="custo" class="form-label">Custo (R$)</label>
+            @include('partials.ajuda-campo', ['id' => 'ajuda-custo', 'campo' => 'o custo'])
+        </div>
+        <input type="number" step="0.01" min="0" name="custo" id="custo" class="form-control @error('custo') is-invalid @enderror"
+               @error('custo') aria-invalid="true" aria-describedby="ajuda-custo custo-aviso custo-erro" @else aria-describedby="ajuda-custo custo-aviso" @enderror
+               value="{{ old('custo', $produto->custo) }}">
+        <p class="ajuda-texto" id="ajuda-custo" hidden>Quanto você pagou por uma unidade. Serve para calcular o lucro.</p>
+        {{-- Aviso (não bloqueia): custo maior que o preço de venda --}}
+        <div class="form-text aviso-custo" id="custo-aviso" aria-live="polite"></div>
+        @error('custo')
+            <div class="invalid-feedback" id="custo-erro">{{ $message }}</div>
+        @enderror
+    </div>
+
     {{-- Campo: Estoque (só no cadastro; depois muda por vendas e movimentações) --}}
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         @if ($produto->exists)
             <label class="form-label">Estoque atual</label>
             <div class="input-group">
@@ -47,7 +64,7 @@
     </div>
 
     {{-- Campo: Estoque mínimo (abaixo disso o produto aparece no alerta do Dashboard) --}}
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <div class="rotulo-com-ajuda">
             <label for="estoque_minimo" class="form-label">Estoque mínimo <span class="text-danger" aria-hidden="true">*</span></label>
             @include('partials.ajuda-campo', ['id' => 'ajuda-estoque-minimo', 'campo' => 'estoque mínimo'])
@@ -96,3 +113,21 @@
         @enderror
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Avisa (sem bloquear) quando o custo passa do preço de venda
+    (() => {
+        const preco = document.getElementById('preco');
+        const custo = document.getElementById('custo');
+        const aviso = document.getElementById('custo-aviso');
+        const conferir = () => {
+            const p = parseFloat(preco.value), c = parseFloat(custo.value);
+            aviso.textContent = !isNaN(p) && !isNaN(c) && c > p ? 'O custo está maior que o preço de venda.' : '';
+        };
+        preco.addEventListener('change', conferir);
+        custo.addEventListener('change', conferir);
+        conferir();
+    })();
+</script>
+@endpush
