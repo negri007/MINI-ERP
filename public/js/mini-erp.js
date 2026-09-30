@@ -103,11 +103,17 @@ if (balcao) {
         desenhar();
     }
 
-    // Desenha os itens agrupados, destacando o escolhido
+    const status = document.getElementById('brStatus');
+    let focoAntes = null; // quem tinha o foco antes de abrir (recebe o foco de volta ao fechar)
+
+    // Desenha os itens agrupados, destacando o escolhido.
+    // Para o leitor de tela: cada item é uma "opção" (role="option") e o campo aponta
+    // para a escolhida com aria-activedescendant, então as setas anunciam o item.
     function desenhar() {
         lista.innerHTML = '';
         if (!itens.length) {
-            lista.innerHTML = '<li class="br-vazio">Nada encontrado.</li>';
+            lista.innerHTML = '<li class="br-vazio" role="presentation">Nada encontrado.</li>';
+            busca.removeAttribute('aria-activedescendant');
             return;
         }
         let grupoAtual = null;
@@ -116,25 +122,41 @@ if (balcao) {
                 grupoAtual = item.grupo;
                 const titulo = document.createElement('li');
                 titulo.className = 'br-grupo';
+                titulo.setAttribute('role', 'presentation');
                 titulo.textContent = grupoAtual;
                 lista.appendChild(titulo);
             }
             const li = document.createElement('li');
+            li.id = `br-opcao-${i}`;
+            li.setAttribute('role', 'option');
+            li.setAttribute('aria-selected', String(i === posicao));
             const link = document.createElement('a');
             link.href = item.url;
+            link.tabIndex = -1; // o foco fica sempre no campo; o link é só para o clique do mouse
             link.className = i === posicao ? 'foco' : '';
-            link.innerHTML = '<span class="icone"></span><span class="texto"></span><span class="dica">Enter</span>';
+            link.innerHTML = '<span class="icone" aria-hidden="true"></span><span class="texto"></span><span class="atalho" aria-hidden="true">Enter</span>';
             link.querySelector('.icone').textContent = item.icone;
             link.querySelector('.texto').textContent = item.titulo;
-            link.querySelector('.dica').style.visibility = i === posicao ? 'visible' : 'hidden';
+            link.querySelector('.atalho').style.visibility = i === posicao ? 'visible' : 'hidden';
             link.addEventListener('mousemove', () => { if (posicao !== i) { posicao = i; desenhar(); } });
             li.appendChild(link);
             lista.appendChild(li);
         });
+        busca.setAttribute('aria-activedescendant', `br-opcao-${posicao}`);
         lista.querySelector('a.foco')?.scrollIntoView({ block: 'nearest' });
     }
 
+    // Avisa quantos resultados há (espera um pouco para não falar a cada letra)
+    let esperaStatus;
+    function anunciar() {
+        clearTimeout(esperaStatus);
+        esperaStatus = setTimeout(() => {
+            status.textContent = itens.length ? `${itens.length} resultados. Use as setas para escolher.` : 'Nada encontrado.';
+        }, 400);
+    }
+
     function abrir() {
+        focoAntes = document.activeElement;
         balcao.hidden = false;
         busca.value = '';
         montar();
@@ -143,36 +165,52 @@ if (balcao) {
 
     function fechar() {
         balcao.hidden = true;
+        focoAntes?.focus?.();
     }
 
     document.querySelectorAll('[data-abrir-rapido]').forEach((b) => b.addEventListener('click', abrir));
     balcao.addEventListener('click', (e) => { if (e.target === balcao) fechar(); });
-    busca.addEventListener('input', montar);
+    busca.addEventListener('input', () => { montar(); anunciar(); });
 
     // Setas escolhem, Enter abre, Esc fecha
     busca.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowDown') { posicao = Math.min(posicao + 1, itens.length - 1); desenhar(); e.preventDefault(); }
         if (e.key === 'ArrowUp') { posicao = Math.max(posicao - 1, 0); desenhar(); e.preventDefault(); }
         if (e.key === 'Enter' && itens[posicao]) { window.location = itens[posicao].url; }
-        if (e.key === 'Escape') fechar();
     });
 
-    // Atalhos globais: Ctrl + K (ou Cmd + K no Mac) e "/" fora de campos de texto
+    // Dentro da caixa: Esc fecha e o Tab não sai para a página que está atrás
+    balcao.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); fechar(); }
+        if (e.key === 'Tab') { e.preventDefault(); busca.focus(); }
+    });
+
+    // Atalho global: Ctrl + K (ou Cmd + K no Mac).
+    // Não usamos atalho de uma tecla só (como "/"): ele dispara sem querer
+    // para quem usa comando de voz ou teclado adaptado (WCAG 2.1.4).
     document.addEventListener('keydown', (e) => {
-        const digitando = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); balcao.hidden ? abrir() : fechar(); }
-        if (e.key === '/' && !digitando && balcao.hidden) { e.preventDefault(); abrir(); }
     });
 }
 
 // ---------- Menu lateral no celular ----------
-// O botão ☰ abre o menu; clicar fora dele fecha
+// O botão ☰ abre o menu; clicar fora dele ou apertar Esc fecha.
+// aria-expanded diz ao leitor de tela se o menu está aberto.
 const lateral = document.getElementById('lateral');
 const abrirMenu = document.getElementById('abrirMenu');
 if (lateral && abrirMenu) {
-    abrirMenu.addEventListener('click', (e) => { e.stopPropagation(); lateral.classList.toggle('aberta'); });
+    const menuCelular = (abrir, devolverFoco = false) => {
+        lateral.classList.toggle('aberta', abrir);
+        abrirMenu.setAttribute('aria-expanded', String(abrir));
+        if (abrir) lateral.querySelector('.menu a')?.focus(); // teclado já cai no primeiro item
+        if (!abrir && devolverFoco) abrirMenu.focus();
+    };
+    abrirMenu.addEventListener('click', (e) => { e.stopPropagation(); menuCelular(!lateral.classList.contains('aberta')); });
     document.addEventListener('click', (e) => {
-        if (lateral.classList.contains('aberta') && !lateral.contains(e.target)) lateral.classList.remove('aberta');
+        if (lateral.classList.contains('aberta') && !lateral.contains(e.target)) menuCelular(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && lateral.classList.contains('aberta')) menuCelular(false, true);
     });
 }
 
@@ -262,23 +300,24 @@ document.addEventListener('click', (e) => {
 });
 
 // ---------- Linhas que abrem ao clicar (detalhes logo abaixo) ----------
+// Com o mouse, clicar em qualquer parte da linha abre. Pelo teclado, quem abre é o
+// botão da seta (›): um <button> de verdade, que o leitor de tela anuncia como
+// "botão, recolhido/expandido" (aria-expanded) e que já responde a Enter e Espaço.
 function alternarLinha(linha) {
     const detalhe = linha.nextElementSibling;
     if (!detalhe?.classList.contains('detalhe')) return;
     const abrir = !linha.classList.contains('aberta');
     linha.classList.toggle('aberta', abrir);
     detalhe.classList.toggle('aberto', abrir);
-    linha.setAttribute('aria-expanded', String(abrir));
+    linha.querySelector('.seta-abrir')?.setAttribute('aria-expanded', String(abrir));
 }
 document.addEventListener('click', (e) => {
     const linha = e.target.closest('tr[data-expande]');
-    // Cliques em botões e links da linha não abrem os detalhes
-    if (!linha || e.target.closest('a, button, form, input, select, label')) return;
+    if (!linha) return;
+    // O botão da seta abre/fecha; os outros botões e links da linha fazem só o trabalho deles
+    if (e.target.closest('.seta-abrir')) { alternarLinha(linha); return; }
+    if (e.target.closest('a, button, form, input, select, label')) return;
     alternarLinha(linha);
-});
-document.addEventListener('keydown', (e) => {
-    const linha = e.target.closest?.('tr[data-expande]');
-    if (linha && (e.key === 'Enter' || e.key === ' ') && e.target === linha) { e.preventDefault(); alternarLinha(linha); }
 });
 
 // ---------- Dica de cada tela ("Entendi" esconde, "Mostrar dica" traz de volta) ----------

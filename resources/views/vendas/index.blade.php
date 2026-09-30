@@ -3,9 +3,12 @@
 @section('title', 'Vendas')
 
 @section('content')
-    {{-- Cabeçalho: título e quantidade (o botão "Nova venda" já fica no topo da página) --}}
+    {{-- Cabeçalho: título, quantidade e "Nova venda" (a ação principal desta tela, em amarelo) --}}
     <div class="cabeca-lista">
-        <h1 class="h3">Vendas <span class="qtd" data-atualiza="qtd">{{ $vendas->total() }} {{ $vendas->total() === 1 ? 'venda' : 'vendas' }} · clique numa venda para ver os itens</span></h1>
+        <h1 class="h3">Vendas <span class="qtd"><span role="status"><span data-atualiza="qtd">{{ $vendas->total() }} {{ $vendas->total() === 1 ? 'venda' : 'vendas' }}</span></span><span class="dica-lista"> · clique numa venda para ver os itens</span></span></h1>
+        <div class="acoes-topo">
+            <a href="{{ route('vendas.create') }}" class="btn btn-primary">+ Nova venda</a>
+        </div>
     </div>
     @include('partials.dica', ['chave' => 'vendas', 'texto' => 'Venda registrada não se edita: se errar, cancele e registre de novo.'])
 
@@ -55,9 +58,9 @@
                     </thead>
                     <tbody>
                         @foreach ($vendas as $venda)
-                            {{-- Linha principal: clique para abrir os itens --}}
-                            <tr class="linha" data-expande tabindex="0" aria-expanded="false">
-                                <td class="text-nowrap"><span class="seta-abrir">›</span><span class="valor-lista">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</span></td>
+                            {{-- Linha principal: clique na linha (mouse) ou no botão da seta (teclado) para abrir os itens --}}
+                            <tr class="linha" data-expande>
+                                <td class="text-nowrap"><button type="button" class="seta-abrir" aria-expanded="false" aria-controls="detalhe-{{ $venda->id }}" aria-label="Ver itens da venda #{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}"><span aria-hidden="true">›</span></button><span class="valor-lista">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</span></td>
                                 <td>
                                     <div class="item-lista">
                                         <span class="avatar-lista redondo">{{ \App\Support\Texto::iniciais($venda->cliente->nome) }}</span>
@@ -83,11 +86,11 @@
                             </tr>
 
                             {{-- Detalhes: itens, cliente e ações --}}
-                            <tr class="detalhe">
+                            <tr class="detalhe" id="detalhe-{{ $venda->id }}">
                                 <td colspan="7">
                                     <div class="grade-detalhe">
                                         <div class="bloco">
-                                            <h6>Itens da venda</h6>
+                                            <h2>Itens da venda</h2>
                                             <div class="itens-venda">
                                                 @foreach ($venda->itens as $item)
                                                     <div><span>{{ $item->quantidade }}× {{ $item->produto->nome }}</span><b>R$ {{ number_format($item->subtotal, 2, ',', '.') }}</b></div>
@@ -98,13 +101,13 @@
                                             @endif
                                         </div>
                                         <div class="bloco">
-                                            <h6>Cliente</h6>
+                                            <h2>Cliente</h2>
                                             <div>{{ $venda->cliente->nome }}</div>
                                             <div class="text-muted small">{{ $venda->cliente->cpf_cnpj ?? 'Sem CPF/CNPJ' }}{{ $venda->cliente->telefone ? ' · '.$venda->cliente->telefone : '' }}</div>
                                             <div class="text-muted small">{{ $venda->cliente->compras_no_mes }} {{ $venda->cliente->compras_no_mes === 1 ? 'compra' : 'compras' }} este mês</div>
                                         </div>
                                         <div class="bloco">
-                                            <h6>Ações</h6>
+                                            <h2>Ações</h2>
                                             <div class="d-flex flex-wrap gap-2">
                                                 <a href="{{ route('vendas.show', $venda) }}" class="btn btn-sm btn-outline-primary">Abrir venda</a>
                                                 @unless ($venda->estaCancelada())

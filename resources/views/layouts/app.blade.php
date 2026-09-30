@@ -36,6 +36,9 @@
     </script>
 </head>
 <body>
+    {{-- Atalho do teclado: o primeiro Tab da página mostra este link, que pula o menu --}}
+    <a href="#conteudo" class="pular">Pular para o conteúdo</a>
+
     @php
         // Menu lateral: [seção-mãe, ícone da seção, [itens-filhos: título, rota, padrão da rota ativa, ícone]]
         // A seção null é o Dashboard, que fica solto no topo, sem seção.
@@ -110,7 +113,7 @@
                     @if (! $secao)
                         {{-- Itens soltos (sem seção): o Dashboard --}}
                         @foreach ($itens as [$titulo, $rota, $padrao, $icone])
-                            <a href="{{ route($rota) }}" title="{{ $titulo }}" class="menu-item raiz {{ request()->routeIs($padrao) ? 'ativo' : '' }}">
+                            <a href="{{ route($rota) }}" title="{{ $titulo }}" class="menu-item raiz {{ request()->routeIs($padrao) ? 'ativo' : '' }}" @if (request()->routeIs($padrao)) aria-current="page" @endif>
                                 <span class="secao-icone">@include('partials.icone', ['nome' => $icone])</span>
                                 <span class="rotulo-menu">{{ $titulo }}</span>
                             </a>
@@ -136,7 +139,7 @@
                             <div class="secao-itens">
                                 <div>
                                     @foreach ($itens as [$titulo, $rota, $padrao, $icone])
-                                        <a href="{{ route($rota) }}" title="{{ $titulo }}" class="menu-item filho {{ request()->routeIs($padrao) ? 'ativo' : '' }}">
+                                        <a href="{{ route($rota) }}" title="{{ $titulo }}" class="menu-item filho {{ request()->routeIs($padrao) ? 'ativo' : '' }}" @if (request()->routeIs($padrao)) aria-current="page" @endif>
                                             @include('partials.icone', ['nome' => $icone])
                                             <span class="rotulo-menu">{{ $titulo }}</span>
                                             {{-- Contador de produtos para repor (vem do AppServiceProvider) --}}
@@ -186,18 +189,18 @@
 
             {{-- Barra do topo: menu (celular), busca rápida e nova venda --}}
             <header class="topo">
-                <button type="button" class="btn btn-secondary abrir-menu" id="abrirMenu" aria-label="Abrir menu" style="width: 42px; padding: .5rem">
+                <button type="button" class="btn btn-secondary abrir-menu" id="abrirMenu" aria-label="Abrir menu" aria-expanded="false" aria-controls="lateral" style="width: 42px; padding: .5rem">
                     @include('partials.icone', ['nome' => 'menu'])
                 </button>
-                <button type="button" class="abrir-rapido" data-abrir-rapido aria-label="Buscar ou ir para (Ctrl + K)">
+                <button type="button" class="abrir-rapido" data-abrir-rapido aria-label="Buscar ou ir para (Ctrl + K)" aria-haspopup="dialog" aria-keyshortcuts="Control+K">
                     <span style="display: contents">@include('partials.icone', ['nome' => 'busca'])</span>
                     <span>Buscar ou ir para…</span>
                     <kbd>Ctrl K</kbd>
                 </button>
                 {{-- Um amarelo cheio por tela: no Dashboard "Nova venda" é a ação principal;
                      nas outras telas vira contorno, porque a página já tem o seu botão principal.
-                     Na própria tela de nova venda o atalho não aparece. --}}
-                @unless (request()->routeIs('vendas.create'))
+                     Nas telas de Vendas (lista e nova venda) o atalho não aparece: a própria tela já tem o botão. --}}
+                @unless (request()->routeIs('vendas.index', 'vendas.create'))
                     <a href="{{ route('vendas.create') }}" class="btn {{ request()->routeIs('dashboard') ? 'btn-primary' : 'btn-outline-primary' }} d-inline-flex align-items-center gap-2">
                         <span style="width: 16px; height: 16px; display: inline-flex">@include('partials.icone', ['nome' => 'mais'])</span>
                         Nova venda
@@ -206,7 +209,7 @@
             </header>
 
             {{-- Conteúdo da página --}}
-            <main class="conteudo">
+            <main class="conteudo" id="conteudo" tabindex="-1">
 
                 {{-- Mensagem de sucesso --}}
                 @if (session('success'))
@@ -250,9 +253,15 @@
 
     {{-- Balcão rápido: busca de telas e ações (Ctrl + K) --}}
     <div class="balcao-rapido" id="balcaoRapido" hidden>
-        <div class="br-caixa" role="dialog" aria-label="Busca rápida">
-            <input type="text" id="brBusca" placeholder="Buscar ou ir para…" autocomplete="off">
-            <ul class="br-lista" id="brLista"></ul>
+        {{-- aria-modal: o leitor de tela ignora a página atrás enquanto a caixa está aberta.
+             O campo é um "combobox": as setas escolhem na lista (listbox) sem tirar o foco do campo. --}}
+        <div class="br-caixa" role="dialog" aria-modal="true" aria-label="Busca rápida">
+            <input type="text" id="brBusca" placeholder="Buscar ou ir para…" autocomplete="off"
+                   aria-label="Buscar telas, ações, produtos, clientes ou vendas"
+                   role="combobox" aria-expanded="true" aria-controls="brLista" aria-autocomplete="list">
+            <ul class="br-lista" id="brLista" role="listbox" aria-label="Resultados"></ul>
+            {{-- Conta os resultados em voz alta para quem usa leitor de tela --}}
+            <div class="visually-hidden" id="brStatus" role="status"></div>
             <div class="br-rodape">
                 <span><kbd>↑</kbd> <kbd>↓</kbd> escolher</span>
                 <span><kbd>Enter</kbd> abrir</span>

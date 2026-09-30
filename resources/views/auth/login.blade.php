@@ -30,7 +30,15 @@
         .vitrine .numeros strong { display: block; color: #fff; font-family: var(--fonte-titulo); font-size: 1.5rem; }
         .formulario { display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .formulario .caixa { width: 100%; max-width: 380px; }
-        @media (max-width: 900px) { .entrada { grid-template-columns: 1fr; } }
+        /* Celular: o painel verde vira uma faixa curta (logo + saudação) e o formulário aparece logo abaixo,
+           sem precisar rolar a tela */
+        @media (max-width: 900px) {
+            .entrada { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+            .vitrine { gap: 1.25rem; padding: 1.5rem 1.25rem 1.75rem; }
+            .vitrine h1 { font-size: 2rem; }
+            .vitrine p, .vitrine .numeros { display: none; }
+            .formulario { align-items: flex-start; padding: 2rem 1.25rem; }
+        }
     </style>
 </head>
 <body>
@@ -62,18 +70,18 @@
                     {{-- Campo: E-mail --}}
                     <div class="mb-3">
                         <label for="email" class="form-label">E-mail</label>
-                        <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" autofocus>
+                        <input type="email" name="email" id="email" autocomplete="email" class="form-control @error('email') is-invalid @enderror" @error('email') aria-invalid="true" aria-describedby="email-erro" @enderror value="{{ old('email') }}" autofocus>
                         @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback" id="email-erro">{{ $message }}</div>
                         @enderror
                     </div>
 
                     {{-- Campo: Senha --}}
                     <div class="mb-3">
                         <label for="password" class="form-label">Senha</label>
-                        <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror">
+                        <input type="password" name="password" id="password" autocomplete="current-password" class="form-control @error('password') is-invalid @enderror" @error('password') aria-invalid="true" aria-describedby="password-erro" @enderror>
                         @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback" id="password-erro">{{ $message }}</div>
                         @enderror
                     </div>
 

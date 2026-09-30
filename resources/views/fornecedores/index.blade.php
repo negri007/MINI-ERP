@@ -5,7 +5,7 @@
 @section('content')
     {{-- Cabeçalho: título, quantidade e botão de cadastro --}}
     <div class="cabeca-lista">
-        <h1 class="h3">Fornecedores <span class="qtd" data-atualiza="qtd">{{ $fornecedores->total() }} {{ $fornecedores->total() === 1 ? 'fornecedor' : 'fornecedores' }} · clique numa linha para ver os produtos</span></h1>
+        <h1 class="h3">Fornecedores <span class="qtd"><span role="status"><span data-atualiza="qtd">{{ $fornecedores->total() }} {{ $fornecedores->total() === 1 ? 'fornecedor' : 'fornecedores' }}</span></span><span class="dica-lista"> · clique numa linha para ver os produtos</span></span></h1>
         <div class="acoes-topo">
             <a href="{{ route('fornecedores.create') }}" class="btn btn-primary">+ Novo fornecedor</a>
         </div>
@@ -42,11 +42,11 @@
                     </thead>
                     <tbody>
                         @foreach ($fornecedores as $fornecedor)
-                            {{-- Linha principal: clique para abrir os detalhes --}}
-                            <tr class="linha" data-expande tabindex="0" aria-expanded="false" style="--cor: var(--ceu)">
+                            {{-- Linha principal: clique na linha (mouse) ou no botão da seta (teclado) para abrir os detalhes --}}
+                            <tr class="linha" data-expande style="--cor: var(--ceu)">
                                 <td>
                                     <div class="item-lista">
-                                        <span class="seta-abrir">›</span>
+                                        <button type="button" class="seta-abrir" aria-expanded="false" aria-controls="detalhe-{{ $fornecedor->id }}" aria-label="Ver detalhes de {{ $fornecedor->nome }}"><span aria-hidden="true">›</span></button>
                                         <span class="avatar-lista">{{ \App\Support\Texto::iniciais($fornecedor->nome) }}</span>
                                         <div class="nome">{{ $fornecedor->nome }}</div>
                                     </div>
@@ -68,17 +68,17 @@
                             </tr>
 
                             {{-- Detalhes (aparecem ao clicar na linha) --}}
-                            <tr class="detalhe">
+                            <tr class="detalhe" id="detalhe-{{ $fornecedor->id }}">
                                 <td colspan="5">
                                     <div class="grade-detalhe">
                                         <div class="bloco">
-                                            <h6>Contato</h6>
+                                            <h2>Contato</h2>
                                             <div>{{ $fornecedor->nome }}</div>
                                             <div class="text-muted small">CNPJ: {{ $fornecedor->cnpj ?? 'não informado' }}</div>
                                             <div class="text-muted small">{{ $fornecedor->telefone ?? 'Sem telefone' }} · {{ $fornecedor->email ?? 'sem e-mail' }}</div>
                                         </div>
                                         <div class="bloco">
-                                            <h6>Produtos fornecidos</h6>
+                                            <h2>Produtos fornecidos</h2>
                                             @forelse ($fornecedor->produtos as $produto)
                                                 <div class="d-flex justify-content-between small py-1">
                                                     <span>{{ $produto->nome }}</span>
@@ -89,7 +89,7 @@
                                             @endforelse
                                         </div>
                                         <div class="bloco">
-                                            <h6>Atalhos</h6>
+                                            <h2>Atalhos</h2>
                                             <div class="d-flex flex-wrap gap-2">
                                                 <a href="{{ route('estoque.create') }}" class="btn btn-sm btn-outline-primary">Registrar compra</a>
                                                 <a href="{{ route('fornecedores.edit', $fornecedor) }}" class="btn btn-sm btn-secondary">Editar</a>

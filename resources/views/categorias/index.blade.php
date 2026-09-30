@@ -5,7 +5,7 @@
 @section('content')
     {{-- Cabeçalho: título, quantidade e botão de cadastro --}}
     <div class="cabeca-lista">
-        <h1 class="h3">Categorias <span class="qtd" data-atualiza="qtd">{{ $categorias->total() }} {{ $categorias->total() === 1 ? 'categoria' : 'categorias' }} · clique numa linha para ver os produtos</span></h1>
+        <h1 class="h3">Categorias <span class="qtd"><span role="status"><span data-atualiza="qtd">{{ $categorias->total() }} {{ $categorias->total() === 1 ? 'categoria' : 'categorias' }}</span></span><span class="dica-lista"> · clique numa linha para ver os produtos</span></span></h1>
         <div class="acoes-topo">
             <a href="{{ route('categorias.create') }}" class="btn btn-primary">+ Nova categoria</a>
         </div>
@@ -40,11 +40,11 @@
                     </thead>
                     <tbody>
                         @foreach ($categorias as $categoria)
-                            {{-- Linha principal: clique para abrir os detalhes --}}
-                            <tr class="linha" data-expande tabindex="0" aria-expanded="false" style="--cor: {{ $categoria->cor() }}">
+                            {{-- Linha principal: clique na linha (mouse) ou no botão da seta (teclado) para abrir os detalhes --}}
+                            <tr class="linha" data-expande style="--cor: {{ $categoria->cor() }}">
                                 <td>
                                     <div class="item-lista">
-                                        <span class="seta-abrir">›</span>
+                                        <button type="button" class="seta-abrir" aria-expanded="false" aria-controls="detalhe-{{ $categoria->id }}" aria-label="Ver detalhes de {{ $categoria->nome }}"><span aria-hidden="true">›</span></button>
                                         <span class="avatar-lista">{{ \App\Support\Texto::iniciais($categoria->nome) }}</span>
                                         <div>
                                             <div class="nome">{{ $categoria->nome }}</div>
@@ -64,16 +64,16 @@
                             </tr>
 
                             {{-- Detalhes (aparecem ao clicar na linha) --}}
-                            <tr class="detalhe">
+                            <tr class="detalhe" id="detalhe-{{ $categoria->id }}">
                                 <td colspan="3">
                                     <div class="grade-detalhe">
                                         <div class="bloco">
-                                            <h6>Sobre</h6>
+                                            <h2>Sobre</h2>
                                             <div>{{ $categoria->descricao ?: 'Sem descrição.' }}</div>
                                             <div class="text-muted small mt-1">Criada em {{ $categoria->created_at->format('d/m/Y') }}</div>
                                         </div>
                                         <div class="bloco">
-                                            <h6>Produtos</h6>
+                                            <h2>Produtos</h2>
                                             @forelse ($categoria->produtos as $produto)
                                                 <div class="d-flex justify-content-between small py-1">
                                                     <span>{{ $produto->nome }}</span>
@@ -84,7 +84,7 @@
                                             @endforelse
                                         </div>
                                         <div class="bloco">
-                                            <h6>Atalhos</h6>
+                                            <h2>Atalhos</h2>
                                             <div class="d-flex flex-wrap gap-2">
                                                 <a href="{{ route('produtos.index', ['categoria_id' => $categoria->id]) }}" class="btn btn-sm btn-outline-primary">Ver produtos</a>
                                                 <a href="{{ route('categorias.edit', $categoria) }}" class="btn btn-sm btn-secondary">Editar</a>

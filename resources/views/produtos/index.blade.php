@@ -5,11 +5,11 @@
 @section('content')
     {{-- Cabeçalho: título, quantidade, Tabela | Vitrine e botão de cadastro --}}
     <div class="cabeca-lista">
-        <h1 class="h3">Produtos <span class="qtd" data-atualiza="qtd">{{ $produtos->total() }} {{ $produtos->total() === 1 ? 'item' : 'itens' }}{{ $visao === 'tabela' ? ' · clique numa linha para ver detalhes' : '' }}</span></h1>
+        <h1 class="h3">Produtos <span class="qtd"><span role="status"><span data-atualiza="qtd">{{ $produtos->total() }} {{ $produtos->total() === 1 ? 'item' : 'itens' }}</span></span>@if ($visao === 'tabela')<span class="dica-lista"> · clique numa linha para ver detalhes</span>@endif</span></h1>
         <div class="acoes-topo">
-            <div class="alterna-visao">
-                <a href="{{ request()->fullUrlWithQuery(['visao' => null, 'page' => null]) }}" class="{{ $visao === 'tabela' ? 'ativo' : '' }}">@include('partials.icone', ['nome' => 'lista']) Tabela</a>
-                <a href="{{ request()->fullUrlWithQuery(['visao' => 'vitrine', 'page' => null]) }}" class="{{ $visao === 'vitrine' ? 'ativo' : '' }}">@include('partials.icone', ['nome' => 'grade']) Vitrine</a>
+            <div class="alterna-visao" role="group" aria-label="Modo de ver">
+                <a href="{{ request()->fullUrlWithQuery(['visao' => null, 'page' => null]) }}" class="{{ $visao === 'tabela' ? 'ativo' : '' }}" @if ($visao === 'tabela') aria-current="true" @endif>@include('partials.icone', ['nome' => 'lista']) Tabela</a>
+                <a href="{{ request()->fullUrlWithQuery(['visao' => 'vitrine', 'page' => null]) }}" class="{{ $visao === 'vitrine' ? 'ativo' : '' }}" @if ($visao === 'vitrine') aria-current="true" @endif>@include('partials.icone', ['nome' => 'grade']) Vitrine</a>
             </div>
             <a href="{{ route('produtos.create') }}" class="btn btn-primary">+ Novo produto</a>
         </div>
@@ -79,11 +79,11 @@
                         @foreach ($produtos as $produto)
                             @php($vendido = $vendas7dias[$produto->id])
 
-                            {{-- Linha principal: clique para abrir os detalhes --}}
-                            <tr class="linha" data-expande tabindex="0" aria-expanded="false" style="--cor: {{ $produto->categoria->cor() }}">
+                            {{-- Linha principal: clique na linha (mouse) ou no botão da seta (teclado) para abrir os detalhes --}}
+                            <tr class="linha" data-expande style="--cor: {{ $produto->categoria->cor() }}">
                                 <td>
                                     <div class="item-lista">
-                                        <span class="seta-abrir">›</span>
+                                        <button type="button" class="seta-abrir" aria-expanded="false" aria-controls="detalhe-{{ $produto->id }}" aria-label="Ver detalhes de {{ $produto->nome }}"><span aria-hidden="true">›</span></button>
                                         <span class="avatar-lista">{{ \App\Support\Texto::iniciais($produto->nome) }}</span>
                                         <div>
                                             <div class="nome">{{ $produto->nome }}</div>
@@ -105,11 +105,11 @@
                             </tr>
 
                             {{-- Detalhes (aparecem ao clicar na linha) --}}
-                            <tr class="detalhe">
+                            <tr class="detalhe" id="detalhe-{{ $produto->id }}">
                                 <td colspan="5">
                                     <div class="grade-detalhe">
                                         <div class="bloco">
-                                            <h6>Detalhes</h6>
+                                            <h2>Detalhes</h2>
                                             <div>{{ $produto->descricao ?: 'Sem descrição.' }}</div>
                                             <div class="text-muted small mt-1">
                                                 Fornecedor: {{ $produto->fornecedor->nome ?? 'nenhum' }}{{ $produto->fornecedor?->telefone ? ' · '.$produto->fornecedor->telefone : '' }}
@@ -117,7 +117,7 @@
                                             <div class="text-muted small">Cadastrado em {{ $produto->created_at->format('d/m/Y') }}</div>
                                         </div>
                                         <div class="bloco">
-                                            <h6>Últimas movimentações</h6>
+                                            <h2>Últimas movimentações</h2>
                                             @if ($produto->movimentacoes->isEmpty())
                                                 <div class="vazio">Nenhuma movimentação.</div>
                                             @else
@@ -132,7 +132,7 @@
                                             @endif
                                         </div>
                                         <div class="bloco">
-                                            <h6>Vendido nos últimos 7 dias</h6>
+                                            <h2>Vendido nos últimos 7 dias</h2>
                                             @include('partials.sparkline', ['valores' => $vendido['dias']])
                                             <div class="small text-muted">{{ $vendido['quantidade'] }} {{ $vendido['quantidade'] === 1 ? 'unidade' : 'unidades' }} · R$ {{ number_format($vendido['valor'], 2, ',', '.') }}</div>
                                         </div>

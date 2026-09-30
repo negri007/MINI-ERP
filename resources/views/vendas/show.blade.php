@@ -5,6 +5,12 @@
 @section('content')
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 no-print">
         <div>
+            {{-- Trilha igual à dos formulários: mostra de onde a pessoa veio --}}
+            <nav class="trilha" aria-label="Você está em">
+                <a href="{{ route('vendas.index') }}">Vendas</a>
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">Venda #{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</span>
+            </nav>
             <h1 class="h3 mb-0">Venda #{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</h1>
             <p class="subtitulo mb-0">Registrada por {{ $venda->usuario->name ?? '-' }} em {{ $venda->created_at->format('d/m/Y \à\s H:i') }}</p>
         </div>
@@ -43,7 +49,7 @@
         <div class="cabecalho-nota">
             <div>
                 <div class="text-muted small">Mini ERP · comprovante de venda</div>
-                <div class="numero-venda">Nº {{ str_pad($venda->id, 6, '0', STR_PAD_LEFT) }}</div>
+                <div class="numero-venda">Nº {{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</div>
             </div>
             @if ($venda->estaCancelada())
                 <span class="badge bg-danger">Cancelada</span>

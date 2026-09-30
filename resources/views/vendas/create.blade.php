@@ -28,7 +28,8 @@
         </div>
     @endif
 
-    <form action="{{ route('vendas.store') }}" method="POST" id="formVenda">
+    {{-- form-venda: mesma largura de leitura dos outros formulários --}}
+    <form action="{{ route('vendas.store') }}" method="POST" id="formVenda" class="form-venda">
         @csrf
 
         {{-- Cabeçalho da venda --}}
@@ -36,7 +37,7 @@
             <div class="card-body row">
                 <div class="col-md-6 mb-3">
                     <div class="rotulo-com-acao">
-                        <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                        <label for="cliente_id" class="form-label">Cliente <span class="text-danger" aria-hidden="true">*</span></label>
                         {{-- Com JavaScript abre o modal; sem JavaScript vai para o cadastro normal --}}
                         <a href="{{ route('clientes.create') }}" class="btn btn-sm btn-outline-secondary" id="btnNovoCliente"
                            data-bs-toggle="modal" data-bs-target="#modalCliente">+ Novo cliente</a>
@@ -44,7 +45,7 @@
 
                     {{-- Reserva: <select> comum. Se o JavaScript carregar, ele fica escondido e a busca abaixo
                          aparece no lugar; o valor escolhido continua sendo enviado por este campo. --}}
-                    <select name="cliente_id" id="cliente_id" class="form-select @error('cliente_id') is-invalid @enderror">
+                    <select name="cliente_id" id="cliente_id" aria-required="true" class="form-select @error('cliente_id') is-invalid @enderror" @error('cliente_id') aria-invalid="true" aria-describedby="clienteErro" @enderror>
                         <option value="">Selecione...</option>
                         @foreach ($clientes as $cliente)
                             <option value="{{ $cliente->id }}" data-nome="{{ $cliente->nome }}" data-documento="{{ $cliente->cpf_cnpj }}"
@@ -57,7 +58,8 @@
                     {{-- Busca enquanto digita (padrão "combobox" do ARIA) --}}
                     <div class="combo" id="comboCliente" data-url="{{ route('clientes.buscar') }}" hidden>
                         <input type="text" id="clienteBusca" class="form-control @error('cliente_id') is-invalid @enderror" role="combobox"
-                               aria-autocomplete="list" aria-expanded="false" aria-controls="clienteOpcoes"
+                               aria-autocomplete="list" aria-expanded="false" aria-controls="clienteOpcoes" aria-required="true"
+                               @error('cliente_id') aria-invalid="true" @enderror
                                aria-describedby="clienteErro" autocomplete="off" placeholder="Ex.: Maria ou 123.456.789-09">
                         <ul class="combo-lista" id="clienteOpcoes" role="listbox" aria-label="Clientes encontrados" hidden></ul>
                         <div class="combo-vazio" id="clienteVazio" hidden>
@@ -70,10 +72,10 @@
                     <div class="visually-hidden" id="clienteAviso" aria-live="polite"></div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label for="data" class="form-label">Data <span class="text-danger">*</span></label>
-                    <input type="date" name="data" id="data" class="form-control @error('data') is-invalid @enderror" value="{{ old('data', now()->toDateString()) }}">
+                    <label for="data" class="form-label">Data <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input type="date" name="data" id="data" aria-required="true" class="form-control @error('data') is-invalid @enderror" @error('data') aria-invalid="true" aria-describedby="data-erro" @enderror value="{{ old('data', now()->toDateString()) }}">
                     @error('data')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback" id="data-erro">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-12">
@@ -86,7 +88,7 @@
         {{-- Itens da venda: linhas adicionadas pelo JavaScript abaixo --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Itens</span>
+                <h2 class="titulo-cartao">Itens</h2>
                 <button type="button" class="btn btn-sm btn-outline-primary" id="btnAdicionarItem">+ Adicionar produto</button>
             </div>
             <div class="card-body p-0">
@@ -97,17 +99,10 @@
                             <th style="width: 15%">Quantidade</th>
                             <th class="text-end">Preço</th>
                             <th class="text-end">Subtotal</th>
-                            <th></th>
+                            <th><span class="visually-hidden">Remover</span></th>
                         </tr>
                     </thead>
                     <tbody id="itens"></tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end">Total</th>
-                            <th class="text-end fs-5" id="totalVenda">R$ 0,00</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
             @if ($esgotados->isNotEmpty())
@@ -118,8 +113,14 @@
             @endif
         </div>
 
-        {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}
-        <div class="pe-form">
+        {{-- Rodapé da venda: o total fica grande ao lado do botão de registrar e acompanha a rolagem
+             (sticky), para o total nunca sumir quando a venda tem muitos itens.
+             aria-live: o leitor de tela anuncia o total novo quando ele muda. --}}
+        <div class="pe-form pe-venda">
+            <div class="total-venda">
+                <small>Total da venda</small>
+                <strong id="totalVenda" aria-live="polite">R$ 0,00</strong>
+            </div>
             <a href="{{ route('vendas.index') }}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">Registrar venda</button>
         </div>
@@ -194,7 +195,7 @@
             </td>
             <td class="text-end text-nowrap preco">-</td>
             <td class="text-end text-nowrap subtotal">-</td>
-            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remover" aria-label="Remover item">&times;</button></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remover" aria-label="Remover item"><span aria-hidden="true">&times;</span></button></td>
         </tr>
     </template>
 @endsection
@@ -234,10 +235,26 @@
         campoQtd.addEventListener('blur', () => conferirEstoque(linha));
         linha.querySelector('.campo-produto').addEventListener('change', () => conferirEstoque(linha));
         campoQtd.addEventListener('input', () => { if (campoQtd.classList.contains('is-invalid')) conferirEstoque(linha); });
-        linha.querySelector('.btn-remover').addEventListener('click', () => { linha.remove(); calcular(); });
+        linha.querySelector('.btn-remover').addEventListener('click', () => {
+            linha.remove();
+            calcular();
+            // O botão clicado sumiu: o foco vai para "Adicionar produto" em vez de se perder
+            document.getElementById('btnAdicionarItem').focus();
+        });
 
         corpo.appendChild(linha);
         calcular();
+        return linha;
+    }
+
+    // Dá nome a cada campo pelo número do item ("Produto do item 2"), para o leitor de tela
+    function numerarItens() {
+        corpo.querySelectorAll('tr').forEach((linha, i) => {
+            const n = i + 1;
+            linha.querySelector('.campo-produto').setAttribute('aria-label', `Produto do item ${n}`);
+            linha.querySelector('.campo-quantidade').setAttribute('aria-label', `Quantidade do item ${n}`);
+            linha.querySelector('.btn-remover').setAttribute('aria-label', `Remover item ${n}`);
+        });
     }
 
     // Recalcula preço, subtotal de cada linha e o total da venda
@@ -258,6 +275,7 @@
             linha.querySelector('.subtotal').textContent = preco ? moeda(subtotal) : '-';
         });
         document.getElementById('totalVenda').textContent = moeda(total);
+        numerarItens();
     }
 
     // Mostra "Só há N em estoque." abaixo da quantidade (o servidor confere de novo ao salvar)
@@ -273,7 +291,10 @@
         aviso.textContent = passou ? `Só há ${estoque} em estoque.` : '';
     }
 
-    document.getElementById('btnAdicionarItem').addEventListener('click', () => adicionarItem());
+    // Ao adicionar pelo botão, o foco já vai para o produto da linha nova
+    document.getElementById('btnAdicionarItem').addEventListener('click', () => {
+        adicionarItem().querySelector('.campo-produto').focus();
+    });
 
     // Recria os itens enviados (se a validação falhou) ou começa com uma linha vazia
     const itensAntigos = @json(array_values(old('itens', [])));

@@ -5,7 +5,7 @@
 @section('content')
     {{-- Cabeçalho: título, quantidade e botão de nova movimentação --}}
     <div class="cabeca-lista">
-        <h1 class="h3">Movimentações de estoque <span class="qtd" data-atualiza="qtd">{{ $movimentacoes->total() }} {{ $movimentacoes->total() === 1 ? 'registro' : 'registros' }}</span></h1>
+        <h1 class="h3">Movimentações de estoque <span class="qtd"><span role="status"><span data-atualiza="qtd">{{ $movimentacoes->total() }} {{ $movimentacoes->total() === 1 ? 'registro' : 'registros' }}</span></span></span></h1>
         <div class="acoes-topo">
             <a href="{{ route('estoque.create') }}" class="btn btn-primary">+ Nova movimentação</a>
         </div>

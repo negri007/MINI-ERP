@@ -12,8 +12,8 @@
 
                 {{-- Campo: Produto --}}
                 <div class="mb-3">
-                    <label for="produto_id" class="form-label">Produto <span class="text-danger">*</span></label>
-                    <select name="produto_id" id="produto_id" class="form-select @error('produto_id') is-invalid @enderror" aria-describedby="estoqueAtual">
+                    <label for="produto_id" class="form-label">Produto <span class="text-danger" aria-hidden="true">*</span></label>
+                    <select name="produto_id" id="produto_id" aria-required="true" class="form-select @error('produto_id') is-invalid @enderror" @error('produto_id') aria-invalid="true" aria-describedby="estoqueAtual produto_id-erro" @else aria-describedby="estoqueAtual" @enderror>
                         <option value="">Selecione...</option>
                         @foreach ($produtos as $produto)
                             <option value="{{ $produto->id }}" data-estoque="{{ $produto->estoque }}" @selected(old('produto_id', $produtoSelecionado) == $produto->id)>
@@ -22,17 +22,17 @@
                         @endforeach
                     </select>
                     @error('produto_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback" id="produto_id-erro">{{ $message }}</div>
                     @enderror
                     {{-- Estoque atual do produto escolhido (lido pelo leitor de tela ao mudar) --}}
                     <p class="form-text mb-0" id="estoqueAtual" aria-live="polite"></p>
                 </div>
 
                 <div class="row">
-                    {{-- Campo: Tipo --}}
-                    <fieldset class="col-md-6 mb-3" aria-describedby="ajuda-tipo">
+                    {{-- Campo: Tipo (fieldset + legend: o leitor de tela lê "Tipo" junto de cada opção) --}}
+                    <fieldset class="col-md-6 mb-3" @error('tipo') aria-describedby="ajuda-tipo tipo-erro" @else aria-describedby="ajuda-tipo" @enderror>
                         {{-- O legend precisa ser o primeiro filho do fieldset: é ele que dá nome ao grupo --}}
-                        <legend class="form-label legenda-com-ajuda">Tipo <span class="text-danger">*</span></legend>
+                        <legend class="form-label legenda-com-ajuda">Tipo <span class="text-danger" aria-hidden="true">*</span></legend>
                         @include('partials.ajuda-campo', ['id' => 'ajuda-tipo', 'campo' => 'o tipo de movimentação'])
                         <div class="mt-1">
                             <div class="form-check form-check-inline">
@@ -46,26 +46,26 @@
                         </div>
                         <p class="ajuda-texto" id="ajuda-tipo" hidden>Entrada soma ao estoque: mercadoria que chegou ou devolução. Saída tira do estoque: perda, quebra ou uso próprio. Vendas já baixam o estoque sozinhas, não registre aqui.</p>
                         @error('tipo')
-                            <div class="text-danger small">{{ $message }}</div>
+                            <div class="text-danger small" id="tipo-erro">{{ $message }}</div>
                         @enderror
                     </fieldset>
 
                     {{-- Campo: Quantidade --}}
                     <div class="col-md-6 mb-3">
-                        <label for="quantidade" class="form-label">Quantidade <span class="text-danger">*</span></label>
-                        <input type="number" min="1" step="1" name="quantidade" id="quantidade" class="form-control @error('quantidade') is-invalid @enderror" value="{{ old('quantidade') }}">
+                        <label for="quantidade" class="form-label">Quantidade <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="number" min="1" step="1" name="quantidade" id="quantidade" aria-required="true" class="form-control @error('quantidade') is-invalid @enderror" @error('quantidade') aria-invalid="true" aria-describedby="quantidade-erro" @enderror value="{{ old('quantidade') }}">
                         @error('quantidade')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback" id="quantidade-erro">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
 
                 {{-- Campo: Motivo --}}
                 <div class="mb-3">
-                    <label for="motivo" class="form-label">Motivo <span class="text-danger">*</span></label>
-                    <input type="text" name="motivo" id="motivo" class="form-control @error('motivo') is-invalid @enderror" value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X">
+                    <label for="motivo" class="form-label">Motivo <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input type="text" name="motivo" id="motivo" aria-required="true" class="form-control @error('motivo') is-invalid @enderror" @error('motivo') aria-invalid="true" aria-describedby="motivo-erro" @enderror value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X">
                     @error('motivo')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback" id="motivo-erro">{{ $message }}</div>
                     @enderror
                 </div>
 
