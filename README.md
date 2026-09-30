@@ -9,6 +9,11 @@ Mini ERP em Laravel + Blade + Bootstrap 5, com MySQL (Laragon).
 - **Vendas**: vários produtos por venda, total calculado, baixa automática de estoque e cancelamento que devolve o estoque.
   O campo Cliente busca por nome ou CPF/CNPJ enquanto você digita, e o botão **+ Novo cliente** cadastra sem sair da venda.
   Para vender sem identificar o cliente, use **Consumidor final** (cliente especial criado pela migration, que não pode ser editado nem excluído).
+  Cada venda tem **forma de pagamento** (Dinheiro, Pix, Cartão de débito ou de crédito) e **desconto em R$**; em Dinheiro,
+  a tela calcula o troco. Os valores são recalculados no servidor.
+- **Caixa do dia**: total por forma de pagamento, número de vendas, descontos e canceladas à parte, para conferir a gaveta. Pronto para imprimir.
+- **Custo e lucro**: cada produto pode ter custo; a venda guarda o custo do momento. Dashboard e relatório mostram lucro bruto
+  e margem, só com vendas que têm custo em todos os itens (as outras são contadas num aviso, sem valor inventado).
 - **Estoque**: histórico de entradas e saídas e movimentação manual (compra, perda, ajuste).
 - **Relatórios**: vendas por período, produtos mais vendidos e exportação para Excel (CSV).
 - **Dashboard**: faturamento do mês, gráficos e alerta de estoque baixo.
@@ -74,7 +79,9 @@ ou `php artisan migrate:fresh --seed` para apagar tudo e recomeçar com os dados
 - **Perfis de usuário (dono e caixa)**: hoje todo usuário acessa tudo. A ideia é o dono ver tudo e o caixa só registrar
   e consultar vendas. Exige um campo de perfil nos usuários e checagem nas rotas.
 
-- **Venda a prazo (fiado)**: quando existir, não poderá usar o Consumidor final, porque a dívida precisa de um cliente identificado.
+- **Venda a prazo (fiado)**: fica para a fase do financeiro. Entra como nova forma de pagamento (constante
+  `Venda::FORMAS_PAGAMENTO` e regra CHECK do banco, numa migration própria, com vencimento e situação do pagamento)
+  e não poderá usar o Consumidor final, porque a dívida precisa de um cliente identificado.
 - **Produto "inativo"**: hoje um produto já vendido não pode ser excluído (o histórico precisa dele). Um campo "inativo"
   tiraria o produto da Nova venda sem apagar o histórico. Exige mudar o banco.
 

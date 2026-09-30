@@ -77,6 +77,7 @@
 
 use App\Http\Controllers\ApresentacaoController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CaixaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\FornecedorController;
@@ -124,6 +125,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
 
     // Estoque: histórico e entradas/saídas manuais
+    // Caixa do dia: só consulta (totais por forma de pagamento de um dia)
+    Route::get('/caixa', [CaixaController::class, 'index'])->name('caixa.index');
+
     Route::get('/estoque', [MovimentacaoEstoqueController::class, 'index'])->name('estoque.index');
     Route::get('/estoque/movimentar', [MovimentacaoEstoqueController::class, 'create'])->name('estoque.create');
     Route::post('/estoque', [MovimentacaoEstoqueController::class, 'store'])->name('estoque.store');
