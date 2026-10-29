@@ -40,7 +40,7 @@
         <div><dt>Total do dia</dt><dd>R$ {{ number_format($resumo['total'], 2, ',', '.') }}</dd></div>
         <div><dt>Vendas</dt><dd>{{ $resumo['quantidade'] }}</dd></div>
         <div><dt>Descontos dados</dt><dd>R$ {{ number_format($resumo['descontos'], 2, ',', '.') }}</dd></div>
-        <div class="canceladas"><dt>Canceladas (fora do total)</dt>
+        <div class="canceladas {{ $resumo['canceladas'] > 0 ? 'com-canceladas' : '' }}"><dt>Canceladas (fora do total)</dt>
             <dd>{{ $resumo['canceladas'] }} {{ $resumo['canceladas'] === 1 ? 'venda' : 'vendas' }} · R$ {{ number_format($resumo['total_canceladas'], 2, ',', '.') }}</dd></div>
     </dl>
 
