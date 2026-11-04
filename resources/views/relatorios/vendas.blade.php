@@ -27,11 +27,19 @@
     </form>
 
     {{-- Resumo do período (só vendas concluídas), no mesmo formato do resumo da tela de Vendas --}}
-    <div class="resumo-lista resumo-3">
+    <div class="resumo-lista resumo-5">
         <div class="mini"><small>Vendas concluídas</small><b>{{ $resumo['quantidade'] }}</b></div>
         <div class="mini"><small>Faturamento</small><b>R$ {{ number_format($resumo['faturamento'], 2, ',', '.') }}</b></div>
         <div class="mini"><small>Ticket médio</small><b>R$ {{ number_format($resumo['ticket_medio'], 2, ',', '.') }}</b></div>
+        <div class="mini"><small>Lucro bruto</small><b>R$ {{ number_format($lucro['lucro'], 2, ',', '.') }}</b></div>
+        <div class="mini"><small>Margem</small><b>{{ is_null($lucro['margem']) ? '-' : number_format($lucro['margem'], 1, ',', '.').'%' }}</b></div>
     </div>
+    @if ($lucro['sem_custo'] > 0)
+        <p class="aviso-lucro mb-3">
+            {{ $lucro['sem_custo'] }} {{ $lucro['sem_custo'] === 1 ? 'venda sem custo informado ficou' : 'vendas sem custo informado ficaram' }}
+            fora do lucro e da margem. Informe o custo nos produtos para as próximas vendas entrarem na conta.
+        </p>
+    @endif
 
     <div class="painel-relatorio">
         {{-- Produtos mais vendidos --}}

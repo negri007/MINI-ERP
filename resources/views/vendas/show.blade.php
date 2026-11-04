@@ -90,6 +90,13 @@
             <div class="px-4 pt-3 text-muted"><strong>Observação:</strong> {{ $venda->observacao }}</div>
         @endif
 
+        {{-- Subtotal, desconto e forma de pagamento (vendas antigas: "não informada") --}}
+        <dl class="contas-nota">
+            <div><dt>Subtotal</dt><dd>R$ {{ number_format($venda->subtotal, 2, ',', '.') }}</dd></div>
+            <div><dt>Desconto</dt><dd>{{ $venda->desconto > 0 ? '− R$ '.number_format($venda->desconto, 2, ',', '.') : 'R$ 0,00' }}</dd></div>
+            <div><dt>Pago em</dt><dd>{{ $venda->nomeFormaPagamento() }}</dd></div>
+        </dl>
+
         <div class="total-nota">
             <span class="text-muted">{{ $venda->itens->sum('quantidade') }} item(ns)</span>
             <span class="valor">R$ {{ number_format($venda->total, 2, ',', '.') }}</span>

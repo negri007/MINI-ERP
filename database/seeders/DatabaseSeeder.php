@@ -12,6 +12,7 @@ use App\Models\Cliente;
 use App\Models\Fornecedor;
 use App\Models\Produto;
 use App\Models\User;
+use App\Models\Venda;
 use App\Services\EstoqueService;
 use App\Services\VendaService;
 use Illuminate\Database\Seeder;
@@ -51,10 +52,12 @@ class DatabaseSeeder extends Seeder
         foreach ($catalogo as $nomeCategoria => $produtos) {
             $categoria = Categoria::create(['nome' => $nomeCategoria, 'descricao' => "Produtos de {$nomeCategoria}"]);
 
-            foreach ($produtos as [$nome, $preco, $inicial, $minimo]) {
+            foreach ($produtos as $i => [$nome, $preco, $inicial, $minimo]) {
                 $produto = Produto::create([
                     'nome' => $nome,
                     'preco' => $preco,
+                    // custo entre 55% e 70% do preço (sempre abaixo do preço de venda)
+                    'custo' => round($preco * (0.55 + ($i % 4) * 0.05), 2),
                     'estoque' => 0,
                     'estoque_minimo' => $minimo,
                     'categoria_id' => $categoria->id,
@@ -77,7 +80,7 @@ class DatabaseSeeder extends Seeder
             $itens = $disponiveis->map(fn ($p) => ['produto_id' => $p->id, 'quantidade' => rand(1, 3)])->all();
 
             if ($itens) {
-                $vendas->registrar($clientes->random()->id, Carbon::today()->subDays(rand(0, 13))->toDateString(), $itens);
+                $vendas->registrar($clientes->random()->id, Carbon::today()->subDays(rand(0, 13))->toDateString(), $itens, array_rand(Venda::FORMAS_PAGAMENTO));
             }
         }
 

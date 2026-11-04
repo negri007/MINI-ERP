@@ -34,6 +34,7 @@ class VendaTest extends TestCase
         return $this->post('/vendas', [
             'cliente_id' => $this->cliente->id,
             'data' => now()->toDateString(),
+            'forma_pagamento' => 'dinheiro',
             'itens' => $itens,
         ]);
     }
@@ -122,7 +123,7 @@ class VendaTest extends TestCase
         $this->get('/relatorios/vendas')->assertOk()->assertSee('R$ 15,00')->assertSee('Suco');
 
         $csv = $this->get('/relatorios/vendas/exportar')->assertOk()->streamedContent();
-        $this->assertStringContainsString('Venda;Data;Cliente;Total', $csv);
-        $this->assertStringContainsString('15,00', $csv);
+        $this->assertStringContainsString('Venda;Data;Cliente;"Forma de pagamento";Subtotal;Desconto;Total', $csv);
+        $this->assertStringContainsString(';Dinheiro;15,00;0,00;15,00', $csv);
     }
 }

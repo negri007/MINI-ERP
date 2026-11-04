@@ -53,6 +53,7 @@
                                 {{ $produto->fornecedor->nome ?? '' }}
                             </div>
                             <div class="preco"><small>R$</small>{{ number_format($produto->preco, 2, ',', '.') }}</div>
+                            @include('partials.custo', ['produto' => $produto])
                             @include('partials.medidor', ['produto' => $produto])
                             <div class="rodape-cartao">
                                 <a href="{{ route('estoque.create', ['produto_id' => $produto->id]) }}" class="botao-icone" title="Movimentar estoque">@include('partials.icone', ['nome' => 'caixa'])</a>
@@ -92,7 +93,10 @@
                                     </div>
                                 </td>
                                 <td><span class="pilula"><i></i>{{ $produto->categoria->nome }}</span></td>
-                                <td class="valor-lista">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
+                                <td>
+                                    <span class="valor-lista">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
+                                    @include('partials.custo', ['produto' => $produto])
+                                </td>
                                 <td>@include('partials.medidor', ['produto' => $produto])</td>
                                 <td>
                                     {{-- Ações: aparecem ao passar o mouse --}}
@@ -113,6 +117,13 @@
                                             <div>{{ $produto->descricao ?: 'Sem descrição.' }}</div>
                                             <div class="text-muted small mt-1">
                                                 Fornecedor: {{ $produto->fornecedor->nome ?? 'nenhum' }}{{ $produto->fornecedor?->telefone ? ' · '.$produto->fornecedor->telefone : '' }}
+                                            </div>
+                                            <div class="text-muted small">
+                                                @if (is_null($produto->custo))
+                                                    Custo: sem custo informado (fica fora do lucro)
+                                                @else
+                                                    Custo: R$ {{ number_format($produto->custo, 2, ',', '.') }}{{ $produto->preco > 0 ? ' · margem '.number_format(($produto->preco - $produto->custo) / $produto->preco * 100, 1, ',', '.').'%' : '' }}
+                                                @endif
                                             </div>
                                             <div class="text-muted small">Cadastrado em {{ $produto->created_at->format('d/m/Y') }}</div>
                                         </div>

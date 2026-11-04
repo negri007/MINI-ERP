@@ -25,6 +25,10 @@ class RelatorioController extends Controller
             'ticket_medio' => $vendas->count() ? $vendas->sum('total') / $vendas->count() : 0,
         ];
 
+        // Lucro bruto do período (vendas sem custo em algum item ficam de fora e são contadas)
+        $lucro = app(\App\Services\LucroService::class)
+            ->calcular(Venda::whereDate('data', '>=', $de)->whereDate('data', '<=', $ate));
+
         // Produtos mais vendidos no período (soma das quantidades de cada produto)
         $maisVendidos = VendaItem::with('produto')
             ->selectRaw('produto_id, SUM(quantidade) as quantidade, SUM(subtotal) as total')
@@ -34,7 +38,7 @@ class RelatorioController extends Controller
             ->limit(10)
             ->get();
 
-        return view('relatorios.vendas', compact('vendas', 'resumo', 'maisVendidos', 'de', 'ate'));
+        return view('relatorios.vendas', compact('vendas', 'resumo', 'lucro', 'maisVendidos', 'de', 'ate'));
     }
 
     // Exporta as vendas do período em CSV (abre no Excel)
@@ -49,13 +53,16 @@ class RelatorioController extends Controller
             fwrite($saida, "\xEF\xBB\xBF"); // BOM: faz o Excel reconhecer os acentos
 
             // Ponto e vírgula como separador, que é o padrão do Excel em português
-            fputcsv($saida, ['Venda', 'Data', 'Cliente', 'Total'], ';');
+            fputcsv($saida, ['Venda', 'Data', 'Cliente', 'Forma de pagamento', 'Subtotal', 'Desconto', 'Total'], ';');
 
             foreach ($vendas as $venda) {
                 fputcsv($saida, [
                     $venda->id,
                     $venda->data->format('d/m/Y'),
-                    $venda->cliente->nome,
+                    self::celulaSegura($venda->cliente->nome),
+                    $venda->nomeFormaPagamento(),
+                    number_format($venda->subtotal, 2, ',', ''),
+                    number_format($venda->desconto, 2, ',', ''),
                     number_format($venda->total, 2, ',', ''),
                 ], ';');
             }
@@ -79,5 +86,15 @@ class RelatorioController extends Controller
         return Venda::where('status', Venda::CONCLUIDA)
             ->whereDate('data', '>=', $de)
             ->whereDate('data', '<=', $ate);
+    }
+
+    // Proteção contra "injeção de fórmula" no Excel: um texto digitado pelo usuário que começa
+    // com = + - @ (ou tab/enter) seria executado como fórmula ao abrir o CSV.
+    // Um apóstrofo na frente faz o Excel tratar como texto comum.
+    public static function celulaSegura(?string $texto): string
+    {
+        $texto = (string) $texto;
+
+        return preg_match('/^[=+\-@\t\r]/', $texto) ? "'".$texto : $texto;
     }
 }

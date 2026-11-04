@@ -50,7 +50,7 @@ class ListasTest extends TestCase
     {
         $produto = Produto::factory()->create(['nome' => 'Suco', 'preco' => 5, 'estoque' => 0]);
         $this->post('/estoque', ['produto_id' => $produto->id, 'tipo' => 'entrada', 'quantidade' => 10, 'motivo' => 'Compra NF 777']);
-        app(VendaService::class)->registrar(Cliente::factory()->create()->id, now()->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 3]]);
+        app(VendaService::class)->registrar(Cliente::factory()->create()->id, now()->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 3]], 'dinheiro');
 
         $this->get('/produtos')
             ->assertSee('Compra NF 777')
@@ -64,8 +64,8 @@ class ListasTest extends TestCase
         $ana = Cliente::factory()->create(['nome' => 'Ana Souza']);
         $bruno = Cliente::factory()->create(['nome' => 'Bruno Lima']);
 
-        $hoje = $servico->registrar($ana->id, now()->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 1]]);
-        $antiga = $servico->registrar($bruno->id, now()->subDays(20)->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 1]]);
+        $hoje = $servico->registrar($ana->id, now()->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 1]], 'dinheiro');
+        $antiga = $servico->registrar($bruno->id, now()->subDays(20)->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 1]], 'dinheiro');
         $servico->cancelar($antiga);
 
         $this->get('/vendas?periodo=hoje')->assertSee('Ana Souza')->assertDontSee('Bruno Lima');
@@ -78,7 +78,7 @@ class ListasTest extends TestCase
     {
         $comCompra = Cliente::factory()->create(['nome' => 'Comprador']);
         Cliente::factory()->create(['nome' => 'Curioso']);
-        app(VendaService::class)->registrar($comCompra->id, now()->toDateString(), [['produto_id' => Produto::factory()->create(['estoque' => 5])->id, 'quantidade' => 1]]);
+        app(VendaService::class)->registrar($comCompra->id, now()->toDateString(), [['produto_id' => Produto::factory()->create(['estoque' => 5])->id, 'quantidade' => 1]], 'dinheiro');
 
         $this->get('/clientes?filtro=com')->assertSee('Comprador')->assertDontSee('Curioso');
         $this->get('/clientes?filtro=sem')->assertSee('Curioso')->assertDontSee('Comprador');

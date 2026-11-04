@@ -52,6 +52,7 @@
                             @include('partials.th-ordem', ['campo' => 'data', 'titulo' => 'Data'])
                             <th class="text-center">Itens</th>
                             <th>Situação</th>
+                            <th>Pagamento</th>
                             @include('partials.th-ordem', ['campo' => 'total', 'titulo' => 'Total', 'classe' => 'text-end'])
                             <th></th>
                         </tr>
@@ -76,7 +77,13 @@
                                         <span class="badge bg-success">Concluída</span>
                                     @endif
                                 </td>
-                                <td class="text-end valor-lista {{ $venda->estaCancelada() ? 'riscado' : '' }}">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
+                                <td class="{{ $venda->forma_pagamento ? '' : 'text-muted' }}">{{ $venda->nomeFormaPagamento() }}</td>
+                                <td class="text-end">
+                                    <span class="valor-lista {{ $venda->estaCancelada() ? 'riscado' : '' }}">R$ {{ number_format($venda->total, 2, ',', '.') }}</span>
+                                    @if ($venda->desconto > 0)
+                                        <small class="d-block text-muted">desconto R$ {{ number_format($venda->desconto, 2, ',', '.') }}</small>
+                                    @endif
+                                </td>
                                 <td>
                                     {{-- Ações: aparecem ao passar o mouse --}}
                                     <div class="acoes-linha">
@@ -87,7 +94,7 @@
 
                             {{-- Detalhes: itens, cliente e ações --}}
                             <tr class="detalhe" id="detalhe-{{ $venda->id }}">
-                                <td colspan="7">
+                                <td colspan="8">
                                     <div class="grade-detalhe">
                                         <div class="bloco">
                                             <h2>Itens da venda</h2>

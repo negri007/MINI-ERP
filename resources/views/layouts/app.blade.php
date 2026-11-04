@@ -54,6 +54,7 @@
             ]],
             ['Operações', 'atividade', [
                 ['Vendas', 'vendas.index', 'vendas.*', 'carrinho'],
+                ['Caixa do dia', 'caixa.index', 'caixa.*', 'dinheiro'],
                 ['Estoque', 'estoque.index', 'estoque.*', 'camadas'],
             ]],
             ['Relatórios', 'grafico', [
