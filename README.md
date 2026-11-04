@@ -56,6 +56,14 @@ Fontes: Outfit e Inter (licença SIL Open Font, em `public/vendor/fonts`).
    ```
 3. Acesse http://127.0.0.1:8000 e entre com **admin@minierp.com / admin123**.
 
+**Outro jeito: importar o banco pronto.** O arquivo `database/banco.sql` já tem todas as tabelas e os dados de exemplo
+(e cria o banco `mini_erp` sozinho). Em vez do `php artisan migrate --seed`, importe esse arquivo:
+```bash
+mysql -u root < database/banco.sql
+```
+ou, no MySQL Workbench, em **Server → Data Import → Import from Self-Contained File**.
+O login é o mesmo: **admin@minierp.com / admin123**.
+
 Já tinha o projeto rodando? Depois do `git pull`, rode `php artisan migrate` para criar as tabelas novas,
 ou `php artisan migrate:fresh --seed` para apagar tudo e recomeçar com os dados de exemplo.
 
@@ -69,8 +77,9 @@ ou `php artisan migrate:fresh --seed` para apagar tudo e recomeçar com os dados
 | `app/Services` | Regras de negócio: `VendaService` (vender/cancelar) e `EstoqueService` (entradas/saídas) |
 | `app/Rules/CpfCnpj.php` | Regra que confere os dígitos do CPF/CNPJ |
 | `resources/views` | Telas Blade (`layouts/app.blade.php` é o layout) |
-| `database/migrations` | Criação das tabelas |
+| `database/migrations` | Criação e alteração das tabelas |
 | `database/seeders` | Dados de exemplo |
+| `database/banco.sql` | Banco pronto (tabelas + dados de exemplo) para importar no MySQL |
 | `lang/pt_BR` | Mensagens de validação em português |
 | `docs/APRESENTACAO.md` | Roteiro para apresentar o CRUD de Produtos |
 
