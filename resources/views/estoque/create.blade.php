@@ -3,7 +3,7 @@
 @section('title', 'Movimentar estoque')
 
 @section('content')
-    @include('partials.cabeca-form', ['lista' => 'Estoque', 'rota' => 'estoque.index', 'titulo' => 'Movimentar estoque', 'chaveDica' => 'estoque-form', 'dica' => 'Entrada = mercadoria que chegou. Saída = perda, quebra ou uso próprio. Vendas baixam o estoque sozinhas.'])
+    @include('partials.cabeca-form', ['lista' => 'Estoque', 'rota' => 'estoque.index', 'titulo' => 'Movimentar estoque', 'chaveDica' => 'estoque-form', 'dica' => 'Entrada = mercadoria que chegou. Saída = perda, quebra ou uso próprio. Vendas e devoluções de cliente mexem no estoque sozinhas.'])
 
     <div class="card cartao-form">
         <div class="card-body">
@@ -11,8 +11,8 @@
                 @csrf
 
                 <div class="row">
-                {{-- Campo: Produto --}}
-                <div class="col-lg-6 mb-3">
+                    {{-- Campo: Produto --}}
+                    <div class="col-lg-6 mb-3">
                     <label for="produto_id" class="form-label">Produto <span class="text-danger" aria-hidden="true">*</span></label>
                     <select name="produto_id" id="produto_id" aria-required="true" class="form-select @error('produto_id') is-invalid @enderror" @error('produto_id') aria-invalid="true" aria-describedby="estoqueAtual produto_id-erro" @else aria-describedby="estoqueAtual" @enderror>
                         <option value="">Selecione...</option>
@@ -61,10 +61,19 @@
                         @enderror
                     </div>
 
-                {{-- Campo: Motivo --}}
-                <div class="col-lg-9 mb-3">
+                    {{-- Campo: Motivo --}}
+                    <div class="col-lg-9 mb-3">
                     <label for="motivo" class="form-label">Motivo <span class="text-danger" aria-hidden="true">*</span></label>
-                    <input type="text" name="motivo" id="motivo" aria-required="true" class="form-control @error('motivo') is-invalid @enderror" @error('motivo') aria-invalid="true" aria-describedby="motivo-erro" @enderror value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X">
+                    <input type="text" name="motivo" id="motivo" aria-required="true" class="form-control @error('motivo') is-invalid @enderror" @error('motivo') aria-invalid="true" aria-describedby="motivo-erro" @enderror value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X" list="motivosComuns">
+                    {{-- Sugestões ao digitar (pode escrever outro texto) --}}
+                    <datalist id="motivosComuns">
+                        <option value="Compra do fornecedor">
+                        <option value="Perda ou quebra">
+                        <option value="Produto vencido">
+                        <option value="Devolução ao fornecedor">
+                        <option value="Uso próprio da loja">
+                        <option value="Ajuste de inventário (contagem)">
+                    </datalist>
                     @error('motivo')
                         <div class="invalid-feedback" id="motivo-erro">{{ $message }}</div>
                     @enderror

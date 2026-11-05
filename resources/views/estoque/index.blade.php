@@ -10,7 +10,7 @@
             <a href="{{ route('estoque.create') }}" class="btn btn-primary">+ Nova movimentação</a>
         </div>
     </div>
-    @include('partials.dica', ['chave' => 'estoque', 'texto' => 'Tudo que entrou e saiu, com o motivo. As vendas aparecem aqui sozinhas.'])
+    @include('partials.dica', ['chave' => 'estoque', 'texto' => 'Tudo que entrou e saiu. A coluna Origem diz de onde veio: venda, cancelamento, devolução, cadastro do produto ou ajuste manual (com o motivo digitado).'])
 
     {{-- Filtros: tipo em pílulas + busca instantânea --}}
     <div class="filtros">
@@ -38,7 +38,7 @@
                             <th>Tipo</th>
                             @include('partials.th-ordem', ['campo' => 'quantidade', 'titulo' => 'Quantidade', 'classe' => 'text-end'])
                             <th class="text-end">Saldo após</th>
-                            <th>Motivo</th>
+                            <th>Origem</th>
                             <th>Usuário</th>
                         </tr>
                     </thead>
@@ -57,19 +57,34 @@
                                 </td>
                                 <td>
                                     @if ($mov->tipo === 'entrada')
-                                        <span class="badge bg-success">Entrada</span>
+                                        <span class="selo-tipo entrada">+ Entrada</span>
                                     @else
-                                        <span class="badge bg-danger">Saída</span>
+                                        <span class="selo-tipo saida">− Saída</span>
                                     @endif
                                 </td>
                                 <td class="text-end valor-lista" style="color: {{ $mov->tipo === 'entrada' ? '#4fd08c' : '#ff8a8a' }}">{{ $mov->tipo === 'entrada' ? '+' : '−' }}{{ $mov->quantidade }}</td>
                                 <td class="text-end">{{ $mov->estoque_apos }}</td>
+                                {{-- Origem: de onde veio a movimentação (pílula) + o detalhe embaixo --}}
                                 <td>
-                                    @if ($mov->venda_id)
-                                        <a href="{{ route('vendas.show', $mov->venda_id) }}">{{ $mov->motivo }}</a>
-                                    @else
-                                        {{ $mov->motivo }}
-                                    @endif
+                                    <span class="selo-origem {{ $mov->origem }}">{{ $mov->nomeOrigem() }}</span>
+                                    <div class="detalhe-origem">
+                                        @switch($mov->origem)
+                                            @case('venda')
+                                                Saiu na <a href="{{ route('vendas.show', $mov->venda_id) }}">venda #{{ str_pad($mov->venda_id, 4, '0', STR_PAD_LEFT) }}</a>
+                                                @break
+                                            @case('cancelamento')
+                                                Voltou com o cancelamento da <a href="{{ route('vendas.show', $mov->venda_id) }}">venda #{{ str_pad($mov->venda_id, 4, '0', STR_PAD_LEFT) }}</a>
+                                                @break
+                                            @case('devolucao')
+                                                Cliente devolveu (#{{ $mov->devolucao_id }}) · <a href="{{ route('vendas.show', $mov->venda_id) }}">venda #{{ str_pad($mov->venda_id, 4, '0', STR_PAD_LEFT) }}</a>
+                                                @break
+                                            @case('estoque_inicial')
+                                                Quantidade do cadastro do produto
+                                                @break
+                                            @default
+                                                {{ $mov->motivo }}
+                                        @endswitch
+                                    </div>
                                 </td>
                                 <td class="text-muted">{{ $mov->usuario->name ?? '-' }}</td>
                             </tr>

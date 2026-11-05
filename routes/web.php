@@ -48,6 +48,7 @@
 |      php artisan make:controller VendaController
 |      php artisan make:controller MovimentacaoEstoqueController
 |      php artisan make:controller RelatorioController
+|      php artisan make:controller DevolucaoController
 |      php artisan make:controller Auth/LoginController
 |
 | 6.1) Criar as validações (Form Requests) e a regra de CPF/CNPJ:
@@ -80,6 +81,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CaixaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\DevolucaoController;
 use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\MovimentacaoEstoqueController;
 use App\Http\Controllers\ProdutoController;
@@ -124,10 +126,15 @@ Route::middleware('auth')->group(function () {
     Route::resource('vendas', VendaController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
 
-    // Estoque: histórico e entradas/saídas manuais
+    // Devoluções: lista de tudo que voltou e o registro a partir de uma venda
+    Route::get('/devolucoes', [DevolucaoController::class, 'index'])->name('devolucoes.index');
+    Route::get('/vendas/{venda}/devolucao', [DevolucaoController::class, 'create'])->name('devolucoes.create');
+    Route::post('/vendas/{venda}/devolucao', [DevolucaoController::class, 'store'])->name('devolucoes.store');
+
     // Caixa do dia: só consulta (totais por forma de pagamento de um dia)
     Route::get('/caixa', [CaixaController::class, 'index'])->name('caixa.index');
 
+    // Estoque: histórico e entradas/saídas manuais
     Route::get('/estoque', [MovimentacaoEstoqueController::class, 'index'])->name('estoque.index');
     Route::get('/estoque/movimentar', [MovimentacaoEstoqueController::class, 'create'])->name('estoque.create');
     Route::post('/estoque', [MovimentacaoEstoqueController::class, 'store'])->name('estoque.store');

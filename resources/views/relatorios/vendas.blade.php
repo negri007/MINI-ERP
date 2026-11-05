@@ -34,6 +34,12 @@
         <div class="mini"><small>Lucro bruto</small><b>R$ {{ number_format($lucro['lucro'], 2, ',', '.') }}</b></div>
         <div class="mini"><small>Margem</small><b>{{ is_null($lucro['margem']) ? '-' : number_format($lucro['margem'], 1, ',', '.').'%' }}</b></div>
     </div>
+    @if ($resumo['devolvido'] > 0)
+        <p class="aviso-lucro mb-3">
+            Faturamento já sem as devoluções: R$ {{ number_format($resumo['devolvido'], 2, ',', '.') }} voltaram aos clientes neste período.
+            <a href="{{ route('devolucoes.index') }}">Ver devoluções</a>
+        </p>
+    @endif
     @if ($lucro['sem_custo'] > 0)
         <p class="aviso-lucro mb-3">
             {{ $lucro['sem_custo'] }} {{ $lucro['sem_custo'] === 1 ? 'venda sem custo informado ficou' : 'vendas sem custo informado ficaram' }}
@@ -79,7 +85,12 @@
                                 <td><a href="{{ route('vendas.show', $venda) }}">#{{ str_pad($venda->id, 4, '0', STR_PAD_LEFT) }}</a></td>
                                 <td>{{ $venda->data->format('d/m/Y') }}</td>
                                 <td>{{ $venda->cliente->nome }}</td>
-                                <td class="text-end text-nowrap">R$ {{ number_format($venda->total, 2, ',', '.') }}</td>
+                                <td class="text-end text-nowrap">
+                                    R$ {{ number_format($venda->totalLiquido(), 2, ',', '.') }}
+                                    @if ($venda->total_devolvido > 0)
+                                        <div class="text-muted small">de R$ {{ number_format($venda->total, 2, ',', '.') }} (houve devolução)</div>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="4" class="text-center text-muted py-4">Sem vendas no período.</td></tr>

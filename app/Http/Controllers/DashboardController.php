@@ -10,6 +10,7 @@ use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\Venda;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -24,8 +25,9 @@ class DashboardController extends Controller
         // Mês atual até hoje
         $mesAtual = $concluidas()->whereDate('data', '>=', $hoje->copy()->startOfMonth()->toDateString());
 
+        // Faturamento líquido: o que foi devolvido ao cliente não conta
         $mes = [
-            'faturamento' => (clone $mesAtual)->sum('total'),
+            'faturamento' => (float) (clone $mesAtual)->sum(DB::raw('total - total_devolvido')),
             'quantidade' => (clone $mesAtual)->count(),
             'hoje' => $concluidas()->whereDate('data', $hoje->toDateString())->count(),
         ];
@@ -41,7 +43,7 @@ class DashboardController extends Controller
         $mesAnterior = $concluidas()
             ->whereDate('data', '>=', $inicioAnterior->toDateString())
             ->whereDate('data', '<=', $fimAnterior->toDateString());
-        $faturamentoAnterior = (clone $mesAnterior)->sum('total');
+        $faturamentoAnterior = (float) (clone $mesAnterior)->sum(DB::raw('total - total_devolvido'));
         $quantidadeAnterior = (clone $mesAnterior)->count();
         $ticketAnterior = $quantidadeAnterior ? $faturamentoAnterior / $quantidadeAnterior : 0;
 
@@ -59,9 +61,9 @@ class DashboardController extends Controller
         $inicio = $hoje->copy()->subDays(13);
         $porDia = $concluidas()
             ->whereDate('data', '>=', $inicio->toDateString())
-            ->get(['data', 'total'])
+            ->get(['data', 'total', 'total_devolvido'])
             ->groupBy(fn ($v) => $v->data->toDateString())
-            ->map(fn ($grupo) => (float) $grupo->sum('total'));
+            ->map(fn ($grupo) => (float) $grupo->sum(fn ($v) => $v->totalLiquido()));
 
         $grafico = ['labels' => [], 'valores' => []];
         for ($dia = $inicio->copy(); $dia->lte($hoje); $dia->addDay()) {

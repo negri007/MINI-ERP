@@ -67,7 +67,7 @@ class VendaService
                     'subtotal' => $subtotalItem / 100,
                 ]);
 
-                $this->estoque->saida($produto, $quantidade, "Venda #{$venda->id}", $venda->id);
+                $this->estoque->saida($produto, $quantidade, "Venda #{$venda->id}", 'venda', $venda->id);
 
                 $subtotalCentavos += $subtotalItem;
             }
@@ -98,10 +98,15 @@ class VendaService
             throw ValidationException::withMessages(['venda' => 'Esta venda já está cancelada.']);
         }
 
+        // Com devolução registrada, cancelar devolveria ao estoque de novo o que já voltou
+        if ($venda->temDevolucao()) {
+            throw ValidationException::withMessages(['venda' => 'Esta venda tem devolução registrada e não pode ser cancelada. Para devolver o restante, registre outra devolução.']);
+        }
+
         DB::transaction(function () use ($venda) {
             foreach ($venda->itens as $item) {
                 $produto = Produto::lockForUpdate()->findOrFail($item->produto_id);
-                $this->estoque->entrada($produto, $item->quantidade, "Cancelamento da venda #{$venda->id}", $venda->id);
+                $this->estoque->entrada($produto, $item->quantidade, "Cancelamento da venda #{$venda->id}", 'cancelamento', $venda->id);
             }
 
             $venda->update(['status' => Venda::CANCELADA]);

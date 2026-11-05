@@ -19,10 +19,13 @@ class RelatorioController extends Controller
 
         $vendas = $this->vendasDoPeriodo($de, $ate)->with('cliente')->orderBy('data')->get();
 
+        // Faturamento líquido: o valor devolvido aos clientes não conta
+        $faturamento = (float) $vendas->sum(fn (Venda $v) => $v->totalLiquido());
         $resumo = [
             'quantidade' => $vendas->count(),
-            'faturamento' => $vendas->sum('total'),
-            'ticket_medio' => $vendas->count() ? $vendas->sum('total') / $vendas->count() : 0,
+            'faturamento' => $faturamento,
+            'devolvido' => (float) $vendas->sum('total_devolvido'),
+            'ticket_medio' => $vendas->count() ? $faturamento / $vendas->count() : 0,
         ];
 
         // Lucro bruto do período (vendas sem custo em algum item ficam de fora e são contadas)
@@ -53,7 +56,7 @@ class RelatorioController extends Controller
             fwrite($saida, "\xEF\xBB\xBF"); // BOM: faz o Excel reconhecer os acentos
 
             // Ponto e vírgula como separador, que é o padrão do Excel em português
-            fputcsv($saida, ['Venda', 'Data', 'Cliente', 'Forma de pagamento', 'Subtotal', 'Desconto', 'Total'], ';');
+            fputcsv($saida, ['Venda', 'Data', 'Cliente', 'Forma de pagamento', 'Subtotal', 'Desconto', 'Total', 'Devolvido', 'Total líquido'], ';');
 
             foreach ($vendas as $venda) {
                 fputcsv($saida, [
@@ -64,6 +67,8 @@ class RelatorioController extends Controller
                     number_format($venda->subtotal, 2, ',', ''),
                     number_format($venda->desconto, 2, ',', ''),
                     number_format($venda->total, 2, ',', ''),
+                    number_format($venda->total_devolvido, 2, ',', ''),
+                    number_format($venda->totalLiquido(), 2, ',', ''),
                 ], ';');
             }
 

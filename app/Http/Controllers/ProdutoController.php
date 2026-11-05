@@ -113,7 +113,7 @@ class ProdutoController extends Controller
             $produto = Produto::create(array_merge($dados, ['estoque' => 0]));
 
             if ($estoqueInicial > 0) {
-                $estoque->entrada($produto, $estoqueInicial, 'Estoque inicial');
+                $estoque->entrada($produto, $estoqueInicial, 'Estoque inicial', 'estoque_inicial');
             }
         });
 

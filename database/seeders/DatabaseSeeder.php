@@ -14,6 +14,7 @@ use App\Models\Produto;
 use App\Models\User;
 use App\Models\Venda;
 use App\Services\EstoqueService;
+use App\Services\DevolucaoService;
 use App\Services\VendaService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -66,7 +67,7 @@ class DatabaseSeeder extends Seeder
 
                 // Estoque inicial entra pelo histórico, como no sistema
                 if ($inicial > 0) {
-                    $estoque->entrada($produto, $inicial, 'Estoque inicial');
+                    $estoque->entrada($produto, $inicial, 'Estoque inicial', 'estoque_inicial');
                 }
             }
         }
@@ -82,6 +83,13 @@ class DatabaseSeeder extends Seeder
             if ($itens) {
                 $vendas->registrar($clientes->random()->id, Carbon::today()->subDays(rand(0, 13))->toDateString(), $itens, array_rand(Venda::FORMAS_PAGAMENTO));
             }
+        }
+
+        // Duas devoluções de exemplo: uma volta ao estoque, outra vai ao fornecedor (estoque não muda)
+        $devolucoes = app(DevolucaoService::class);
+        foreach (Venda::with('itens')->latest('id')->limit(2)->get()->values() as $n => $venda) {
+            $item = $venda->itens->first();
+            $devolucoes->registrar($venda, [$item->id => 1], $n === 0 ? 'desistencia' : 'defeito', $n === 0 ? 'estoque' : 'fornecedor');
         }
 
         $this->command->info('Dados de exemplo criados. Login: admin@minierp.com / admin123');

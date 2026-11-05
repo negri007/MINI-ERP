@@ -1247,3 +1247,30 @@ html:has(.pe-venda) { scroll-padding-bottom: 10rem; }
     .caixa-forma, .caixa-resumo { background: #fff !important; color: #000; border-color: #ccc; }
     .caixa-forma .rotulo, .caixa-forma .rodape, .caixa-resumo dt, .caixa-resumo .canceladas dd { color: #000 !important; }
 }
+
+/* ============================================================
+   SELOS: tipo e origem do estoque, destino da devolução
+   Texto do tamanho normal da tabela (antes as etiquetas eram pequenas demais)
+   ============================================================ */
+.selo-tipo, .selo-origem, .selo-destino {
+    display: inline-block;
+    padding: .25rem .7rem;
+    border-radius: 99px;
+    font-size: .875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, .07);
+    color: var(--texto);
+}
+.selo-tipo.entrada, .selo-destino.estoque { background: rgba(45, 171, 106, .15); color: var(--verde-texto); }
+.selo-tipo.saida, .selo-destino.perda { background: rgba(229, 96, 96, .15); color: #ff8a8a; }
+.selo-destino.fornecedor { background: rgba(194, 128, 59, .18); color: #e8a15a; }
+.selo-origem.venda { background: rgba(67, 148, 232, .15); color: #8cc0f5; }
+.selo-origem.cancelamento { background: rgba(229, 96, 96, .12); color: #ff9c9c; }
+.selo-origem.devolucao { background: rgba(194, 128, 59, .18); color: #e8a15a; }
+.selo-origem.estoque_inicial { background: rgba(45, 171, 106, .12); color: var(--verde-texto); }
+.selo-origem.manual { background: rgba(255, 255, 255, .08); color: var(--texto); }
+.detalhe-origem { margin-top: .3rem; color: var(--texto-2); font-size: .875rem; }
+
+.lista-simples { list-style: none; padding: 0; margin: 0; }
+.lista-simples li + li { margin-top: .15rem; }

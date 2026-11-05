@@ -20,7 +20,7 @@ class Venda extends Model
     protected $table = 'vendas';
 
     // Campos que podem ser preenchidos em massa
-    protected $fillable = ['cliente_id', 'user_id', 'data', 'status', 'subtotal', 'desconto', 'total', 'forma_pagamento', 'observacao'];
+    protected $fillable = ['cliente_id', 'user_id', 'data', 'status', 'subtotal', 'desconto', 'total', 'total_devolvido', 'forma_pagamento', 'observacao'];
 
     // Formas de pagamento aceitas (a mesma lista está na regra CHECK do banco).
     // Fiado (venda a prazo) fica para a fase do financeiro: vai entrar aqui e na regra do banco
@@ -38,6 +38,7 @@ class Venda extends Model
         'total' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'desconto' => 'decimal:2',
+        'total_devolvido' => 'decimal:2', // soma das devoluções desta venda
     ];
 
     // Uma venda pertence a um cliente
@@ -56,6 +57,31 @@ class Venda extends Model
     public function itens(): HasMany
     {
         return $this->hasMany(VendaItem::class);
+    }
+
+    // Devoluções feitas a partir desta venda
+    public function devolucoes(): HasMany
+    {
+        return $this->hasMany(Devolucao::class);
+    }
+
+    // O que a loja ficou de fato: total menos o que foi devolvido ao cliente
+    public function totalLiquido(): float
+    {
+        return round((float) $this->total - (float) $this->total_devolvido, 2);
+    }
+
+    // Tem devolução registrada? (aí a venda não pode mais ser cancelada)
+    public function temDevolucao(): bool
+    {
+        return (float) $this->total_devolvido > 0 || $this->devolucoes()->exists();
+    }
+
+    // Ainda dá para devolver algum item? (venda concluída e algum item com quantidade sobrando)
+    public function podeDevolver(): bool
+    {
+        return ! $this->estaCancelada()
+            && $this->itens->contains(fn (VendaItem $item) => $item->quantidadeDisponivelParaDevolver() > 0);
     }
 
     // Diz se a venda já foi cancelada
