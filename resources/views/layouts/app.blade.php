@@ -51,6 +51,7 @@
                 ['Fornecedores', 'fornecedores.index', 'fornecedores.*', 'caminhao'],
                 ['Clientes', 'clientes.index', 'clientes.*', 'pessoas'],
                 ['Produtos', 'produtos.index', 'produtos.*', 'caixa'],
+                ['Usuários', 'usuarios.index', 'usuarios.*', 'chave'],
             ]],
             ['Operações', 'atividade', [
                 ['Vendas', 'vendas.index', 'vendas.*', 'carrinho'],
@@ -147,6 +148,9 @@
                                             {{-- Contador de produtos para repor (vem do AppServiceProvider) --}}
                                             @if ($rota === 'produtos.index' && $qtdEstoqueBaixo > 0)
                                                 <span class="contador" title="Produtos com estoque baixo">{{ $qtdEstoqueBaixo }}</span>
+                                            @endif
+                                            @if ($rota === 'usuarios.index' && $qtdPendentes > 0)
+                                                <span class="contador" title="Pedidos de acesso aguardando aprovação">{{ $qtdPendentes }}</span>
                                             @endif
                                         </a>
                                     @endforeach

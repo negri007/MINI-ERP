@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@minierp.com'],
             ['name' => 'Administrador', 'password' => 'admin123'] // a senha é criptografada pelo model User
         );
+        if (! $admin->estaAprovado()) {
+            $admin->aprovar(); // o admin já nasce liberado
+        }
 
         // Se já existem dados, não duplica
         if (Categoria::exists()) {
