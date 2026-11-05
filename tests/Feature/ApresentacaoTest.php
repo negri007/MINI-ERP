@@ -18,7 +18,8 @@ class ApresentacaoTest extends TestCase
             ->assertOk()
             ->assertViewIs('apresentacao')
             ->assertSee('Controle de estoque e vendas para quem toca o balcão.')
-            ->assertSee('Hoje todo usuário acessa tudo. Separar dono e caixa está nos planos.')
+            ->assertSee('Hoje todo usuário aprovado acessa tudo. Separar dono e caixa está nos planos.')
+            ->assertSee('href="'.route('cadastro').'"', false)
             ->assertSee('Não emite nota fiscal eletrônica. Use o emissor que seu contador indicar.')
             ->assertSee('href="'.route('login').'"', false);
     }

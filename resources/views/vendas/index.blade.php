@@ -75,11 +75,17 @@
                                         <span class="badge bg-danger">Cancelada</span>
                                     @else
                                         <span class="badge bg-success">Concluída</span>
+                                        @if ($venda->total_devolvido > 0)
+                                            <span class="badge bg-warning">Com devolução</span>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="{{ $venda->forma_pagamento ? '' : 'text-muted' }}">{{ $venda->nomeFormaPagamento() }}</td>
                                 <td class="text-end">
                                     <span class="valor-lista {{ $venda->estaCancelada() ? 'riscado' : '' }}">R$ {{ number_format($venda->total, 2, ',', '.') }}</span>
+                                    @if ($venda->total_devolvido > 0)
+                                        <small class="d-block text-muted text-nowrap">devolvido R$ {{ number_format($venda->total_devolvido, 2, ',', '.') }}</small>
+                                    @endif
                                     @if ($venda->desconto > 0)
                                         <small class="d-block text-muted">desconto R$ {{ number_format($venda->desconto, 2, ',', '.') }}</small>
                                     @endif

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Produto;
+use App\Models\User;
 use App\Models\Venda;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
@@ -29,7 +30,9 @@ class AppServiceProvider extends ServiceProvider
         // Toda vez que o layout é desenhado, envia os números que aparecem no menu:
         // - produtos para repor (contador vermelho no item "Produtos")
         // - vendas concluídas hoje (etiqueta verde na seção "Operações")
+        // - pedidos de acesso aguardando aprovação (contador no item "Usuários")
         View::composer('layouts.app', function ($view) {
+            $view->with('qtdPendentes', User::pendentes()->count());
             $view->with('qtdEstoqueBaixo', Produto::estoqueBaixo()->count());
             $view->with('vendasHoje', Venda::where('status', Venda::CONCLUIDA)->whereDate('data', today()->toDateString())->count());
         });

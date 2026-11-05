@@ -20,8 +20,13 @@
                 @include('partials.icone', ['nome' => 'impressora']) Imprimir
             </button>
 
-            {{-- Cancelar devolve os produtos ao estoque --}}
-            @unless ($venda->estaCancelada())
+            {{-- Devolução: o cliente trouxe parte (ou tudo) de volta --}}
+            @if ($venda->podeDevolver())
+                <a href="{{ route('devolucoes.create', $venda) }}" class="btn btn-outline-primary">Registrar devolução</a>
+            @endif
+
+            {{-- Cancelar devolve os produtos ao estoque (só sem devolução registrada) --}}
+            @unless ($venda->estaCancelada() || $venda->temDevolucao())
                 <form action="{{ route('vendas.cancelar', $venda) }}" method="POST"
                       data-confirmar="Cancelar a venda #{{ $venda->id }}? Os produtos voltam para o estoque e a venda sai do faturamento."
                                                           data-confirmar-titulo="Cancelar venda?" data-confirmar-sim="Cancelar venda" data-confirmar-nao="Manter venda">
@@ -33,7 +38,7 @@
     </div>
 
     <div class="no-print">
-        @include('partials.dica', ['chave' => 'venda-detalhe', 'texto' => 'Cancelar devolve os produtos ao estoque e tira a venda do faturamento.'])
+        @include('partials.dica', ['chave' => 'venda-detalhe', 'texto' => 'Cliente devolveu só uma parte? Use "Registrar devolução". Cancelar desfaz a venda inteira.'])
     </div>
 
     @error('venda')
@@ -101,5 +106,47 @@
             <span class="text-muted">{{ $venda->itens->sum('quantidade') }} item(ns)</span>
             <span class="valor">R$ {{ number_format($venda->total, 2, ',', '.') }}</span>
         </div>
+
+        @if ($venda->total_devolvido > 0)
+            <dl class="contas-nota">
+                <div><dt>Devolvido ao cliente</dt><dd class="text-danger">− R$ {{ number_format($venda->total_devolvido, 2, ',', '.') }}</dd></div>
+                <div><dt>Ficou para a loja</dt><dd class="fw-semibold">R$ {{ number_format($venda->totalLiquido(), 2, ',', '.') }}</dd></div>
+            </dl>
+        @endif
     </div>
+
+    {{-- Devoluções desta venda --}}
+    @if ($venda->devolucoes->isNotEmpty())
+        <div class="card mt-4 no-print">
+            <div class="card-header"><h2 class="titulo-cartao">Devoluções desta venda</h2></div>
+            <div class="card-body p-0">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Devolução</th>
+                            <th>Produtos</th>
+                            <th>Motivo</th>
+                            <th>Destino</th>
+                            <th class="text-end">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($venda->devolucoes as $devolucao)
+                            <tr>
+                                <td class="text-nowrap">#{{ $devolucao->id }}<div class="text-muted">{{ $devolucao->created_at->format('d/m/Y H:i') }}</div></td>
+                                <td>
+                                    @foreach ($devolucao->itens as $item)
+                                        <div>{{ $item->quantidade }}× {{ $item->produto->nome }}</div>
+                                    @endforeach
+                                </td>
+                                <td>{{ $devolucao->nomeMotivo() }}@if ($devolucao->observacao)<div class="text-muted">{{ $devolucao->observacao }}</div>@endif</td>
+                                <td><span class="selo-destino {{ $devolucao->destino }}">{{ $devolucao->nomeDestino() }}</span></td>
+                                <td class="text-end">R$ {{ number_format($devolucao->valor, 2, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 @endsection

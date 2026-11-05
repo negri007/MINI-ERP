@@ -6,40 +6,7 @@
     <title>Entrar - Mini ERP</title>
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/tema.css') }}" rel="stylesheet">
-    <style>
-        /* Tela de login: painel verde-mata à esquerda, formulário à direita */
-        .entrada { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; }
-        .vitrine {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 2rem;
-            padding: 3rem clamp(2rem, 5vw, 4.5rem);
-            overflow: hidden;
-            background:
-                radial-gradient(90% 70% at 10% 0%, rgba(245, 197, 24, .22), transparent 60%),
-                radial-gradient(80% 80% at 100% 100%, rgba(67, 148, 232, .2), transparent 60%),
-                linear-gradient(160deg, #125237, #0b2a1e);
-        }
-        .vitrine::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: linear-gradient(90deg, var(--sol) 0 62%, var(--ceu) 62% 84%, #e8efe9 84%); }
-        .vitrine h1 { font-size: clamp(2.6rem, 5vw, 4.2rem); line-height: 1.02; font-weight: 700; letter-spacing: -.03em; margin: 0; }
-        .vitrine h1 span { color: var(--sol); }
-        .vitrine p { color: #b7d6c6; max-width: 28rem; font-size: 1.05rem; margin-top: 1.2rem; }
-        .vitrine .numeros { display: flex; gap: 2.5rem; color: #b7d6c6; font-size: .85rem; }
-        .vitrine .numeros strong { display: block; color: #fff; font-family: var(--fonte-titulo); font-size: 1.5rem; }
-        .formulario { display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .formulario .caixa { width: 100%; max-width: 380px; }
-        /* Celular: o painel verde vira uma faixa curta (logo + saudação) e o formulário aparece logo abaixo,
-           sem precisar rolar a tela */
-        @media (max-width: 900px) {
-            .entrada { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-            .vitrine { gap: 1.25rem; padding: 1.5rem 1.25rem 1.75rem; }
-            .vitrine h1 { font-size: 2rem; }
-            .vitrine p, .vitrine .numeros { display: none; }
-            .formulario { align-items: flex-start; padding: 2rem 1.25rem; }
-        }
-    </style>
+    <link href="{{ asset('css/entrada.css') }}" rel="stylesheet">
 </head>
 <body>
     <main class="entrada">
@@ -61,8 +28,14 @@
         {{-- Lado direito: formulário de login --}}
         <section class="formulario">
             <div class="caixa">
+                <a href="{{ route('sobre') }}" class="voltar">← Conhecer o Mini ERP</a>
                 <h2 class="h3 mb-1">Entrar</h2>
                 <p class="text-muted mb-4">Use seu e-mail e senha para acessar.</p>
+
+                {{-- Aviso depois de criar a conta --}}
+                @if (session('aviso'))
+                    <div class="alert alert-success" role="status">{{ session('aviso') }}</div>
+                @endif
 
                 <form action="{{ url('/login') }}" method="POST">
                     @csrf
@@ -94,6 +67,8 @@
                 </form>
 
                 <p class="text-muted small mt-4 mb-0">Usuário de teste: admin@minierp.com / admin123</p>
+
+                <p class="troca mb-0">Ainda não tem conta? <a href="{{ route('cadastro') }}">Criar conta</a></p>
             </div>
         </section>
     </main>

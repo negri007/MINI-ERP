@@ -6,6 +6,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,11 +26,23 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (! Auth::attempt($credenciais, $request->boolean('lembrar'))) {
+        // 1) Confere e-mail e senha (sem entrar ainda)
+        if (! Auth::validate($credenciais)) {
             return back()
                 ->withErrors(['email' => 'E-mail ou senha incorretos.'])
                 ->onlyInput('email');
         }
+
+        // 2) Senha certa, mas o cadastro ainda não foi aprovado: não entra
+        $usuario = User::where('email', $credenciais['email'])->firstOrFail();
+        if (! $usuario->estaAprovado()) {
+            return back()
+                ->withErrors(['email' => 'Seu cadastro ainda aguarda aprovação. Peça a um usuário do sistema para liberar seu acesso em "Usuários".'])
+                ->onlyInput('email');
+        }
+
+        // 3) Tudo certo: entra
+        Auth::login($usuario, $request->boolean('lembrar'));
 
         // Gera uma nova sessão (protege contra roubo de sessão)
         $request->session()->regenerate();

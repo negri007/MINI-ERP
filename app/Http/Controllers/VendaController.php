@@ -12,6 +12,7 @@ use App\Models\Venda;
 use App\Services\VendaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 // Vendas não são editadas nem apagadas: se houver erro, a venda é CANCELADA
 // e o estoque volta. Assim o histórico fica sempre correto.
@@ -62,7 +63,7 @@ class VendaController extends Controller
         $filtradas = $filtrar(Venda::query());
         $concluidas = (clone $filtradas)->where('status', Venda::CONCLUIDA);
         $resumo = [
-            'faturamento' => (clone $concluidas)->sum('total'),
+            'faturamento' => (float) (clone $concluidas)->sum(DB::raw('total - total_devolvido')), // devoluções não contam
             'concluidas' => (clone $concluidas)->count(),
             'canceladas' => (clone $filtradas)->where('status', Venda::CANCELADA)->count(),
         ];
@@ -113,7 +114,7 @@ class VendaController extends Controller
     // Detalhes de uma venda
     public function show(Venda $venda)
     {
-        $venda->load(['cliente', 'usuario', 'itens.produto']);
+        $venda->load(['cliente', 'usuario', 'itens.produto', 'devolucoes.itens.produto']);
 
         return view('vendas.show', compact('venda'));
     }
