@@ -10,8 +10,9 @@
             <form action="{{ route('estoque.store') }}" method="POST">
                 @csrf
 
+                <div class="row">
                 {{-- Campo: Produto --}}
-                <div class="mb-3">
+                <div class="col-lg-6 mb-3">
                     <label for="produto_id" class="form-label">Produto <span class="text-danger" aria-hidden="true">*</span></label>
                     <select name="produto_id" id="produto_id" aria-required="true" class="form-select @error('produto_id') is-invalid @enderror" @error('produto_id') aria-invalid="true" aria-describedby="estoqueAtual produto_id-erro" @else aria-describedby="estoqueAtual" @enderror>
                         <option value="">Selecione...</option>
@@ -28,9 +29,8 @@
                     <p class="form-text mb-0" id="estoqueAtual" aria-live="polite"></p>
                 </div>
 
-                <div class="row">
                     {{-- Campo: Tipo (fieldset + legend: o leitor de tela lê "Tipo" junto de cada opção) --}}
-                    <fieldset class="col-md-6 mb-3" @error('tipo') aria-describedby="ajuda-tipo tipo-erro" @else aria-describedby="ajuda-tipo" @enderror>
+                    <fieldset class="col-lg-6 mb-3" @error('tipo') aria-describedby="ajuda-tipo tipo-erro" @else aria-describedby="ajuda-tipo" @enderror>
                         {{-- O legend precisa ser o primeiro filho do fieldset: é ele que dá nome ao grupo --}}
                         <legend class="form-label legenda-com-ajuda">Tipo <span class="text-danger" aria-hidden="true">*</span></legend>
                         @include('partials.ajuda-campo', ['id' => 'ajuda-tipo', 'campo' => 'o tipo de movimentação'])
@@ -49,24 +49,26 @@
                             <div class="text-danger small" id="tipo-erro">{{ $message }}</div>
                         @enderror
                     </fieldset>
+                </div>
 
+                <div class="row">
                     {{-- Campo: Quantidade --}}
-                    <div class="col-md-6 mb-3">
+                    <div class="col-lg-3 mb-3">
                         <label for="quantidade" class="form-label">Quantidade <span class="text-danger" aria-hidden="true">*</span></label>
                         <input type="number" min="1" step="1" name="quantidade" id="quantidade" aria-required="true" class="form-control @error('quantidade') is-invalid @enderror" @error('quantidade') aria-invalid="true" aria-describedby="quantidade-erro" @enderror value="{{ old('quantidade') }}">
                         @error('quantidade')
                             <div class="invalid-feedback" id="quantidade-erro">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
                 {{-- Campo: Motivo --}}
-                <div class="mb-3">
+                <div class="col-lg-9 mb-3">
                     <label for="motivo" class="form-label">Motivo <span class="text-danger" aria-hidden="true">*</span></label>
                     <input type="text" name="motivo" id="motivo" aria-required="true" class="form-control @error('motivo') is-invalid @enderror" @error('motivo') aria-invalid="true" aria-describedby="motivo-erro" @enderror value="{{ old('motivo') }}" placeholder="Ex.: Compra NF 1234 do fornecedor X">
                     @error('motivo')
                         <div class="invalid-feedback" id="motivo-erro">{{ $message }}</div>
                     @enderror
+                </div>
                 </div>
 
                 {{-- Botões: rodapé do formulário (Cancelar à esquerda, ação principal em amarelo) --}}

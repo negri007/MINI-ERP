@@ -28,14 +28,14 @@
         </div>
     @endif
 
-    {{-- form-venda: mesma largura de leitura dos outros formulários --}}
+    {{-- form-venda: ocupa a largura da área de conteúdo, como os outros formulários --}}
     <form action="{{ route('vendas.store') }}" method="POST" id="formVenda" class="form-venda">
         @csrf
 
         {{-- Cabeçalho da venda --}}
         <div class="card mb-3">
             <div class="card-body row">
-                <div class="col-md-6 mb-3">
+                <div class="col-lg-5 mb-3">
                     <div class="rotulo-com-acao">
                         <label for="cliente_id" class="form-label">Cliente <span class="text-danger" aria-hidden="true">*</span></label>
                         {{-- Com JavaScript abre o modal; sem JavaScript vai para o cadastro normal --}}
@@ -71,14 +71,14 @@
                     {{-- Avisos para o leitor de tela (quantos clientes apareceram, qual foi escolhido) --}}
                     <div class="visually-hidden" id="clienteAviso" aria-live="polite"></div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-sm-6 col-lg-2 mb-3">
                     <label for="data" class="form-label">Data <span class="text-danger" aria-hidden="true">*</span></label>
                     <input type="date" name="data" id="data" aria-required="true" class="form-control @error('data') is-invalid @enderror" @error('data') aria-invalid="true" aria-describedby="data-erro" @enderror value="{{ old('data', now()->toDateString()) }}">
                     @error('data')
                         <div class="invalid-feedback" id="data-erro">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="col-12">
+                <div class="col-lg-5 mb-3">
                     <label for="observacao" class="form-label">Observação</label>
                     <textarea name="observacao" id="observacao" rows="2" class="form-control">{{ old('observacao') }}</textarea>
                 </div>
@@ -118,7 +118,7 @@
         <div class="card mb-3">
             <div class="card-header"><h2 class="titulo-cartao">Pagamento</h2></div>
             <div class="card-body row">
-                <fieldset class="col-12 mb-3" @error('forma_pagamento') aria-describedby="forma-erro" @enderror>
+                <fieldset class="col-xl-6 mb-3" @error('forma_pagamento') aria-describedby="forma-erro" @enderror>
                     <legend class="form-label">Forma de pagamento <span class="text-danger" aria-hidden="true">*</span></legend>
                     <div class="formas-pagamento">
                         @foreach (\App\Models\Venda::FORMAS_PAGAMENTO as $valor => $nome)
@@ -134,7 +134,7 @@
                     @enderror
                 </fieldset>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-sm-6 col-xl-3 mb-3">
                     <label for="desconto" class="form-label">Desconto (R$)</label>
                     <input type="text" inputmode="decimal" name="desconto" id="desconto" placeholder="0,00" autocomplete="off"
                            class="form-control @error('desconto') is-invalid @enderror" value="{{ old('desconto') }}"
@@ -144,7 +144,7 @@
                 </div>
 
                 {{-- Só em Dinheiro: valor recebido e troco (não é gravado, serve só para o caixa) --}}
-                <div class="col-md-4 mb-3" id="blocoTroco" hidden>
+                <div class="col-sm-6 col-xl-3 mb-3" id="blocoTroco" hidden>
                     <label for="recebido" class="form-label">Valor recebido (R$)</label>
                     <input type="text" inputmode="decimal" id="recebido" placeholder="0,00" autocomplete="off" class="form-control" aria-describedby="troco">
                     <div class="form-text troco" id="troco" aria-live="polite"></div>
