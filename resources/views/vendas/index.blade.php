@@ -84,7 +84,7 @@
                                 <td class="text-end">
                                     <span class="valor-lista {{ $venda->estaCancelada() ? 'riscado' : '' }}">R$ {{ number_format($venda->total, 2, ',', '.') }}</span>
                                     @if ($venda->total_devolvido > 0)
-                                        <small class="d-block text-muted">devolvido R$ {{ number_format($venda->total_devolvido, 2, ',', '.') }}</small>
+                                        <small class="d-block text-muted text-nowrap">devolvido R$ {{ number_format($venda->total_devolvido, 2, ',', '.') }}</small>
                                     @endif
                                     @if ($venda->desconto > 0)
                                         <small class="d-block text-muted">desconto R$ {{ number_format($venda->desconto, 2, ',', '.') }}</small>
