@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\UsuarioAprovado;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Apelido usado em routes/web.php: só entra quem tem cadastro aprovado
-        $middleware->alias(['aprovado' => \App\Http\Middleware\UsuarioAprovado::class]);
+        $middleware->alias(['aprovado' => UsuarioAprovado::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Venda;
 use App\Models\VendaItem;
+use App\Services\LucroService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -29,7 +30,7 @@ class RelatorioController extends Controller
         ];
 
         // Lucro bruto do período (vendas sem custo em algum item ficam de fora e são contadas)
-        $lucro = app(\App\Services\LucroService::class)
+        $lucro = app(LucroService::class)
             ->calcular(Venda::whereDate('data', '>=', $de)->whereDate('data', '<=', $ate));
 
         // Produtos mais vendidos no período (soma das quantidades de cada produto)

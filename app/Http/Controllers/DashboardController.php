@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\Venda;
+use App\Services\LucroService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -32,7 +33,7 @@ class DashboardController extends Controller
             'hoje' => $concluidas()->whereDate('data', $hoje->toDateString())->count(),
         ];
         // Lucro bruto do mês (só vendas com custo em todos os itens; as outras são contadas à parte)
-        $mes['lucro'] = app(\App\Services\LucroService::class)
+        $mes['lucro'] = app(LucroService::class)
             ->calcular(Venda::whereDate('data', '>=', $hoje->copy()->startOfMonth()->toDateString()));
 
         $mes['ticket_medio'] = $mes['quantidade'] ? $mes['faturamento'] / $mes['quantidade'] : 0;

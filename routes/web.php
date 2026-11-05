@@ -115,7 +115,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'aprovado'])->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-
     // CRUDs de cadastro (sem a rota "show", que não é usada)
     // Cadastro rápido de categoria usado pelo formulário de produto
     Route::post('/categorias/rapida', [CategoriaController::class, 'rapida'])->name('categorias.rapida');
