@@ -1,41 +1,44 @@
 {{-- Campos do formulário, usados tanto no create quanto no edit --}}
 
-{{-- Campo: Nome --}}
-<div class="mb-3">
-    <label for="nome" class="form-label">Nome <span class="text-danger" aria-hidden="true">*</span></label>
-    <input type="text" name="nome" id="nome" aria-required="true" class="form-control @error('nome') is-invalid @enderror" @error('nome') aria-invalid="true" aria-describedby="nome-erro" @enderror value="{{ old('nome', $cliente->nome) }}">
-    @error('nome')
-        <div class="invalid-feedback" id="nome-erro">{{ $message }}</div>
-    @enderror
-</div>
-
-{{-- Campo: CPF/CNPJ --}}
-<div class="mb-3">
-    <div class="rotulo-com-ajuda">
-        <label for="cpf_cnpj" class="form-label">CPF/CNPJ</label>
-        @include('partials.ajuda-campo', ['id' => 'ajuda-cpf-cnpj', 'campo' => 'o campo CPF/CNPJ'])
+{{-- Grade: dois campos por linha em telas grandes; um por linha no celular --}}
+<div class="row">
+    {{-- Campo: Nome --}}
+    <div class="col-lg-6 mb-3">
+        <label for="nome" class="form-label">Nome <span class="text-danger" aria-hidden="true">*</span></label>
+        <input type="text" name="nome" id="nome" aria-required="true" class="form-control @error('nome') is-invalid @enderror" @error('nome') aria-invalid="true" aria-describedby="nome-erro" @enderror value="{{ old('nome', $cliente->nome) }}">
+        @error('nome')
+            <div class="invalid-feedback" id="nome-erro">{{ $message }}</div>
+        @enderror
     </div>
-    <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control @error('cpf_cnpj') is-invalid @enderror" @error('cpf_cnpj') aria-invalid="true" aria-describedby="ajuda-cpf-cnpj cpf_cnpj-erro" @else aria-describedby="ajuda-cpf-cnpj" @enderror value="{{ old('cpf_cnpj', $cliente->cpf_cnpj) }}" data-mascara="cpfcnpj" inputmode="numeric">
-    <p class="ajuda-texto" id="ajuda-cpf-cnpj" hidden>Pode digitar só os números; a máscara entra sozinha. Não é obrigatório.</p>
-    @error('cpf_cnpj')
-        <div class="invalid-feedback" id="cpf_cnpj-erro">{{ $message }}</div>
-    @enderror
-</div>
 
-{{-- Campo: Telefone --}}
-<div class="mb-3">
-    <label for="telefone" class="form-label">Telefone</label>
-    <input type="text" name="telefone" id="telefone" class="form-control @error('telefone') is-invalid @enderror" @error('telefone') aria-invalid="true" aria-describedby="telefone-erro" @enderror value="{{ old('telefone', $cliente->telefone) }}" data-mascara="telefone">
-    @error('telefone')
-        <div class="invalid-feedback" id="telefone-erro">{{ $message }}</div>
-    @enderror
-</div>
+    {{-- Campo: CPF/CNPJ --}}
+    <div class="col-lg-6 mb-3">
+        <div class="rotulo-com-ajuda">
+            <label for="cpf_cnpj" class="form-label">CPF/CNPJ</label>
+            @include('partials.ajuda-campo', ['id' => 'ajuda-cpf-cnpj', 'campo' => 'o campo CPF/CNPJ'])
+        </div>
+        <input type="text" name="cpf_cnpj" id="cpf_cnpj" class="form-control @error('cpf_cnpj') is-invalid @enderror" @error('cpf_cnpj') aria-invalid="true" aria-describedby="ajuda-cpf-cnpj cpf_cnpj-erro" @else aria-describedby="ajuda-cpf-cnpj" @enderror value="{{ old('cpf_cnpj', $cliente->cpf_cnpj) }}" data-mascara="cpfcnpj" inputmode="numeric">
+        <p class="ajuda-texto" id="ajuda-cpf-cnpj" hidden>Pode digitar só os números; a máscara entra sozinha. Não é obrigatório.</p>
+        @error('cpf_cnpj')
+            <div class="invalid-feedback" id="cpf_cnpj-erro">{{ $message }}</div>
+        @enderror
+    </div>
 
-{{-- Campo: E-mail --}}
-<div class="mb-3">
-    <label for="email" class="form-label">E-mail</label>
-    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" @error('email') aria-invalid="true" aria-describedby="email-erro" @enderror value="{{ old('email', $cliente->email) }}">
-    @error('email')
-        <div class="invalid-feedback" id="email-erro">{{ $message }}</div>
-    @enderror
+    {{-- Campo: Telefone --}}
+    <div class="col-lg-6 mb-3">
+        <label for="telefone" class="form-label">Telefone</label>
+        <input type="text" name="telefone" id="telefone" class="form-control @error('telefone') is-invalid @enderror" @error('telefone') aria-invalid="true" aria-describedby="telefone-erro" @enderror value="{{ old('telefone', $cliente->telefone) }}" data-mascara="telefone">
+        @error('telefone')
+            <div class="invalid-feedback" id="telefone-erro">{{ $message }}</div>
+        @enderror
+    </div>
+
+    {{-- Campo: E-mail --}}
+    <div class="col-lg-6 mb-3">
+        <label for="email" class="form-label">E-mail</label>
+        <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" @error('email') aria-invalid="true" aria-describedby="email-erro" @enderror value="{{ old('email', $cliente->email) }}">
+        @error('email')
+            <div class="invalid-feedback" id="email-erro">{{ $message }}</div>
+        @enderror
+    </div>
 </div>

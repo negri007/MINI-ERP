@@ -54,7 +54,7 @@ class CaixaTest extends TestCase
         $this->assertEquals(0.0, $porForma['debito']['total']);
 
         $this->assertSame([
-            'total' => 77.0, 'quantidade' => 3, 'descontos' => 3.0, 'canceladas' => 1, 'total_canceladas' => 40.0,
+            'vendido' => 77.0, 'devolvido' => 0.0, 'total' => 77.0, 'quantidade' => 3, 'descontos' => 3.0, 'canceladas' => 1, 'total_canceladas' => 40.0,
         ], $resposta->viewData('resumo'));
     }
 

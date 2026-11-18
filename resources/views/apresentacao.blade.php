@@ -12,24 +12,42 @@
 </head>
 <body class="apresentacao">
     @php
-        // Logado: os botões levam ao Dashboard; visitante: ao login
+        // Logado: o botão leva ao Dashboard; visitante: Entrar e Criar conta
         $logado = auth()->check();
-        $destino = $logado ? route('dashboard') : route('login');
-        $rotuloBotao = $logado ? 'Ir para o Dashboard' : 'Entrar';
     @endphp
 
+    {{-- Topo: marca e acesso --}}
     <header class="ap-topo">
         <a href="{{ route('sobre') }}" class="logo p-0"><span class="marca">ME</span> Mini ERP</a>
-        <a href="{{ $destino }}" class="btn btn-outline-primary">{{ $rotuloBotao }}</a>
+        <nav class="ap-acesso" aria-label="Acesso">
+            @if ($logado)
+                <a href="{{ route('dashboard') }}" class="btn btn-primary">Ir para o Dashboard</a>
+            @else
+                <a href="{{ route('cadastro') }}" class="btn btn-secondary">Criar conta</a>
+                <a href="{{ route('login') }}" class="btn btn-primary">Entrar</a>
+            @endif
+        </nav>
     </header>
 
-    <main>
+    {{-- Em tela de computador tudo cabe sem rolar: abertura em cima e três blocos embaixo --}}
+    <main class="ap-pagina">
         {{-- Abertura: o que é, em uma frase, e uma amostra real do sistema --}}
         <section class="ap-abertura" aria-labelledby="ap-titulo">
             <div>
                 <h1 id="ap-titulo">Controle de estoque e vendas para quem toca o balcão.</h1>
                 <p class="ap-lead">Cadastre o que vende, registre as vendas e veja o mês num painel. O estoque baixa sozinho.</p>
-                <a href="{{ $destino }}" class="btn btn-primary btn-lg">{{ $rotuloBotao }}</a>
+                <p class="ap-chamada">Pronto para abrir o caixa?</p>
+                <div class="ap-botoes">
+                    @if ($logado)
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg">Ir para o Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Entrar</a>
+                        <a href="{{ route('cadastro') }}" class="btn btn-outline-primary btn-lg">Criar conta</a>
+                    @endif
+                </div>
+                @unless ($logado)
+                    <p class="ap-nota">A conta nova é liberada por um usuário do sistema.</p>
+                @endunless
             </div>
 
             {{-- Amostra feita com os mesmos componentes do sistema (não é imagem) --}}
@@ -50,17 +68,9 @@
             </figure>
         </section>
 
-        <div class="ap-corpo">
-            <section aria-labelledby="ap-quem">
-                <h2 id="ap-quem">Para quem é</h2>
-                <p>
-                    Mercadinho, loja pequena e MEI: quem vende no balcão e precisa saber o que tem, o que vendeu e o que acabou.
-                    O Sebrae aponta a falta de planejamento entre os sinais de alerta para pequenos negócios
-                    (<a href="https://agenciasebrae.com.br/?p=41140" rel="noopener" target="_blank">Agência Sebrae, 07/07/2026<span class="visually-hidden">, abre em nova aba</span></a>).
-                </p>
-            </section>
-
-            <section aria-labelledby="ap-resolve">
+        {{-- Três blocos: o que resolve, como funciona e para quem é --}}
+        <div class="ap-blocos">
+            <section class="ap-bloco ap-resolve" aria-labelledby="ap-resolve">
                 <h2 id="ap-resolve">O que ele resolve</h2>
                 <dl class="ap-lista">
                     <div>
@@ -70,6 +80,10 @@
                     <div>
                         <dt>Venda que baixa o estoque</dt>
                         <dd>Registrou a venda, o estoque desce. Cancelou, ele volta.</dd>
+                    </div>
+                    <div>
+                        <dt>Devolução com motivo</dt>
+                        <dd>Volta ao estoque, vira perda ou vai ao fornecedor. O caixa desconta.</dd>
                     </div>
                     <div>
                         <dt>Painel do mês</dt>
@@ -86,7 +100,7 @@
                 </dl>
             </section>
 
-            <section aria-labelledby="ap-como">
+            <section class="ap-bloco" aria-labelledby="ap-como">
                 <h2 id="ap-como">Como funciona</h2>
                 <ol class="ap-passos">
                     <li>
@@ -104,19 +118,19 @@
                 </ol>
             </section>
 
-            <section aria-labelledby="ap-usa">
-                <h2 id="ap-usa">Quem usa</h2>
-                <p>Hoje todo usuário acessa tudo. Separar dono e caixa está nos planos.</p>
-            </section>
+            <section class="ap-bloco ap-quem" aria-labelledby="ap-quem">
+                <h2 id="ap-quem">Para quem é</h2>
+                <p>
+                    Mercadinho, loja pequena e MEI: quem vende no balcão e precisa saber o que tem, o que vendeu e o que acabou.
+                    O Sebrae aponta a falta de planejamento entre os sinais de alerta para pequenos negócios
+                    (<a href="https://agenciasebrae.com.br/?p=41140" rel="noopener" target="_blank">Agência Sebrae, 07/07/2026<span class="visually-hidden">, abre em nova aba</span></a>).
+                </p>
 
-            <section aria-labelledby="ap-nao">
-                <h2 id="ap-nao">O que ele não faz</h2>
+                <h3 id="ap-usa">Quem usa</h3>
+                <p>Hoje todo usuário aprovado acessa tudo. Separar dono e caixa está nos planos.</p>
+
+                <h3 id="ap-nao">O que ele não faz</h3>
                 <p>Não emite nota fiscal eletrônica. Use o emissor que seu contador indicar.</p>
-            </section>
-
-            <section class="ap-fim" aria-labelledby="ap-fim">
-                <h2 id="ap-fim">Pronto para abrir o caixa?</h2>
-                <a href="{{ $destino }}" class="btn btn-outline-primary btn-lg">{{ $rotuloBotao }}</a>
             </section>
         </div>
     </main>

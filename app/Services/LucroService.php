@@ -31,10 +31,20 @@ class LucroService
         $comCusto = (clone $concluidas)->whereNotExists($itemSemCusto);
         $semCusto = (clone $concluidas)->whereExists($itemSemCusto)->count();
 
-        $faturamento = (float) (clone $comCusto)->sum('vendas.total');
-        $custo = (float) DB::table('venda_itens')
+        // Faturamento líquido: o que foi devolvido ao cliente não conta
+        $faturamento = (float) (clone $comCusto)->sum(DB::raw('vendas.total - vendas.total_devolvido'));
+
+        // Custo do que saiu da loja. Produto devolvido que VOLTOU ao estoque não é custo
+        // (vai ser vendido de novo); o que virou perda ou foi para o fornecedor continua sendo.
+        $custoVendido = (float) DB::table('venda_itens')
             ->whereIn('venda_id', (clone $comCusto)->select('vendas.id'))
             ->sum(DB::raw('quantidade * custo_unitario'));
+        $custoQueVoltou = (float) DB::table('devolucao_itens')
+            ->join('devolucoes', 'devolucoes.id', '=', 'devolucao_itens.devolucao_id')
+            ->where('devolucoes.destino', 'estoque')
+            ->whereIn('devolucoes.venda_id', (clone $comCusto)->select('vendas.id'))
+            ->sum(DB::raw('devolucao_itens.quantidade * devolucao_itens.custo_unitario'));
+        $custo = $custoVendido - $custoQueVoltou;
 
         $lucro = round($faturamento - $custo, 2);
 

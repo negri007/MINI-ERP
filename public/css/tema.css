@@ -49,14 +49,15 @@
     --raio: 14px;
 
     /* Escala dos textos pequenos: só dois tamanhos, e nada abaixo de 12px (fica legível) */
-    --texto-mini: .75rem;      /* 12px: etiquetas, legendas, contadores */
-    --texto-pequeno: .8125rem; /* 13px: textos de apoio, rótulos, pílulas */
+    /* (aumentados: antes 12px e 13px davam a impressão de informação demais, tudo miúdo) */
+    --texto-mini: .8125rem;    /* 13px: etiquetas, legendas, contadores */
+    --texto-pequeno: .875rem;  /* 14px: textos de apoio, rótulos, pílulas */
 
     /* Bootstrap usando a paleta */
     --bs-body-bg: var(--fundo);
     --bs-body-color: var(--texto);
     --bs-body-font-family: var(--fonte-texto);
-    --bs-body-font-size: .92rem;
+    --bs-body-font-size: 1rem; /* 16px: texto principal (antes 14,7px) */
     --bs-secondary-color: var(--texto-2);
     --bs-tertiary-bg: var(--cartao-2);
     --bs-border-color: var(--borda);
@@ -241,7 +242,7 @@ h1, h2, h3, .h1, .h2, .h3, .h4, .h5 { font-family: var(--fonte-titulo); font-wei
 .secao-itens > div { overflow: hidden; margin-left: 1.55rem; padding: .25rem 0 .1rem .95rem; }
 
 /* Itens-filhos ligados à seção por "galhos" (linhas em curva) */
-.menu-item.filho { padding: .45rem .65rem; font-size: .9rem; }
+.menu-item.filho { padding: .45rem .65rem; font-size: .95rem; }
 .menu-item.filho svg { width: 16px; height: 16px; opacity: .9; }
 .menu-item.filho:hover { transform: translateX(3px); }
 .menu-item.filho::before, .menu-item.filho::after {
@@ -414,7 +415,7 @@ kbd {
     border-bottom-color: var(--borda);
 }
 .table > :not(caption) > * > * { padding-left: 1rem; padding-right: 1rem; }
-.table > tbody td { padding-top: .75rem; padding-bottom: .75rem; }
+.table > tbody td { padding-top: .85rem; padding-bottom: .85rem; }
 .table-sm > :not(caption) > * > * { padding-top: .45rem; padding-bottom: .45rem; }
 
 .form-label { color: var(--texto-2); font-size: var(--texto-pequeno); font-weight: 500; margin-bottom: .35rem; }
@@ -485,7 +486,7 @@ kbd {
 }
 
 /* Selos de situação: fundo translúcido + texto na cor */
-.badge { font-weight: 600; padding: .35em .75em; border-radius: 99px; }
+.badge { font-size: var(--texto-mini); font-weight: 600; padding: .35em .8em; border-radius: 99px; }
 .badge.bg-success { background: rgba(45, 171, 106, .15) !important; color: var(--verde-texto) !important; }
 .badge.bg-danger { background: rgba(229, 96, 96, .15) !important; color: #ff8a8a !important; }
 .badge.bg-warning { background: rgba(194, 128, 59, .18) !important; color: #e8a15a !important; }
@@ -755,7 +756,7 @@ a:hover { text-decoration: underline; }
 .resumo-lista .mini b { font-family: var(--fonte-titulo); font-size: 1.3rem; font-weight: 600; }
 
 /* A tabela: cada linha é um cartão separado */
-.lista { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: -8px; }
+.lista { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: -10px; }
 .lista > thead th { padding: .2rem 1rem; color: var(--texto-2); font-size: var(--texto-mini); font-weight: 500; text-align: left; white-space: nowrap; }
 .lista > thead th.text-end { text-align: right; }
 .lista > thead th.text-center { text-align: center; }
@@ -766,7 +767,7 @@ a:hover { text-decoration: underline; }
 .lista .ordenavel.ativa .seta { opacity: 1; }
 
 .lista > tbody > tr > td {
-    padding: .75rem 1rem;
+    padding: .9rem 1.1rem;
     border-top: 1px solid var(--borda);
     border-bottom: 1px solid var(--borda);
     background: var(--cartao);
@@ -952,8 +953,19 @@ a:hover { text-decoration: underline; }
 .trilha a { color: var(--texto-2); }
 .trilha a:hover { color: var(--texto); }
 
-/* Cartão do formulário: largura boa de ler e preencher (os campos não esticam pela tela toda) */
-.cartao-form { max-width: 820px; }
+/* Cartão do formulário: ocupa a largura da área de conteúdo, como as listas */
+.cartao-form { max-width: none; }
+/* Os campos usam a grade do Bootstrap (row/col-lg-*): ocupam a largura toda da área de conteúdo
+   e se reorganizam sozinhos em telas menores. */
+/* Respiro interno maior (o rodapé de botões usa as mesmas medidas para encostar nas bordas) */
+.cartao-form { --bs-card-spacer-x: 1.75rem; --bs-card-spacer-y: 1.5rem; }
+
+/* Subtítulo de um bloco de campos (ex.: "Dados do produto", "Preço e estoque") */
+.grupo-form {
+    margin: 0 0 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--borda);
+    color: var(--texto-2); font-family: var(--fonte-texto); font-size: var(--texto-pequeno);
+    font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+}
 .form-label { color: #b9cbc1; }
 
 /* Rodapé dos botões: Cancelar à esquerda da ação principal, tudo alinhado à direita */
@@ -986,7 +998,6 @@ a:hover { text-decoration: underline; }
 @media (max-width: 991.98px) {
     /* O último indicador ("Para repor") ocupa a linha toda em vez de ficar sozinho pela metade */
     .kpis > .kpi:last-child { grid-column: 1 / -1; }
-    .cartao-form { max-width: none; }
 }
 
 /* =====================================================================
@@ -1043,7 +1054,7 @@ a:hover { text-decoration: underline; }
 
 /* Dica abaixo do título (azul-céu = informação) */
 .dica { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin: -.35rem 0 1.1rem; }
-.dica-texto { display: flex; align-items: flex-start; gap: .5rem; margin: 0; color: var(--texto-2); font-size: .88rem; }
+.dica-texto { display: flex; align-items: flex-start; gap: .5rem; margin: 0; color: var(--texto-2); font-size: .9375rem; }
 .dica-marca {
     display: inline-grid; place-items: center; flex-shrink: 0;
     width: 20px; height: 20px; border-radius: 50%;
@@ -1052,7 +1063,7 @@ a:hover { text-decoration: underline; }
 .dica-fechar, .dica-abrir {
     display: inline-flex; align-items: center; gap: .35rem;
     min-height: 32px; padding: .2rem .6rem; border: 1px solid var(--borda); border-radius: 8px;
-    background: transparent; color: var(--ceu); font-size: .8rem; font-weight: 500;
+    background: transparent; color: var(--ceu); font-size: var(--texto-pequeno); font-weight: 500;
 }
 .dica-fechar:hover, .dica-abrir:hover { background: var(--cartao-2); color: #7ab4f0; }
 .dica-abrir { display: none; }
@@ -1062,7 +1073,7 @@ a:hover { text-decoration: underline; }
 /* "?" ao lado do rótulo e o texto de explicação embaixo do campo */
 .rotulo-com-ajuda { display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; }
 .rotulo-com-ajuda .form-label { margin-bottom: 0; }
-.legenda-com-ajuda { float: none; display: inline-block; width: auto; margin: 0 .4rem .35rem 0; font-size: .8rem; }
+.legenda-com-ajuda { float: none; display: inline-block; width: auto; margin: 0 .4rem .35rem 0; font-size: var(--texto-pequeno); }
 .ajuda-botao {
     display: inline-grid; place-items: center;
     width: 24px; height: 24px; padding: 0; border: 1px solid rgba(67, 148, 232, .45); border-radius: 50%;
@@ -1097,7 +1108,7 @@ a:hover { text-decoration: underline; }
 .passos-lista li.feito .passos-marca { border-color: var(--verde); background: var(--verde); }
 .passos-lista li.feito .passos-texto { color: var(--texto-2); }
 .passos-texto { flex: 1; }
-.passos-feito { color: var(--verde-texto); font-size: .82rem; font-weight: 600; }
+.passos-feito { color: var(--verde-texto); font-size: var(--texto-pequeno); font-weight: 600; }
 
 /* "Sobre o Mini ERP" no fim do menu: empurrado para baixo, logo acima do usuário */
 .menu-rodape { position: relative; z-index: 1; margin-top: auto; padding-top: .5rem; }
@@ -1123,8 +1134,8 @@ legend.form-label { float: none; width: auto; padding: 0; font-size: var(--texto
 /* Título dentro do cabeçalho do cartão: é um <h2> para o leitor de tela, mas com o tamanho de antes */
 .titulo-cartao { margin: 0; font: inherit; letter-spacing: inherit; }
 
-/* Nova venda: mesma largura de leitura dos outros formulários */
-.form-venda { max-width: 820px; }
+/* Nova venda: ocupa a largura da área de conteúdo, como os outros formulários */
+.form-venda { max-width: none; }
 
 /* Rodapé da venda: total grande à esquerda e botões à direita.
    Fica "grudado" no pé da tela enquanto a lista de itens rola. */
@@ -1145,10 +1156,6 @@ html:has(.pe-venda) { scroll-padding-bottom: 10rem; }
 .total-venda { margin-right: auto; }
 .total-venda small { display: block; color: var(--texto-2); font-size: var(--texto-pequeno); }
 .total-venda strong { font-family: var(--fonte-titulo); font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-
-@media (max-width: 991.98px) {
-    .form-venda { max-width: none; }
-}
 
 /* ---------- Navegação pelo teclado ---------- */
 
@@ -1200,7 +1207,7 @@ html:has(.pe-venda) { scroll-padding-bottom: 10rem; }
 .aviso-custo:empty { display: none; }
 .aviso-custo { color: #e8a15a; }
 /* Aviso de vendas sem custo que ficaram fora do lucro */
-.aviso-lucro, .kpi .aviso-lucro { color: #e8a15a; font-size: .8rem; }
+.aviso-lucro, .kpi .aviso-lucro { color: #e8a15a; font-size: var(--texto-pequeno); }
 .resumo-5 { grid-template-columns: repeat(5, 1fr); }
 @media (max-width: 991.98px) { .resumo-5 { grid-template-columns: 1fr 1fr; } }
 
@@ -1240,4 +1247,40 @@ html:has(.pe-venda) { scroll-padding-bottom: 10rem; }
 @media print {
     .caixa-forma, .caixa-resumo { background: #fff !important; color: #000; border-color: #ccc; }
     .caixa-forma .rotulo, .caixa-forma .rodape, .caixa-resumo dt, .caixa-resumo .canceladas dd { color: #000 !important; }
+}
+
+/* ============================================================
+   SELOS: tipo e origem do estoque, destino da devolução
+   Texto do tamanho normal da tabela (antes as etiquetas eram pequenas demais)
+   ============================================================ */
+.selo-tipo, .selo-origem, .selo-destino {
+    display: inline-block;
+    padding: .25rem .7rem;
+    border-radius: 99px;
+    font-size: .875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, .07);
+    color: var(--texto);
+}
+.selo-tipo.entrada, .selo-destino.estoque { background: rgba(45, 171, 106, .15); color: var(--verde-texto); }
+.selo-tipo.saida, .selo-destino.perda { background: rgba(229, 96, 96, .15); color: #ff8a8a; }
+.selo-destino.fornecedor { background: rgba(194, 128, 59, .18); color: #e8a15a; }
+.selo-origem.venda { background: rgba(67, 148, 232, .15); color: #8cc0f5; }
+.selo-origem.cancelamento { background: rgba(229, 96, 96, .12); color: #ff9c9c; }
+.selo-origem.devolucao { background: rgba(194, 128, 59, .18); color: #e8a15a; }
+.selo-origem.estoque_inicial { background: rgba(45, 171, 106, .12); color: var(--verde-texto); }
+.selo-origem.manual { background: rgba(255, 255, 255, .08); color: var(--texto); }
+.detalhe-origem { margin-top: .3rem; color: var(--texto-2); font-size: .875rem; }
+
+.lista-simples { list-style: none; padding: 0; margin: 0; }
+.lista-simples li + li { margin-top: .15rem; }
+
+/* Telas baixas (notebook 1366×768): menu um pouco mais justo para caber sem rolar */
+@media (min-width: 992px) and (max-height: 820px) {
+    .lateral { padding-top: .8rem; padding-bottom: .8rem; }
+    .lateral-topo { padding-bottom: .6rem; }
+    .menu-item { padding-top: .4rem; padding-bottom: .4rem; }
+    .menu-item.filho { padding-top: .32rem; padding-bottom: .32rem; }
+    .secao { margin-top: .4rem; }
 }

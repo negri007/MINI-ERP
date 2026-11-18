@@ -255,4 +255,8 @@ Para fechar: *"Os outros três cadastros (Categorias, Fornecedores e Clientes) s
 | Por que custo vazio e não zero? | Zero seria inventar um custo e mostrar um lucro falso. Vendas sem custo ficam fora do lucro, com aviso. |
 | Como o desconto é calculado? | No servidor (`VendaService`), em centavos, para não ter erro de arredondamento. Desconto maior que o subtotal é recusado. |
 | O que é o "Consumidor final"? | Um cliente especial, criado pela migration, para vender sem identificar quem comprou. Ele não pode ser editado nem excluído. |
+| Como funciona a devolução? | Parte de uma venda: escolhe os itens, o motivo e o destino. Só "volta para o estoque" soma no estoque; perda e fornecedor não. O valor sai com o desconto da venda e é descontado do faturamento. |
+| Por que venda com devolução não pode ser cancelada? | O cancelamento devolveria ao estoque também o que já voltou na devolução. Para devolver o resto, registra-se outra devolução. |
+| O que é middleware? | Um filtro que roda antes do controller. `auth` exige login; `aprovado` (nosso, em `app/Http/Middleware`) barra quem ainda não foi aprovado. |
+| Alguém pode se aprovar sozinho no cadastro? | Não: `aprovado_em` não está no `$fillable` do User, então o campo enviado no formulário é ignorado. |
 | Como foi testado? | `php artisan test` roda os testes de todos os módulos; no GitHub rodam sozinhos a cada push. |

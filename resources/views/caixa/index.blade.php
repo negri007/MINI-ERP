@@ -28,8 +28,14 @@
             @foreach ($porForma as $chave => $forma)
                 <div class="card caixa-forma {{ $chave === 'nao_informada' ? 'nao-informada' : '' }}">
                     <div class="rotulo">{{ $forma['nome'] }}</div>
-                    <div class="valor"><small>R$</small>{{ number_format($forma['total'], 2, ',', '.') }}</div>
-                    <div class="rodape">{{ $forma['quantidade'] }} {{ $forma['quantidade'] === 1 ? 'venda' : 'vendas' }}</div>
+                    {{-- Pode ficar negativo: devolução hoje de uma venda de outro dia --}}
+                    <div class="valor {{ $forma['total'] < 0 ? 'text-danger' : '' }}">{{ $forma['total'] < 0 ? '−' : '' }}<small>R$</small>{{ number_format(abs($forma['total']), 2, ',', '.') }}</div>
+                    <div class="rodape">
+                        {{ $forma['quantidade'] }} {{ $forma['quantidade'] === 1 ? 'venda' : 'vendas' }}
+                        @if ($forma['devolvido'] > 0)
+                            · <span class="text-danger">− R$ {{ number_format($forma['devolvido'], 2, ',', '.') }} devolvido</span>
+                        @endif
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -37,7 +43,10 @@
 
     {{-- Resumo do dia; canceladas ficam à parte, fora do total --}}
     <dl class="caixa-resumo">
-        <div><dt>Total do dia</dt><dd>R$ {{ number_format($resumo['total'], 2, ',', '.') }}</dd></div>
+        <div><dt>{{ $resumo['devolvido'] > 0 ? 'Saldo do dia (vendas − devoluções)' : 'Total do dia' }}</dt><dd class="{{ $resumo['total'] < 0 ? 'text-danger' : '' }}">{{ $resumo['total'] < 0 ? '− ' : '' }}R$ {{ number_format(abs($resumo['total']), 2, ',', '.') }}</dd></div>
+        @if ($resumo['devolvido'] > 0)
+            <div><dt>Devolvido a clientes</dt><dd class="text-danger">− R$ {{ number_format($resumo['devolvido'], 2, ',', '.') }}</dd></div>
+        @endif
         <div><dt>Vendas</dt><dd>{{ $resumo['quantidade'] }}</dd></div>
         <div><dt>Descontos dados</dt><dd>R$ {{ number_format($resumo['descontos'], 2, ',', '.') }}</dd></div>
         <div class="canceladas {{ $resumo['canceladas'] > 0 ? 'com-canceladas' : '' }}"><dt>Canceladas (fora do total)</dt>
@@ -90,4 +99,37 @@
             </table>
         </div>
     </div>
+
+    {{-- Devoluções feitas neste dia (só aparece se houver) --}}
+    @if ($devolucoes->isNotEmpty())
+        <div class="card mt-4">
+            <div class="card-header"><h2 class="titulo-cartao">Devoluções do dia</h2></div>
+            <div class="card-body p-0">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Devolução</th>
+                            <th>Venda</th>
+                            <th>Cliente</th>
+                            <th>Pagamento</th>
+                            <th>Motivo</th>
+                            <th class="text-end">Valor devolvido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($devolucoes as $devolucao)
+                            <tr>
+                                <td>#{{ $devolucao->id }}</td>
+                                <td><a href="{{ route('vendas.show', $devolucao->venda) }}">#{{ str_pad($devolucao->venda_id, 4, '0', STR_PAD_LEFT) }}</a></td>
+                                <td>{{ $devolucao->venda->cliente->nome }}</td>
+                                <td>{{ $devolucao->venda->nomeFormaPagamento() }}</td>
+                                <td>{{ $devolucao->nomeMotivo() }}</td>
+                                <td class="text-end valor-lista text-danger">− R$ {{ number_format($devolucao->valor, 2, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 @endsection

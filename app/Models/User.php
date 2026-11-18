@@ -26,7 +26,31 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'aprovado_em' => 'datetime', // vazio = cadastro aguardando aprovação
             'password' => 'hashed',
         ];
+    }
+
+    // "aprovado_em" fica fora do $fillable de propósito: quem se cadastra não consegue
+    // se aprovar sozinho mandando esse campo no formulário. Só a tela Usuários aprova.
+    public function estaAprovado(): bool
+    {
+        return $this->aprovado_em !== null;
+    }
+
+    public function aprovar(): void
+    {
+        $this->forceFill(['aprovado_em' => now()])->save();
+    }
+
+    // Consultas prontas: User::pendentes()->get() e User::aprovados()->get()
+    public function scopePendentes($query)
+    {
+        return $query->whereNull('aprovado_em');
+    }
+
+    public function scopeAprovados($query)
+    {
+        return $query->whereNotNull('aprovado_em');
     }
 }

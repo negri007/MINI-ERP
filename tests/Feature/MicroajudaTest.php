@@ -41,7 +41,7 @@ class MicroajudaTest extends TestCase
     {
         $this->get('/estoque/movimentar')
             ->assertOk()
-            ->assertSee('Vendas baixam o estoque sozinhas.')
+            ->assertSee('Vendas e devoluções de cliente mexem no estoque sozinhas.')
             ->assertSee('Entendi');
     }
 }
