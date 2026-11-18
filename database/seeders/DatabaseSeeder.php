@@ -88,11 +88,14 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // Duas devoluções de exemplo: uma volta ao estoque, outra vai ao fornecedor (estoque não muda)
+        // Duas vendas de hoje, cada uma com uma devolução de exemplo:
+        // uma volta ao estoque, outra vai ao fornecedor (estoque não muda).
+        // Ficam no mesmo dia da venda para o Caixa do dia não mostrar valor negativo.
         $devolucoes = app(DevolucaoService::class);
-        foreach (Venda::with('itens')->latest('id')->limit(2)->get()->values() as $n => $venda) {
-            $item = $venda->itens->first();
-            $devolucoes->registrar($venda, [$item->id => 1], $n === 0 ? 'desistencia' : 'defeito', $n === 0 ? 'estoque' : 'fornecedor');
+        foreach ([['desistencia', 'estoque', 'dinheiro'], ['defeito', 'fornecedor', 'pix']] as [$motivo, $destino, $forma]) {
+            $produto = Produto::where('estoque', '>', 10)->inRandomOrder()->first();
+            $venda = $vendas->registrar($clientes->random()->id, Carbon::today()->toDateString(), [['produto_id' => $produto->id, 'quantidade' => 2]], $forma);
+            $devolucoes->registrar($venda, [$venda->itens()->first()->id => 1], $motivo, $destino);
         }
 
         $this->command->info('Dados de exemplo criados. Login: admin@minierp.com / admin123');
