@@ -19,7 +19,7 @@
                 <p>Cadastros, vendas, estoque e relatórios da sua loja em um só lugar.</p>
             </div>
             <div class="numeros">
-                <div><strong>4</strong>cadastros</div>
+                <div><strong>5</strong>cadastros</div>
                 <div><strong>Ctrl K</strong>busca rápida</div>
                 <div><strong>100%</strong>offline</div>
             </div>
