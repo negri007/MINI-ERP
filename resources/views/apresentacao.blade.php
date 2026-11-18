@@ -68,71 +68,27 @@
             </figure>
         </section>
 
-        {{-- Três blocos: o que resolve, como funciona e para quem é --}}
+        {{-- Três destaques curtos (o resto está no sistema, com dica em cada tela) --}}
         <div class="ap-blocos">
-            <section class="ap-bloco ap-resolve" aria-labelledby="ap-resolve">
-                <h2 id="ap-resolve">O que ele resolve</h2>
-                <dl class="ap-lista">
-                    <div>
-                        <dt>Estoque que avisa</dt>
-                        <dd>Quando um produto chega no mínimo, ele aparece em "Para repor".</dd>
-                    </div>
-                    <div>
-                        <dt>Venda que baixa o estoque</dt>
-                        <dd>Registrou a venda, o estoque desce. Cancelou, ele volta.</dd>
-                    </div>
-                    <div>
-                        <dt>Devolução com motivo</dt>
-                        <dd>Volta ao estoque, vira perda ou vai ao fornecedor. O caixa desconta.</dd>
-                    </div>
-                    <div>
-                        <dt>Painel do mês</dt>
-                        <dd>Faturamento, ticket médio e os últimos 14 dias num gráfico.</dd>
-                    </div>
-                    <div>
-                        <dt>Cliente na hora</dt>
-                        <dd>Cadastre o cliente sem sair da venda, ou venda como Consumidor final.</dd>
-                    </div>
-                    <div>
-                        <dt>Ajuda em cada tela</dt>
-                        <dd>Uma dica curta abaixo do título explica para que a tela serve.</dd>
-                    </div>
-                </dl>
+            <section class="ap-bloco" aria-labelledby="ap-estoque">
+                <h2 id="ap-estoque">Estoque que avisa</h2>
+                <p>Quando um produto chega no mínimo, ele aparece em "Para repor".</p>
             </section>
-
-            <section class="ap-bloco" aria-labelledby="ap-como">
-                <h2 id="ap-como">Como funciona</h2>
-                <ol class="ap-passos">
-                    <li>
-                        <h3>Cadastre os produtos</h3>
-                        <p>Nome, preço, categoria e o estoque mínimo que acende o alerta.</p>
-                    </li>
-                    <li>
-                        <h3>Registre as vendas</h3>
-                        <p>Escolha o cliente e os produtos. O total e o estoque se ajustam sozinhos.</p>
-                    </li>
-                    <li>
-                        <h3>Acompanhe o painel</h3>
-                        <p>O Dashboard mostra o mês, o que vendeu e o que precisa repor.</p>
-                    </li>
-                </ol>
+            <section class="ap-bloco" aria-labelledby="ap-venda">
+                <h2 id="ap-venda">Venda e devolução</h2>
+                <p>A venda baixa o estoque. A devolução volta ao estoque, vira perda ou vai ao fornecedor.</p>
             </section>
-
-            <section class="ap-bloco ap-quem" aria-labelledby="ap-quem">
-                <h2 id="ap-quem">Para quem é</h2>
-                <p>
-                    Mercadinho, loja pequena e MEI: quem vende no balcão e precisa saber o que tem, o que vendeu e o que acabou.
-                    O Sebrae aponta a falta de planejamento entre os sinais de alerta para pequenos negócios
-                    (<a href="https://agenciasebrae.com.br/?p=41140" rel="noopener" target="_blank">Agência Sebrae, 07/07/2026<span class="visually-hidden">, abre em nova aba</span></a>).
-                </p>
-
-                <h3 id="ap-usa">Quem usa</h3>
-                <p>Hoje todo usuário aprovado acessa tudo. Separar dono e caixa está nos planos.</p>
-
-                <h3 id="ap-nao">O que ele não faz</h3>
-                <p>Não emite nota fiscal eletrônica. Use o emissor que seu contador indicar.</p>
+            <section class="ap-bloco" aria-labelledby="ap-painel">
+                <h2 id="ap-painel">Painel do mês</h2>
+                <p>Faturamento, lucro e os últimos 14 dias num gráfico.</p>
             </section>
         </div>
+
+        {{-- Rodapé: para quem é e limites do sistema, em uma linha discreta --}}
+        <p class="ap-rodape">
+            Para mercadinho, loja pequena e MEI. Hoje todo usuário aprovado acessa tudo. Separar dono e caixa está nos planos.
+            Não emite nota fiscal eletrônica. Use o emissor que seu contador indicar.
+        </p>
     </main>
 </body>
 </html>
