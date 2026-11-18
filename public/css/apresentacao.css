@@ -66,79 +66,28 @@
 .ap-contagem { color: #ff8a8a; font-family: var(--fonte-texto); font-size: var(--texto-pequeno); font-weight: 600; }
 .ap-amostra figcaption { margin-top: 1rem; color: var(--texto-2); font-size: var(--texto-pequeno); text-align: center; }
 
-/* Blocos: três cartões lado a lado, cada um com um assunto */
-.ap-blocos {
-    display: grid;
-    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr) minmax(0, 1.35fr);
-    gap: 1rem;
-}
-.ap-bloco {
-    padding: 1.3rem 1.4rem;
-    border: 1px solid var(--borda);
-    border-radius: var(--raio);
-    background: var(--cartao);
-}
-.ap-bloco h2 { margin: 0 0 .9rem; font-size: 1.15rem; }
-.ap-bloco h3 { margin: .9rem 0 .2rem; font-size: 1rem; }
-.ap-bloco p { margin: 0; color: var(--texto-2); font-size: .9375rem; line-height: 1.55; }
-
-/* "O que ele resolve": seis itens em três colunas (duas linhas) */
-.ap-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem 1.4rem; margin: 0; }
-.ap-lista dt { color: var(--texto); font-family: var(--fonte-titulo); font-weight: 600; }
-.ap-lista dd { margin: .1rem 0 0; color: var(--texto-2); font-size: .9375rem; line-height: 1.45; }
-
-/* "Como funciona": é uma sequência de verdade, então leva número */
-.ap-passos { display: grid; gap: .85rem; margin: 0; padding: 0; list-style: none; counter-reset: passo; }
-.ap-passos li { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); counter-increment: passo; }
-.ap-passos li::before {
-    content: counter(passo);
-    grid-row: span 2;
-    color: var(--verde-texto);
-    font-family: var(--fonte-titulo);
-    font-size: 1.9rem;
-    font-weight: 700;
-    line-height: 1;
-}
-.ap-passos h3 { margin: 0 0 .15rem; font-size: 1rem; }
-
-/* Notebook mais baixo: aperta um pouco para continuar sem rolar */
-@media (min-width: 992px) and (max-height: 800px) {
-    .ap-topo { padding: .75rem 0; }
-    .ap-pagina { gap: 1.1rem; }
-    .ap-amostra figcaption { margin-top: .6rem; }
-    .ap-amostra .card-header { padding-top: .7rem; padding-bottom: .7rem; }
-    .ap-abertura h1 { font-size: 2.35rem; }
-    .ap-lead { font-size: 1rem; margin-bottom: .8rem; }
-    .ap-bloco { padding: 1rem 1.2rem; }
-    .ap-bloco p, .ap-lista dd { font-size: .875rem; }
-    .ap-amostra .estoque-item { padding-top: .55rem; padding-bottom: .55rem; }
-}
-
-/* Telas ainda mais baixas (1280×720): títulos menores */
-@media (min-width: 992px) and (max-height: 740px) {
-    .ap-abertura h1 { font-size: 2.1rem; margin-bottom: .6rem; }
-    .ap-chamada { display: none; } /* a frase volta nas telas maiores; os botões continuam */
-    .ap-bloco h2 { margin-bottom: .6rem; font-size: 1.05rem; }
-    .ap-lista { gap: .6rem 1.2rem; }
-    .ap-bloco h3 { margin-top: .6rem; }
-    .ap-blocos { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1.15fr) minmax(0, 1.4fr); }
-    .ap-amostra .estoque-item { padding-top: .4rem; padding-bottom: .4rem; }
-    .ap-passos { gap: .6rem; }
-    .ap-topo { padding: .5rem 0; }
-    .ap-bloco { padding: .85rem 1.1rem; }
-    .ap-bloco p, .ap-lista dd { font-size: .8125rem; line-height: 1.4; }
-    .ap-blocos { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.1fr) minmax(0, 1.35fr); }
-}
-
-/* Tablet: blocos em duas colunas */
-@media (max-width: 1199.98px) {
-    .ap-blocos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-    .ap-resolve { grid-column: 1 / -1; }
-}
+/* Destaques: três cartões lado a lado, com título e uma frase */
+.ap-blocos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.ap-bloco { padding: 1.1rem 1.3rem; border: 1px solid var(--borda); border-radius: var(--raio); background: var(--cartao); }
+.ap-bloco h2 { margin: 0 0 .35rem; font-size: 1.1rem; }
+.ap-bloco p { margin: 0; color: var(--texto-2); font-size: .9375rem; line-height: 1.5; }
+.ap-rodape { margin: 0; color: var(--texto-2); font-size: var(--texto-pequeno); text-align: center; }
 
 /* Celular: tudo em uma coluna */
 @media (max-width: 767.98px) {
-    .ap-abertura, .ap-blocos, .ap-lista { grid-template-columns: minmax(0, 1fr); }
+    .ap-abertura, .ap-blocos { grid-template-columns: minmax(0, 1fr); }
     .ap-amostra .card { transform: none; }
     .ap-acesso .btn-secondary { display: none; } /* "Criar conta" continua nos botões da abertura */
+    .ap-rodape { text-align: left; }
+}
+
+/* Telas baixas: aperta um pouco para continuar sem rolar */
+@media (min-width: 992px) and (max-height: 800px) {
+    .ap-topo { padding: .6rem 0; }
+    .ap-pagina { gap: 1rem; }
+    .ap-abertura h1 { font-size: 2.2rem; }
+    .ap-lead { font-size: 1rem; margin-bottom: .8rem; }
+    .ap-chamada { display: none; }
+    .ap-amostra figcaption { margin-top: .5rem; }
+    .ap-amostra .estoque-item { padding-top: .45rem; padding-bottom: .45rem; }
 }
